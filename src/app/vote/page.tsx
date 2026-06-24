@@ -158,8 +158,11 @@ export default function VotePage() {
           : "용의자를 선택하세요"}
       </button>
 
-      <p className="text-xs text-zinc-600 text-center">정답 제출은 단 2회만 가능합니다.<br/>
-        충분한 증거를 수집한 후 신중하게 판단하여 제출하세요</p>
+      <p className="text-xs text-zinc-600 text-center">
+        정답 제출은 단 2회만 가능합니다.<br/>
+        남은 제출 횟수: <span className="text-zinc-400 font-medium">{Math.max(0, 2 - submitCount)}회</span><br/>
+        충분한 증거를 수집한 후 신중하게 판단하여 제출하세요
+      </p>
     </div>
   );
 }
