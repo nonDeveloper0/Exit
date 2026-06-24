@@ -93,7 +93,7 @@ export default function MainPage() {
             const allCollected =
               locationEvidence.length > 0 &&
               locationEvidence.every((e) => collected.includes(e.id));
-            const label = `QR${String(index + 1).padStart(2, "0")}`;
+            const label = `#${index + 1}`;
 
             return (
               <div
