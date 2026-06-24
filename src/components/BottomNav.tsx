@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   {
-    href: "/",
+    href: "/home",
     label: "수사본부",
     icon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -53,12 +53,13 @@ const NAV_ITEMS = [
 export default function BottomNav() {
   const pathname = usePathname();
 
+  if (pathname === "/") return null;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900 border-t border-zinc-800">
       <div className="max-w-md mx-auto flex">
         {NAV_ITEMS.map((item) => {
-          const isActive =
-            item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}

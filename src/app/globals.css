@@ -17,3 +17,33 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, sans-serif;
 }
+
+@keyframes blob-one {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(-30px, 25px) scale(1.05); }
+  66% { transform: translate(20px, -35px) scale(0.95); }
+}
+
+@keyframes blob-two {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(40px, -20px) scale(1.08); }
+  66% { transform: translate(-25px, 15px) scale(0.92); }
+}
+
+@keyframes blob-three {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(15px, -20px) scale(1.06); }
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.text-glow-amber {
+  text-shadow:
+    0 0 40px rgba(245, 158, 11, 0.3),
+    0 0 120px rgba(245, 158, 11, 0.1);
+}

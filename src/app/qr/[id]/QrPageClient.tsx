@@ -28,7 +28,7 @@ export default function QrPageClient({ location, evidence }: Props) {
     <div className="flex flex-col gap-4 p-4 pt-6">
       {/* Back link */}
       <Link
-        href="/"
+        href="/home"
         className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-300 transition-colors w-fit"
       >
         <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
