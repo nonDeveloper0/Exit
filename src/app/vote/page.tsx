@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { SUSPECTS } from "@/lib/data";
-import { getVote, castVote, getTeamInfo, saveTeamInfo } from "@/lib/store";
+import { getVote, castVote, getTeamInfo } from "@/lib/store";
 
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSclsS9dAFGB2YgYNMNYd8NVQ5tBbdUBYwUF9tWosu5patyHXg/formResponse";
@@ -22,33 +22,29 @@ async function submitToGoogleForm(teamNumber: string, leaderName: string, suspec
 
 export default function VotePage() {
   const [selected, setSelected] = useState<string | null>(null);
-  const [teamNumber, setTeamNumber] = useState("");
-  const [leaderName, setLeaderName] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [team, setTeam] = useState<{ teamNumber: string; leaderName: string } | null>(null);
 
   useEffect(() => {
     const vote = getVote();
-    const team = getTeamInfo();
+    const teamInfo = getTeamInfo();
     if (vote) { setSelected(vote); setSubmitted(true); }
-    if (team) { setTeamNumber(team.teamNumber); setLeaderName(team.leaderName); }
+    setTeam(teamInfo);
   }, []);
 
   async function handleSubmit() {
-    if (!selected || !teamNumber || !leaderName.trim()) return;
+    if (!selected || !team) return;
     setSubmitting(true);
     try {
-      await submitToGoogleForm(teamNumber, leaderName.trim(), selected);
+      await submitToGoogleForm(team.teamNumber, team.leaderName, selected);
     } catch {
       // no-cors 응답은 읽을 수 없으나 제출은 정상 처리됨
     }
     castVote(selected);
-    saveTeamInfo(teamNumber, leaderName.trim());
     setSubmitted(true);
     setSubmitting(false);
   }
-
-  const canSubmit = !!selected && !!teamNumber && leaderName.trim().length > 0;
 
   if (submitted) {
     const votedSuspect = SUSPECTS.find((s) => s.id === selected);
@@ -62,10 +58,10 @@ export default function VotePage() {
         </div>
 
         <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-8 text-center space-y-2">
-          <p className="text-sm text-zinc-400">{teamNumber}조의 최종 선택</p>
+          <p className="text-sm text-zinc-400">{team?.teamNumber}조의 최종 선택</p>
           <p className="text-5xl font-black text-emerald-400">{selected}</p>
           <p className="text-base font-semibold text-zinc-200">{votedSuspect?.role}</p>
-          <p className="text-xs text-zinc-500 pt-1">조장: {leaderName}</p>
+          <p className="text-xs text-zinc-500 pt-1">조장: {team?.leaderName}</p>
         </div>
 
         <p className="text-sm text-zinc-500 text-center">
@@ -90,89 +86,56 @@ export default function VotePage() {
         </div>
         <h1 className="text-2xl font-bold text-zinc-100">최종 추리</h1>
         <p className="text-sm text-zinc-500">범인은 누구인가? 조의 최종 결론을 선택하세요.</p>
+        {team && (
+          <p className="text-xs text-zinc-600 font-mono">{team.teamNumber}조 · {team.leaderName}</p>
+        )}
       </div>
 
-      {/* 팀 번호 */}
-      <div className="space-y-2">
-        <p className="text-xs font-mono text-zinc-500 uppercase tracking-wider">팀(조) 번호</p>
-        <div className="grid grid-cols-4 gap-2">
-          {["1", "2", "3", "4", "5", "6", "7", "8"].map((n) => (
-            <button
-              key={n}
-              onClick={() => setTeamNumber(n)}
-              className={`py-2.5 rounded-lg border text-sm font-bold transition-all active:scale-95 ${
-                teamNumber === n
-                  ? "border-amber-400 bg-amber-400/10 text-amber-400"
-                  : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700"
-              }`}
-            >
-              {n}조
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 조장 이름 */}
-      <div className="space-y-2">
-        <p className="text-xs font-mono text-zinc-500 uppercase tracking-wider">조장 이름</p>
-        <input
-          type="text"
-          value={leaderName}
-          onChange={(e) => setLeaderName(e.target.value)}
-          placeholder="조장 이름 입력"
-          className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400/50 focus:outline-none transition-colors"
-        />
-      </div>
-
-      {/* 용의자 선택 */}
-      <div className="space-y-2">
-        <p className="text-xs font-mono text-zinc-500 uppercase tracking-wider">용의자 선택</p>
-        <div className="space-y-3">
-          {SUSPECTS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setSelected(s.id)}
-              className={`w-full text-left rounded-lg border p-4 transition-all active:scale-[0.98] ${
-                selected === s.id
-                  ? "border-amber-400 bg-amber-400/10"
-                  : "border-zinc-800 bg-zinc-900 hover:border-zinc-700"
-              }`}
-            >
-              <div className="flex items-center gap-4">
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                    selected === s.id ? "border-amber-400 bg-amber-400" : "border-zinc-600"
-                  }`}
-                >
-                  {selected === s.id && (
-                    <div className="w-2 h-2 rounded-full bg-zinc-900" />
-                  )}
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-xs font-mono text-zinc-500">{s.codename}</p>
-                  <p className="text-base font-bold text-zinc-100">{s.role}</p>
-                  <p className="text-xs text-zinc-500">{s.motive}</p>
-                </div>
+      <div className="space-y-3">
+        {SUSPECTS.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => setSelected(s.id)}
+            className={`w-full text-left rounded-lg border p-4 transition-all active:scale-[0.98] ${
+              selected === s.id
+                ? "border-amber-400 bg-amber-400/10"
+                : "border-zinc-800 bg-zinc-900 hover:border-zinc-700"
+            }`}
+          >
+            <div className="flex items-center gap-4">
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                  selected === s.id ? "border-amber-400 bg-amber-400" : "border-zinc-600"
+                }`}
+              >
+                {selected === s.id && (
+                  <div className="w-2 h-2 rounded-full bg-zinc-900" />
+                )}
               </div>
-            </button>
-          ))}
-        </div>
+              <div className="space-y-0.5">
+                <p className="text-xs font-mono text-zinc-500">{s.codename}</p>
+                <p className="text-base font-bold text-zinc-100">{s.role}</p>
+                <p className="text-xs text-zinc-500">{s.motive}</p>
+              </div>
+            </div>
+          </button>
+        ))}
       </div>
 
       <button
         onClick={handleSubmit}
-        disabled={!canSubmit || submitting}
+        disabled={!selected || submitting}
         className={`w-full rounded-lg py-4 text-base font-bold transition-all active:scale-[0.98] ${
-          canSubmit && !submitting
+          selected && !submitting
             ? "bg-amber-400 text-zinc-900 hover:bg-amber-300"
             : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
         }`}
       >
         {submitting
           ? "제출 중..."
-          : canSubmit
-          ? `${teamNumber}조 — 용의자 ${selected} 범인 지목`
-          : "모든 항목을 입력하세요"}
+          : selected
+          ? `용의자 ${selected} — 범인으로 지목`
+          : "용의자를 선택하세요"}
       </button>
 
       <p className="text-xs text-zinc-600 text-center">제출 후에도 수사 종료 전까지 변경 가능합니다</p>
