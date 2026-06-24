@@ -17,14 +17,14 @@ export interface Suspect {
 }
 
 // 최종 추리 제출에 필요한 최소 증거 수 (0 = 제한 없음)
-export const VOTE_UNLOCK_COUNT = 0;
+export const VOTE_UNLOCK_COUNT = 1;
 
 export interface QrLocation {
   id: string;
   name: string;
   description: string;
 }
-
+  
 export const EVIDENCE: Evidence[] = [
   {
     id: "E01",
