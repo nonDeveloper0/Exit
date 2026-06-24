@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SUSPECTS } from "@/lib/data";
-import { getVote, castVote, getTeamInfo, getSubmitCount, incrementSubmitCount } from "@/lib/store";
+import { SUSPECTS, VOTE_UNLOCK_COUNT } from "@/lib/data";
+import { getVote, castVote, getTeamInfo, getSubmitCount, incrementSubmitCount, getCollectedEvidence } from "@/lib/store";
 
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSclsS9dAFGB2YgYNMNYd8NVQ5tBbdUBYwUF9tWosu5patyHXg/formResponse";
@@ -26,6 +26,7 @@ export default function VotePage() {
   const [submitting, setSubmitting] = useState(false);
   const [team, setTeam] = useState<{ teamNumber: string; leaderName: string } | null>(null);
   const [submitCount, setSubmitCount] = useState(0);
+  const [collectedCount, setCollectedCount] = useState(0);
 
   useEffect(() => {
     const vote = getVote();
@@ -33,7 +34,10 @@ export default function VotePage() {
     if (vote) { setSelected(vote); setSubmitted(true); }
     setTeam(teamInfo);
     setSubmitCount(getSubmitCount());
+    setCollectedCount(getCollectedEvidence().length);
   }, []);
+
+  const voteLocked = VOTE_UNLOCK_COUNT > 0 && collectedCount < VOTE_UNLOCK_COUNT;
 
   async function handleSubmit() {
     if (!selected || !team) return;
@@ -130,23 +134,32 @@ export default function VotePage() {
         ))}
       </div>
 
+      {voteLocked && (
+        <p className="text-sm text-amber-500/80 text-center rounded-lg border border-amber-500/20 bg-amber-500/5 py-3 px-4">
+          증거 {collectedCount}/{VOTE_UNLOCK_COUNT}개 수집됨 — 추리 제출까지 {VOTE_UNLOCK_COUNT - collectedCount}개 더 필요합니다
+        </p>
+      )}
+
       <button
         onClick={handleSubmit}
-        disabled={!selected || submitting}
+        disabled={!selected || submitting || voteLocked}
         className={`w-full rounded-lg py-4 text-base font-bold transition-all active:scale-[0.98] ${
-          selected && !submitting
+          selected && !submitting && !voteLocked
             ? "bg-amber-400 text-zinc-900 hover:bg-amber-300"
             : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
         }`}
       >
         {submitting
           ? "제출 중..."
+          : voteLocked
+          ? `증거 ${VOTE_UNLOCK_COUNT - collectedCount}개 추가 수집 시 제출 가능`
           : selected
           ? `용의자 ${selected} — 범인으로 지목`
           : "용의자를 선택하세요"}
       </button>
 
-      <p className="text-xs text-zinc-600 text-center">제출 후에도 수사 종료 전까지 변경 가능합니다</p>
+      <p className="text-xs text-zinc-600 text-center">정답 제출은 단 2회만 가능합니다.<br/>
+        충분한 증거를 수집한 후 신중하게 판단하여 제출하세요</p>
     </div>
   );
 }

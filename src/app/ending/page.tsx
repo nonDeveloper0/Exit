@@ -15,7 +15,7 @@ export default function EndingPage() {
           </p>
           <h1 className="text-3xl font-black text-zinc-100">진실의 순간</h1>
           <p className="text-sm text-zinc-500">
-            NS건설 공사장 살인사건의 진실이 밝혀집니다.
+            NS건설 공사 현장 살인사건의 진실이 밝혀집니다.
           </p>
         </div>
 
@@ -58,7 +58,7 @@ export default function EndingPage() {
 
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-5 space-y-3">
           <p className="text-sm text-zinc-300 leading-relaxed">
-            C(M)의 진짜 이름은{" "}
+            C의 진짜 이름은{" "}
             <strong className="text-amber-400 text-base">모세</strong>
             입니다.
           </p>
@@ -85,7 +85,7 @@ export default function EndingPage() {
               ["용의자 A (노동자 대표)", "히브리 노예들"],
               ["용의자 B (현장 소장)", "이집트 관료"],
               ["용의자 C — M", "모세"],
-              ["NS건설 공사장", "고대 이집트"],
+              ["NS건설 공사 현장", "고대 이집트"],
             ].map(([left, right]) => (
               <div key={left} className="flex items-center gap-2 text-xs font-mono">
                 <span className="text-zinc-400 flex-1">{left}</span>

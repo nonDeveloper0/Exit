@@ -11,9 +11,13 @@ export interface Suspect {
   codename: string;
   role: string;
   motive: string;
+  motiveRevealIds: string[]; // 이 증거들을 모두 수집하면 motive 공개
   description: string;
   motiveLevel: "높음" | "중간" | "낮음" | "불명";
 }
+
+// 최종 추리 제출에 필요한 최소 증거 수 (0 = 제한 없음)
+export const VOTE_UNLOCK_COUNT = 0;
 
 export interface QrLocation {
   id: string;
@@ -38,7 +42,7 @@ export const EVIDENCE: Evidence[] = [
   {
     id: "E03",
     title: "통화기록",
-    description: "사건 당일 피해자와 C(M) 사이의 3분간 통화 내역 확인됨. 내용 불명.",
+    description: "사건 당일 피해자와 C 사이의 3분간 통화 내역 확인됨. 내용 불명.",
     qrId: "h6t4c3",
   },
   {
@@ -75,13 +79,13 @@ export const EVIDENCE: Evidence[] = [
   {
     id: "E09",
     title: "현장출입기록",
-    description: "사건 당일 오후 9시 이후 출입자: A, B, C(M). 퇴장 기록 없음.",
+    description: "사건 당일 오후 9시 이후 출입자: A, B, C. 퇴장 기록 없음.",
     qrId: "x4k9m2",
   },
   {
     id: "E10",
     title: "비밀문서",
-    description: "C(M)가 회장에게 보낸 서한 일부. '더 이상 두고 볼 수 없습니다'라는 문구만 해독 가능.",
+    description: "C가 회장에게 보낸 서한 일부. '더 이상 두고 볼 수 없습니다'라는 문구만 해독 가능.",
     qrId: "m1d7k5",
   },
 ];
@@ -92,6 +96,7 @@ export const SUSPECTS: Suspect[] = [
     codename: "용의자 A",
     role: "노동자 대표",
     motive: "반복적인 폭행과 착취에 대한 복수",
+    motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E07", "E08"])
     description:
       "현장 노동자들의 리더. 피해자에게 수차례 부당한 폭행과 징계를 받아왔다. 사건 당일 현장에 있었음을 인정했다.",
     motiveLevel: "높음",
@@ -101,6 +106,7 @@ export const SUSPECTS: Suspect[] = [
     codename: "용의자 B",
     role: "현장 소장",
     motive: "비리 은폐",
+    motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E02", "E06"])
     description:
       "공사 현장의 실질적 책임자. 피해자와 수년간 부당 거래를 해온 것으로 알려져 있다. 사건 관련 서류를 사전에 은폐한 정황이 있다.",
     motiveLevel: "중간",
@@ -108,8 +114,9 @@ export const SUSPECTS: Suspect[] = [
   {
     id: "C",
     codename: "용의자 C",
-    role: "회장 아들 (M)",
-    motive: "불명확 — 조사 중",
+    role: "회장 아들",
+    motive: "불명확 — 조사 중", // TODO: 동기 확정 후 교체
+    motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E10"])
     description:
       "회장의 아들이라는 것 외에 신원 대부분이 비공개. 사건 당일 현장에 있었으며, 사건 직후 잠적. 연락 두절.",
     motiveLevel: "불명",
@@ -120,7 +127,7 @@ export const QR_LOCATIONS: QrLocation[] = [
   {
     id: "x4k9m2",
     name: "살해 현장",
-    description: "피해자가 발견된 공사장 B2 구역. 격렬한 다툼의 흔적이 남아있다.",
+    description: "피해자가 발견된 공사 현장 B2 구역. 격렬한 다툼의 흔적이 남아있다.",
   },
   {
     id: "p7n3q8",

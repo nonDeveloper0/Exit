@@ -1,24 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { SUSPECTS } from "@/lib/data";
+import { SUSPECTS, type Suspect } from "@/lib/data";
+import { getCollectedEvidence } from "@/lib/store";
 
-const MOTIVE_BADGE: Record<string, string> = {
-  높음: "text-red-400 bg-red-400/10 border-red-400/20",
-  중간: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-  낮음: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  불명: "text-zinc-400 bg-zinc-400/10 border-zinc-400/20",
-};
+const SUSPECT_AVATAR_CLASS = "bg-zinc-700 text-zinc-300";
 
-const SUSPECT_AVATAR: Record<string, string> = {
-  A: "bg-red-500/20 text-red-400",
-  B: "bg-amber-500/20 text-amber-400",
-  C: "bg-zinc-500/20 text-zinc-400",
-};
+function getDisplayMotive(s: Suspect, collected: string[]): string {
+  if (s.motiveRevealIds.length > 0 && s.motiveRevealIds.every((id) => collected.includes(id))) {
+    return s.motive;
+  }
+  return "불명확 — 조사 중";
+}
 
 export default function SuspectsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [collected, setCollected] = useState<string[]>([]);
+
+  useEffect(() => {
+    setCollected(getCollectedEvidence());
+  }, []);
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
@@ -47,20 +49,11 @@ export default function SuspectsPage() {
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-mono text-zinc-500">{s.codename}</span>
-                      <span
-                        className={`text-xs font-medium px-2 py-0.5 rounded border ${
-                          MOTIVE_BADGE[s.motiveLevel]
-                        }`}
-                      >
-                        동기 {s.motiveLevel}
-                      </span>
                     </div>
                     <h2 className="text-lg font-bold text-zinc-100">{s.role}</h2>
                   </div>
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-black shrink-0 ${
-                      SUSPECT_AVATAR[s.id]
-                    }`}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-black shrink-0 ${SUSPECT_AVATAR_CLASS}`}
                   >
                     {s.id}
                   </div>
@@ -99,7 +92,7 @@ export default function SuspectsPage() {
                       <span className="text-zinc-500 w-12 shrink-0 font-mono text-xs pt-0.5">
                         동기
                       </span>
-                      <span className="text-zinc-300">{s.motive}</span>
+                      <span className="text-zinc-300">{getDisplayMotive(s, collected)}</span>
                     </div>
                   </div>
                   <div className="rounded bg-zinc-800 p-3">
