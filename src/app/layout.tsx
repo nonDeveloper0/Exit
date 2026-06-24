@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EXIT 2026 — 수사본부",
-  description: "EGYPT CITY 공사장 살인사건 특별 수사",
+  title: "EXIT SEASON1",
+  description: "NS건설 공사장 살인사건 특별 수사",
 };
 
 export default function RootLayout({
