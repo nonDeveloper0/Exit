@@ -18,6 +18,7 @@ export interface QrLocation {
   id: string;
   name: string;
   description: string;
+  imageUrl?: string;
 }
 
 export const EVIDENCE: Evidence[] = [
@@ -118,6 +119,7 @@ export const QR_LOCATIONS: QrLocation[] = [
     id: "x4k9m2",
     name: "살해 현장",
     description: "피해자가 발견된 공사장 B2 구역. 격렬한 다툼의 흔적이 남아있다.",
+    imageUrl: "/hammer.png",
   },
   {
     id: "p7n3q8",

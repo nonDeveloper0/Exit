@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Evidence, QrLocation } from "@/lib/data";
 import { getCollectedEvidence, collectEvidence } from "@/lib/store";
@@ -49,6 +50,18 @@ export default function QrPageClient({ location, evidence }: Props) {
         <h1 className="text-2xl font-bold text-zinc-100">{location.name}</h1>
         <p className="text-sm text-zinc-500">{location.description}</p>
       </div>
+
+      {/* Location image */}
+      {location.imageUrl && (
+        <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-zinc-800">
+          <Image
+            src={location.imageUrl}
+            alt={location.name}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
 
       {/* Evidence list */}
       <div className="space-y-2">
