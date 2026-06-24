@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { SUSPECTS } from "@/lib/data";
-import { getVote, castVote, getTeamInfo } from "@/lib/store";
+import { getVote, castVote, getTeamInfo, getSubmitCount, incrementSubmitCount } from "@/lib/store";
 
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSclsS9dAFGB2YgYNMNYd8NVQ5tBbdUBYwUF9tWosu5patyHXg/formResponse";
@@ -25,12 +25,14 @@ export default function VotePage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [team, setTeam] = useState<{ teamNumber: string; leaderName: string } | null>(null);
+  const [submitCount, setSubmitCount] = useState(0);
 
   useEffect(() => {
     const vote = getVote();
     const teamInfo = getTeamInfo();
     if (vote) { setSelected(vote); setSubmitted(true); }
     setTeam(teamInfo);
+    setSubmitCount(getSubmitCount());
   }, []);
 
   async function handleSubmit() {
@@ -42,6 +44,8 @@ export default function VotePage() {
       // no-cors 응답은 읽을 수 없으나 제출은 정상 처리됨
     }
     castVote(selected);
+    incrementSubmitCount();
+    setSubmitCount((c) => c + 1);
     setSubmitted(true);
     setSubmitting(false);
   }
@@ -68,12 +72,16 @@ export default function VotePage() {
           모든 조의 추리가 끝나면 진실이 공개됩니다.
         </p>
 
-        <button
-          onClick={() => setSubmitted(false)}
-          className="text-xs text-zinc-600 hover:text-zinc-400 text-center mt-2"
-        >
-          다시 선택하기
-        </button>
+        {submitCount < 2 ? (
+          <button
+            onClick={() => setSubmitted(false)}
+            className="text-xs text-zinc-600 hover:text-zinc-400 text-center mt-2"
+          >
+            다시 선택하기 ({2 - submitCount}회 남음)
+          </button>
+        ) : (
+          <p className="text-xs text-zinc-700 text-center mt-2">제출 횟수를 모두 사용했습니다</p>
+        )}
       </div>
     );
   }

@@ -1,6 +1,7 @@
 const EVIDENCE_KEY = "exit2026_evidence";
 const VOTE_KEY = "exit2026_vote";
 const TEAM_KEY = "exit2026_team";
+const SUBMIT_COUNT_KEY = "exit2026_submit_count";
 
 export function getCollectedEvidence(): string[] {
   if (typeof window === "undefined") return [];
@@ -42,8 +43,18 @@ export function saveTeamInfo(teamNumber: string, leaderName: string): void {
   localStorage.setItem(TEAM_KEY, JSON.stringify({ teamNumber, leaderName }));
 }
 
+export function getSubmitCount(): number {
+  if (typeof window === "undefined") return 0;
+  return parseInt(localStorage.getItem(SUBMIT_COUNT_KEY) ?? "0", 10);
+}
+
+export function incrementSubmitCount(): void {
+  localStorage.setItem(SUBMIT_COUNT_KEY, String(getSubmitCount() + 1));
+}
+
 export function resetAll(): void {
   localStorage.removeItem(EVIDENCE_KEY);
   localStorage.removeItem(VOTE_KEY);
   localStorage.removeItem(TEAM_KEY);
+  localStorage.removeItem(SUBMIT_COUNT_KEY);
 }
