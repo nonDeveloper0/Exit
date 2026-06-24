@@ -78,21 +78,15 @@ export default function LandingPage() {
       <div className="relative z-10 flex flex-col gap-3 px-6 flex-1 justify-center">
         <div className="space-y-2">
           <p className="text-xs font-mono text-zinc-500 tracking-wider uppercase">팀(조) 번호</p>
-          <div className="grid grid-cols-4 gap-2">
-            {["1", "2", "3", "4", "5", "6", "7", "8"].map((n) => (
-              <button
-                key={n}
-                onClick={() => setTeamNumber(n)}
-                className={`py-2.5 rounded-lg border text-sm font-bold transition-all active:scale-95 ${
-                  teamNumber === n
-                    ? "border-amber-400 bg-amber-400/10 text-amber-400"
-                    : "border-zinc-800 bg-zinc-900/80 text-zinc-400"
-                }`}
-              >
-                {n}조
-              </button>
-            ))}
-          </div>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={teamNumber}
+            onChange={(e) => setTeamNumber(e.target.value.replace(/\D/g, ""))}
+            onKeyDown={(e) => e.key === "Enter" && handleEnter()}
+            placeholder="조 번호 입력"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400/50 focus:outline-none transition-colors"
+          />
         </div>
 
         <div className="space-y-2">
