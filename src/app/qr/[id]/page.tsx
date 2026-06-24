@@ -8,7 +8,7 @@ export default async function QrPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const location = QR_LOCATIONS.find((l) => l.id === id.toUpperCase());
+  const location = QR_LOCATIONS.find((l) => l.id === id);
 
   if (!location) {
     notFound();
