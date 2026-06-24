@@ -21,7 +21,7 @@ export default function MainPage() {
           Special Investigation Unit
         </div>
         <h1 className="text-2xl font-bold text-zinc-100 leading-tight">
-          EGYPT CITY
+          NS건설
           <br />
           공사장 살인사건
         </h1>
@@ -43,7 +43,7 @@ export default function MainPage() {
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">장소</span>
-            <span>Egypt City 건설 현장 B2 구역</span>
+            <span>NS건설 건설 현장 B2 구역</span>
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">용의자</span>
@@ -87,12 +87,13 @@ export default function MainPage() {
       <div className="space-y-2">
         <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-wider">수사 구역</h2>
         <div className="grid grid-cols-2 gap-2">
-          {QR_LOCATIONS.map((loc) => {
+          {QR_LOCATIONS.map((loc, index) => {
             const locationEvidence = EVIDENCE.filter((e) => e.qrId === loc.id);
             const hasCollected = locationEvidence.some((e) => collected.includes(e.id));
             const allCollected =
               locationEvidence.length > 0 &&
               locationEvidence.every((e) => collected.includes(e.id));
+            const label = `QR${String(index + 1).padStart(2, "0")}`;
 
             return (
               <div
@@ -106,7 +107,7 @@ export default function MainPage() {
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-mono text-zinc-500">{loc.id}</span>
+                  <span className="text-xs font-mono text-zinc-500">{label}</span>
                   {allCollected && (
                     <span className="text-xs text-emerald-400">✓</span>
                   )}
