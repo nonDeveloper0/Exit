@@ -27,7 +27,7 @@ export const EVIDENCE: Evidence[] = [
     title: "혈흔 사진",
     description: "현장 주변에서 발견된 혈흔. 피해자의 혈액형과 일치하며, 격렬한 저항의 흔적이 보인다.",
     qrId: "x4k9m2",
-    imageUrl: "/hammer.png",
+    imageUrl: "/blood.png",
   },
   {
     id: "E02",
