@@ -24,10 +24,10 @@ export interface QrLocation {
 export const EVIDENCE: Evidence[] = [
   {
     id: "E01",
-    title: "혈흔 사진",
-    description: "현장 주변에서 발견된 혈흔. 피해자의 혈액형과 일치하며, 격렬한 저항의 흔적이 보인다.",
+    title: "목격자 진술",
+    description: "당일 밤 현장 인근에서 '두 사람이 격렬히 다투는 것'을 목격했다는 진술.",
     qrId: "x4k9m2",
-    imageUrl: "/blood.png",
+    imageUrl: "/03_evidence.png",
   },
   {
     id: "E02",
@@ -49,9 +49,10 @@ export const EVIDENCE: Evidence[] = [
   },
   {
     id: "E05",
-    title: "목격자 진술",
-    description: "당일 밤 현장 인근에서 '두 사람이 격렬히 다투는 것'을 목격했다는 진술.",
+    title: "혈흔 사진",
+    description: "현장 주변에서 발견된 혈흔. 피해자의 혈액형과 일치하며, 격렬한 저항의 흔적이 보인다.",
     qrId: "j8f2v9",
+    imageUrl: "/02_blood.png",
   },
   {
     id: "E06",
