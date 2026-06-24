@@ -8,6 +8,7 @@ import { getCollectedEvidence } from "@/lib/store";
 export default function EvidencePage() {
   const [collected, setCollected] = useState<string[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<string | null>(null);
 
   useEffect(() => {
     setCollected(getCollectedEvidence());
@@ -106,9 +107,17 @@ export default function EvidencePage() {
               {isExpanded && isCollected && (
                 <div className="px-3 pb-3 border-t border-zinc-800 pt-3 space-y-2">
                   {e.imageUrl && (
-                    <div className="relative w-full aspect-video rounded overflow-hidden">
+                    <button
+                      onClick={() => setLightbox(e.imageUrl!)}
+                      className="relative w-full aspect-video rounded overflow-hidden block"
+                    >
                       <Image src={e.imageUrl} alt={e.title} fill className="object-cover" />
-                    </div>
+                      <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <span className="opacity-0 hover:opacity-100 text-white text-xs font-mono bg-black/50 px-2 py-1 rounded">
+                          눌러서 크게 보기
+                        </span>
+                      </div>
+                    </button>
                   )}
                   <p className="text-xs text-zinc-400 font-mono leading-relaxed">
                     {e.description}
@@ -119,6 +128,24 @@ export default function EvidencePage() {
           );
         })}
       </div>
+      {/* Lightbox */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <div className="relative w-full max-w-md">
+            <Image
+              src={lightbox}
+              alt="증거 이미지"
+              width={800}
+              height={600}
+              className="w-full h-auto rounded object-contain"
+            />
+            <p className="text-center text-xs text-zinc-500 mt-2">탭하면 닫힘</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
