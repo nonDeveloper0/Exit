@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { EVIDENCE } from "@/lib/data";
 import { getCollectedEvidence } from "@/lib/store";
 
@@ -103,7 +104,12 @@ export default function EvidencePage() {
               </button>
 
               {isExpanded && isCollected && (
-                <div className="px-3 pb-3 border-t border-zinc-800 pt-3">
+                <div className="px-3 pb-3 border-t border-zinc-800 pt-3 space-y-2">
+                  {e.imageUrl && (
+                    <div className="relative w-full aspect-video rounded overflow-hidden">
+                      <Image src={e.imageUrl} alt={e.title} fill className="object-cover" />
+                    </div>
+                  )}
                   <p className="text-xs text-zinc-400 font-mono leading-relaxed">
                     {e.description}
                   </p>

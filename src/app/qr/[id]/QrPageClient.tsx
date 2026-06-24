@@ -51,17 +51,6 @@ export default function QrPageClient({ location, evidence }: Props) {
         <p className="text-sm text-zinc-500">{location.description}</p>
       </div>
 
-      {/* Location image */}
-      {location.imageUrl && (
-        <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-zinc-800">
-          <Image
-            src={location.imageUrl}
-            alt={location.name}
-            fill
-            className="object-cover"
-          />
-        </div>
-      )}
 
       {/* Evidence list */}
       <div className="space-y-2">
@@ -105,6 +94,11 @@ export default function QrPageClient({ location, evidence }: Props) {
                       </button>
                     )}
                   </div>
+                  {e.imageUrl && (
+                    <div className="relative w-full aspect-video rounded overflow-hidden mb-2">
+                      <Image src={e.imageUrl} alt={e.title} fill className="object-cover" />
+                    </div>
+                  )}
                   <p className="text-xs text-zinc-400 font-mono leading-relaxed">
                     {e.description}
                   </p>

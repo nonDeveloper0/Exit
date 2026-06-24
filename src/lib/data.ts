@@ -3,6 +3,7 @@ export interface Evidence {
   title: string;
   description: string;
   qrId: string;
+  imageUrl?: string;
 }
 
 export interface Suspect {
@@ -18,7 +19,6 @@ export interface QrLocation {
   id: string;
   name: string;
   description: string;
-  imageUrl?: string;
 }
 
 export const EVIDENCE: Evidence[] = [
@@ -27,6 +27,7 @@ export const EVIDENCE: Evidence[] = [
     title: "혈흔 사진",
     description: "현장 주변에서 발견된 혈흔. 피해자의 혈액형과 일치하며, 격렬한 저항의 흔적이 보인다.",
     qrId: "x4k9m2",
+    imageUrl: "/hammer.png",
   },
   {
     id: "E02",
@@ -119,7 +120,6 @@ export const QR_LOCATIONS: QrLocation[] = [
     id: "x4k9m2",
     name: "살해 현장",
     description: "피해자가 발견된 공사장 B2 구역. 격렬한 다툼의 흔적이 남아있다.",
-    imageUrl: "/hammer.png",
   },
   {
     id: "p7n3q8",
