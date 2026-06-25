@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 
 export default function ResetPage() {
-  const [done, setDone] = useState(false);
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function handleReset() {
@@ -18,8 +19,7 @@ export default function ResetPage() {
         .eq("pair_id", team.teamNumber.toUpperCase());
     }
     resetAll();
-    setLoading(false);
-    setDone(true);
+    router.push("/");
   }
 
   return (
@@ -32,30 +32,17 @@ export default function ResetPage() {
         </p>
       </div>
 
-      {done ? (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-6 text-center space-y-2">
-          <p className="text-base font-bold text-emerald-400">초기화 완료</p>
-          <p className="text-sm text-zinc-500">모든 데이터가 삭제됐습니다.</p>
-          <button
-            onClick={() => setDone(false)}
-            className="mt-2 text-xs text-zinc-600 hover:text-zinc-400"
-          >
-            다시 초기화하기
-          </button>
-        </div>
-      ) : (
-        <button
-          onClick={handleReset}
-          disabled={loading}
-          className={`w-full rounded-lg py-4 text-base font-bold transition-all active:scale-[0.98] ${
-            loading
-              ? "bg-zinc-800 text-zinc-600 cursor-not-allowed"
-              : "bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20"
-          }`}
-        >
-          {loading ? "삭제 중..." : "전체 초기화"}
-        </button>
-      )}
+      <button
+        onClick={handleReset}
+        disabled={loading}
+        className={`w-full rounded-lg py-4 text-base font-bold transition-all active:scale-[0.98] ${
+          loading
+            ? "bg-zinc-800 text-zinc-600 cursor-not-allowed"
+            : "bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20"
+        }`}
+      >
+        {loading ? "삭제 중..." : "전체 초기화"}
+      </button>
     </div>
   );
 }
