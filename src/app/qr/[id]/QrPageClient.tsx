@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Evidence, QrLocation, LOCKED_EVIDENCE } from "@/lib/data";
-import { getCollectedEvidence, collectEvidence, getUnlockedEvidence, unlockEvidence } from "@/lib/store";
+import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 interface Props {
   location: QrLocation;
@@ -12,31 +12,23 @@ interface Props {
 }
 
 export default function QrPageClient({ location, evidence }: Props) {
-  const [collected, setCollected] = useState<string[]>([]);
-  const [unlocked, setUnlocked] = useState<string[]>([]);
+  const { collected, unlocked, collect, unlock } = useTeamEvidence();
   const [passwords, setPasswords] = useState<Record<string, string>>({});
   const [wrongIds, setWrongIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    setCollected(getCollectedEvidence());
-    setUnlocked(getUnlockedEvidence());
-  }, []);
-
-  function handleCollect(id: string) {
-    collectEvidence(id);
-    setCollected(getCollectedEvidence());
+  async function handleCollect(id: string) {
+    await collect(id);
   }
 
-  function handlePasswordSubmit(e: Evidence) {
+  async function handlePasswordSubmit(e: Evidence) {
     const input = (passwords[e.id] ?? "").trim();
     const correct = LOCKED_EVIDENCE[e.id];
     if (input === correct) {
-      unlockEvidence(e.id);
-      setUnlocked(getUnlockedEvidence());
+      await unlock(e.id);
       setWrongIds((prev) => prev.filter((id) => id !== e.id));
-      handleCollect(e.id);
+      await handleCollect(e.id);
     } else {
-      setWrongIds((prev) => prev.includes(e.id) ? prev : [...prev, e.id]);
+      setWrongIds((prev) => (prev.includes(e.id) ? prev : [...prev, e.id]));
     }
   }
 

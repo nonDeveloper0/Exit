@@ -1,42 +1,6 @@
-const EVIDENCE_KEY = "exit2026_evidence";
-const UNLOCKED_KEY = "exit2026_unlocked";
 const VOTE_KEY = "exit2026_vote";
 const TEAM_KEY = "exit2026_team";
 const SUBMIT_COUNT_KEY = "exit2026_submit_count";
-
-export function getCollectedEvidence(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(EVIDENCE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function collectEvidence(id: string): void {
-  const current = getCollectedEvidence();
-  if (!current.includes(id)) {
-    localStorage.setItem(EVIDENCE_KEY, JSON.stringify([...current, id]));
-  }
-}
-
-export function getUnlockedEvidence(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(UNLOCKED_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function unlockEvidence(id: string): void {
-  const current = getUnlockedEvidence();
-  if (!current.includes(id)) {
-    localStorage.setItem(UNLOCKED_KEY, JSON.stringify([...current, id]));
-  }
-}
 
 export function getVote(): string | null {
   if (typeof window === "undefined") return null;
@@ -71,9 +35,10 @@ export function incrementSubmitCount(): void {
 }
 
 export function resetAll(): void {
-  localStorage.removeItem(EVIDENCE_KEY);
-  localStorage.removeItem(UNLOCKED_KEY);
   localStorage.removeItem(VOTE_KEY);
   localStorage.removeItem(TEAM_KEY);
   localStorage.removeItem(SUBMIT_COUNT_KEY);
+  // 이전 버전 localStorage 키 정리
+  localStorage.removeItem("exit2026_evidence");
+  localStorage.removeItem("exit2026_unlocked");
 }

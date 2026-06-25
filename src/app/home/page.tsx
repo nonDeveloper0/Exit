@@ -1,15 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { EVIDENCE, QR_LOCATIONS } from "@/lib/data";
-import { getCollectedEvidence } from "@/lib/store";
+import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 export default function MainPage() {
-  const [collected, setCollected] = useState<string[]>([]);
-
-  useEffect(() => {
-    setCollected(getCollectedEvidence());
-  }, []);
+  const { collected } = useTeamEvidence();
 
   const progress = EVIDENCE.length > 0 ? (collected.length / EVIDENCE.length) * 100 : 0;
 

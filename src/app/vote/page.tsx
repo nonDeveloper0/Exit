@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { SUSPECTS, VOTE_UNLOCK_COUNT } from "@/lib/data";
-import { getVote, castVote, getTeamInfo, getSubmitCount, incrementSubmitCount, getCollectedEvidence } from "@/lib/store";
+import { getVote, castVote, getTeamInfo, getSubmitCount, incrementSubmitCount } from "@/lib/store";
+import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSclsS9dAFGB2YgYNMNYd8NVQ5tBbdUBYwUF9tWosu5patyHXg/formResponse";
@@ -21,12 +22,12 @@ async function submitToGoogleForm(teamNumber: string, leaderName: string, suspec
 }
 
 export default function VotePage() {
+  const { collected } = useTeamEvidence();
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [team, setTeam] = useState<{ teamNumber: string; leaderName: string } | null>(null);
   const [submitCount, setSubmitCount] = useState(0);
-  const [collectedCount, setCollectedCount] = useState(0);
 
   useEffect(() => {
     const vote = getVote();
@@ -34,9 +35,9 @@ export default function VotePage() {
     if (vote) { setSelected(vote); setSubmitted(true); }
     setTeam(teamInfo);
     setSubmitCount(getSubmitCount());
-    setCollectedCount(getCollectedEvidence().length);
   }, []);
 
+  const collectedCount = collected.length;
   const voteLocked = VOTE_UNLOCK_COUNT > 0 && collectedCount < VOTE_UNLOCK_COUNT;
 
   async function handleSubmit() {

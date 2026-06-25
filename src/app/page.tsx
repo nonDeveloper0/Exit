@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getTeamInfo, saveTeamInfo } from "@/lib/store";
 
+const TEAM_OPTIONS = ["A", "B", "C"];
+
 export default function LandingPage() {
   const router = useRouter();
   const [teamNumber, setTeamNumber] = useState("");
@@ -78,15 +80,16 @@ export default function LandingPage() {
       <div className="relative z-10 flex flex-col gap-3 px-6 flex-1 justify-center">
         <div className="space-y-2">
           <p className="text-xs font-mono text-zinc-500 tracking-wider uppercase">팀(조) 번호</p>
-          <input
-            type="text"
-            inputMode="numeric"
+          <select
             value={teamNumber}
-            onChange={(e) => setTeamNumber(e.target.value.replace(/\D/g, ""))}
-            onKeyDown={(e) => e.key === "Enter" && handleEnter()}
-            placeholder="조 번호 입력"
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400/50 focus:outline-none transition-colors"
-          />
+            onChange={(e) => setTeamNumber(e.target.value)}
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 focus:border-amber-400/50 focus:outline-none transition-colors appearance-none"
+          >
+            <option value="" disabled className="text-zinc-600 bg-zinc-900">조 선택</option>
+            {TEAM_OPTIONS.map((t) => (
+              <option key={t} value={t} className="bg-zinc-900">{t}팀</option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">

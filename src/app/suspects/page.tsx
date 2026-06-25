@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { SUSPECTS, type Suspect } from "@/lib/data";
-import { getCollectedEvidence } from "@/lib/store";
+import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 const SUSPECT_AVATAR_CLASS = "bg-zinc-700 text-zinc-300";
 
@@ -15,12 +15,8 @@ function getDisplayMotive(s: Suspect, collected: string[]): string {
 }
 
 export default function SuspectsPage() {
+  const { collected } = useTeamEvidence();
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [collected, setCollected] = useState<string[]>([]);
-
-  useEffect(() => {
-    setCollected(getCollectedEvidence());
-  }, []);
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">

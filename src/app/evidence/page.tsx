@@ -1,18 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { EVIDENCE } from "@/lib/data";
-import { getCollectedEvidence } from "@/lib/store";
+import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 export default function EvidencePage() {
-  const [collected, setCollected] = useState<string[]>([]);
+  const { collected } = useTeamEvidence();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
-
-  useEffect(() => {
-    setCollected(getCollectedEvidence());
-  }, []);
 
   const progress = EVIDENCE.length > 0 ? (collected.length / EVIDENCE.length) * 100 : 0;
 
