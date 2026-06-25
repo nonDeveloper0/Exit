@@ -1,13 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { resetAll } from "@/lib/store";
+import { resetAll, getTeamInfo } from "@/lib/store";
+import { supabase } from "@/lib/supabase";
 
 export default function ResetPage() {
   const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  function handleReset() {
+  async function handleReset() {
+    setLoading(true);
+    const team = getTeamInfo();
+    if (team) {
+      await supabase
+        .from("team_evidence_items")
+        .delete()
+        .eq("pair_id", team.teamNumber.toUpperCase());
+    }
     resetAll();
+    setLoading(false);
     setDone(true);
   }
 
@@ -16,7 +27,9 @@ export default function ResetPage() {
       <div className="space-y-1">
         <div className="text-xs font-mono text-red-400 tracking-widest uppercase">Dev Only</div>
         <h1 className="text-2xl font-bold text-zinc-100">초기화</h1>
-        <p className="text-sm text-zinc-500">이 기기의 증거 수집 및 투표 기록을 모두 삭제합니다.</p>
+        <p className="text-sm text-zinc-500">
+          이 팀의 증거 수집 기록(Supabase) 및 투표 기록(기기)을 모두 삭제합니다.
+        </p>
       </div>
 
       {done ? (
@@ -33,9 +46,14 @@ export default function ResetPage() {
       ) : (
         <button
           onClick={handleReset}
-          className="w-full rounded-lg bg-red-500/10 border border-red-500/30 py-4 text-base font-bold text-red-400 hover:bg-red-500/20 active:scale-[0.98] transition-all"
+          disabled={loading}
+          className={`w-full rounded-lg py-4 text-base font-bold transition-all active:scale-[0.98] ${
+            loading
+              ? "bg-zinc-800 text-zinc-600 cursor-not-allowed"
+              : "bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20"
+          }`}
         >
-          전체 초기화
+          {loading ? "삭제 중..." : "전체 초기화"}
         </button>
       )}
     </div>
