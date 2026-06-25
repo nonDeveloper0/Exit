@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "EXIT SEASON1",
-  description: "NS건설 공사장 살인사건 특별 수사",
+  description: "NS건설 공사 현장 살인사건 특별 수사",
   openGraph: {
     title: "EXIT SEASON1",
-    description: "NS건설 공사장 살인사건 특별 수사",
+    description: "NS건설 공사 현장 살인사건 특별 수사",
   },
 };
 

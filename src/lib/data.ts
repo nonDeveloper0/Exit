@@ -19,6 +19,11 @@ export interface Suspect {
 // 최종 추리 제출에 필요한 최소 증거 수 (0 = 제한 없음)
 export const VOTE_UNLOCK_COUNT = 1;
 
+// 비밀번호로 잠긴 증거 목록. { 증거ID: "비밀번호" } 형태로 지정.
+export const LOCKED_EVIDENCE: Record<string, string> = {
+  E01: "1234",
+};
+
 export interface QrLocation {
   id: string;
   name: string;
