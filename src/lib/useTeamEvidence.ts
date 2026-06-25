@@ -25,12 +25,12 @@ export function useTeamEvidence() {
 
     supabase
       .from("team_evidence_items")
-      .select("evidence_id, type")
+      .select("evidence_id")
       .eq("pair_id", pairId)
+      .eq("type", "collected")
       .then(({ data }) => {
         if (data) {
-          setCollected(data.filter((r) => r.type === "collected").map((r) => r.evidence_id));
-          setUnlocked(data.filter((r) => r.type === "unlocked").map((r) => r.evidence_id));
+          setCollected(data.map((r) => r.evidence_id));
         }
         setLoading(false);
       });
@@ -49,10 +49,6 @@ export function useTeamEvidence() {
           const item = payload.new as { evidence_id: string; type: string };
           if (item.type === "collected") {
             setCollected((prev) =>
-              prev.includes(item.evidence_id) ? prev : [...prev, item.evidence_id]
-            );
-          } else if (item.type === "unlocked") {
-            setUnlocked((prev) =>
               prev.includes(item.evidence_id) ? prev : [...prev, item.evidence_id]
             );
           }
@@ -79,19 +75,12 @@ export function useTeamEvidence() {
     [pairId]
   );
 
-  const unlock = useCallback(
-    async (id: string) => {
-      if (!pairId || unlockedRef.current.includes(id)) return;
-      setUnlocked((prev) => (prev.includes(id) ? prev : [...prev, id]));
-      await supabase
-        .from("team_evidence_items")
-        .upsert(
-          { pair_id: pairId, evidence_id: id, type: "unlocked" },
-          { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
-        );
-    },
-    [pairId]
-  );
+  // unlocked는 로컬 전용 — 비밀번호 잠금 UI 제어에만 사용, Supabase에 저장하지 않음
+  // isCollected=true이면 showLockUI=false가 되므로 상대방 폰도 수집 후 정상 표시됨
+  const unlock = useCallback(async (id: string) => {
+    if (unlockedRef.current.includes(id)) return;
+    setUnlocked((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  }, []);
 
   return { collected, unlocked, loading, collect, unlock };
 }
