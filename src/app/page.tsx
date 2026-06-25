@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getTeamInfo, saveTeamInfo } from "@/lib/store";
 
-const TEAM_OPTIONS = ["A", "B", "C"];
-
 export default function LandingPage() {
   const router = useRouter();
   const [teamNumber, setTeamNumber] = useState("");
@@ -20,12 +18,13 @@ export default function LandingPage() {
   }, []);
 
   function handleEnter() {
-    if (!teamNumber || !leaderName.trim()) return;
-    saveTeamInfo(teamNumber, leaderName.trim());
+    const num = parseInt(teamNumber);
+    if (!num || num < 1 || !leaderName.trim()) return;
+    saveTeamInfo(String(num), leaderName.trim());
     router.push("/home");
   }
 
-  const canEnter = !!teamNumber && leaderName.trim().length > 0;
+  const canEnter = parseInt(teamNumber) >= 1 && leaderName.trim().length > 0;
 
   return (
     <div className="relative h-screen overflow-hidden bg-zinc-950 flex flex-col">
@@ -79,17 +78,16 @@ export default function LandingPage() {
       {/* Team setup */}
       <div className="relative z-10 flex flex-col gap-3 px-6 flex-1 justify-center">
         <div className="space-y-2">
-          <p className="text-xs font-mono text-zinc-500 tracking-wider uppercase">팀(조) 번호</p>
-          <select
+          <p className="text-xs font-mono text-zinc-500 tracking-wider uppercase">조 번호</p>
+          <input
+            type="number"
+            min="1"
             value={teamNumber}
             onChange={(e) => setTeamNumber(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 focus:border-amber-400/50 focus:outline-none transition-colors appearance-none"
-          >
-            <option value="" disabled className="text-zinc-600 bg-zinc-900">조 선택</option>
-            {TEAM_OPTIONS.map((t) => (
-              <option key={t} value={t} className="bg-zinc-900">{t}팀</option>
-            ))}
-          </select>
+            onKeyDown={(e) => e.key === "Enter" && handleEnter()}
+            placeholder="조 번호 입력 (예: 1)"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400/50 focus:outline-none transition-colors"
+          />
         </div>
 
         <div className="space-y-2">

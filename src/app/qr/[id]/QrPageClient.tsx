@@ -3,15 +3,16 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Evidence, QrLocation, LOCKED_EVIDENCE } from "@/lib/data";
+import { Evidence, LOCKED_EVIDENCE } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 interface Props {
-  location: QrLocation;
+  qrId: string;
+  location: string;
   evidence: Evidence[];
 }
 
-export default function QrPageClient({ location, evidence }: Props) {
+export default function QrPageClient({ qrId, location, evidence }: Props) {
   const { collected, unlocked, collect, unlock } = useTeamEvidence();
   const [passwords, setPasswords] = useState<Record<string, string>>({});
   const [wrongIds, setWrongIds] = useState<string[]>([]);
@@ -51,13 +52,12 @@ export default function QrPageClient({ location, evidence }: Props) {
         수사본부
       </Link>
 
-      {/* Location header */}
+      {/* QR header */}
       <div className="space-y-1">
         <div className="text-xs font-mono text-amber-400 tracking-widest uppercase">
-          {location.id}
+          {qrId}
         </div>
-        <h1 className="text-2xl font-bold text-zinc-100">{location.name}</h1>
-        <p className="text-sm text-zinc-500">{location.description}</p>
+        <h1 className="text-2xl font-bold text-zinc-100">{location}</h1>
       </div>
 
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { EVIDENCE, QR_LOCATIONS } from "@/lib/data";
+import { EVIDENCE, QR_CODES } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 export default function MainPage() {
@@ -43,7 +43,7 @@ export default function MainPage() {
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">용의자</span>
-            <span>A, B, C — 3인</span>
+            <span>A, B, C, D, E — 5인</span>
           </div>
         </div>
         <p className="text-xs text-zinc-500 border-t border-zinc-800 pt-2">
@@ -79,22 +79,19 @@ export default function MainPage() {
         </ol>
       </div>
 
-      {/* QR Location Map */}
+      {/* QR Map */}
       <div className="space-y-2">
-        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-wider">수사 구역</h2>
-        <div className="grid grid-cols-2 gap-2">
-          {QR_LOCATIONS.map((loc, index) => {
-            const locationEvidence = EVIDENCE.filter((e) => e.qrId === loc.id);
-            const hasCollected = locationEvidence.some((e) => collected.includes(e.id));
-            const allCollected =
-              locationEvidence.length > 0 &&
-              locationEvidence.every((e) => collected.includes(e.id));
-            const label = `#${index + 1}`;
+        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-wider">QR 수집 현황</h2>
+        <div className="grid grid-cols-6 gap-2">
+          {QR_CODES.map((qr, index) => {
+            const qrEvidence = EVIDENCE.filter((e) => qr.evidenceIds.includes(e.id));
+            const hasCollected = qrEvidence.some((e) => collected.includes(e.id));
+            const allCollected = qrEvidence.every((e) => collected.includes(e.id));
 
             return (
               <div
-                key={loc.id}
-                className={`rounded border p-3 ${
+                key={qr.id}
+                className={`rounded border p-3 flex flex-col items-center gap-1 ${
                   allCollected
                     ? "border-emerald-500/30 bg-emerald-500/5"
                     : hasCollected
@@ -102,16 +99,14 @@ export default function MainPage() {
                     : "border-zinc-800 bg-zinc-900"
                 }`}
               >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-mono text-zinc-500">{label}</span>
-                  {allCollected && (
-                    <span className="text-xs text-emerald-400">✓</span>
-                  )}
-                  {hasCollected && !allCollected && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
-                  )}
-                </div>
-                <p className="text-xs text-zinc-300">{loc.name}</p>
+                <span className="text-xs font-mono text-zinc-500">QR{index + 1}</span>
+                {allCollected ? (
+                  <span className="text-xs text-emerald-400">✓</span>
+                ) : hasCollected ? (
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+                )}
               </div>
             );
           })}
