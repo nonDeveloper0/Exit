@@ -62,6 +62,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - Supabase 기록 있는 조 목록 자동 조회
   - 조별 개별 초기화 + 전체 일괄 초기화
   - 내 기기 조 reset 시 localStorage도 함께 삭제
+- [x] 잠금 증거 퀴즈 문제 표시
+  - `EVIDENCE_QUIZ` 상수 추가 (`data.ts`)
+  - 비밀번호 입력창 위에 퀴즈 문제 표시 (`QrPageClient.tsx`)
+  - EDIT_GUIDE.md 6-1절 추가
 
 ## 구조 확정 사항
 

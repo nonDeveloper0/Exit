@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Evidence, LOCKED_EVIDENCE } from "@/lib/data";
+import { Evidence, LOCKED_EVIDENCE, EVIDENCE_QUIZ } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 interface Props {
@@ -116,7 +116,13 @@ export default function QrPageClient({ qrId, location, evidence }: Props) {
 
                   {showLockUI && (
                     <div className="space-y-2">
-                      <p className="text-xs text-zinc-500">비밀번호를 입력하면 단서가 공개됩니다.</p>
+                      {EVIDENCE_QUIZ[e.id] ? (
+                        <p className="text-sm text-zinc-200 font-medium leading-relaxed">
+                          {EVIDENCE_QUIZ[e.id]}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-zinc-500">비밀번호를 입력하면 단서가 공개됩니다.</p>
+                      )}
                       <div className="flex gap-2">
                         <input
                           type="text"

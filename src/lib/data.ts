@@ -23,6 +23,11 @@ export const LOCKED_EVIDENCE: Record<string, string> = {
   E01: "1234",
 };
 
+// 잠긴 증거 퀴즈 문제. { 증거ID: "문제" } 형태로 지정. 없으면 기본 안내 문구 표시.
+export const EVIDENCE_QUIZ: Record<string, string> = {
+  E01: "퀴즈 문제를 여기에 입력하세요.",
+};
+
 // 장소 이름 — 수정 시 여기서만 변경
 export const LOCATIONS = {
   L1: "살해 현장",

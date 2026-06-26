@@ -110,6 +110,37 @@ export const LOCKED_EVIDENCE: Record<string, string> = {
 
 ---
 
+## 6-1. 잠금 증거 퀴즈 문제 수정
+
+**파일:** `src/lib/data.ts` → `EVIDENCE_QUIZ` 객체
+
+```ts
+export const EVIDENCE_QUIZ: Record<string, string> = {
+  E01: "퀴즈 문제를 여기에 입력하세요.",
+  // E05: "다른 증거에도 퀴즈 추가 가능",
+};
+```
+
+- `LOCKED_EVIDENCE`에 등록된 증거에만 의미 있음 (잠기지 않은 증거엔 표시 안 됨)
+- 해당 증거 ID의 퀴즈가 있으면 → 비밀번호 입력창 위에 퀴즈 문구 표시
+- 퀴즈가 없으면 → 기본 안내 문구("비밀번호를 입력하면 단서가 공개됩니다.") 표시
+- 퀴즈와 비밀번호는 별개 — 퀴즈 정답이 비밀번호가 되도록 직접 설계할 것
+
+**예시 세팅:**
+```ts
+// data.ts
+
+export const LOCKED_EVIDENCE: Record<string, string> = {
+  E01: "모세",   // 정답(비밀번호) = "모세"
+};
+
+export const EVIDENCE_QUIZ: Record<string, string> = {
+  E01: "이집트에서 노예를 이끌고 탈출한 인물의 이름은?",  // 퀴즈 문제
+};
+```
+
+---
+
 ## 7. 사건 개요 수정 (수사본부 메인 화면)
 
 **파일:** `src/app/home/page.tsx`
