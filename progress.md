@@ -66,6 +66,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - `EVIDENCE_QUIZ` 상수 추가 (`data.ts`)
   - 비밀번호 입력창 위에 퀴즈 문제 표시 (`QrPageClient.tsx`)
   - EDIT_GUIDE.md 6-1절 추가
+- [x] 관리자 패널 (/admin) — PIN 인증 + 게임 진행 제어
+  - `/reset` → `/admin` 페이지 이름 변경
+  - PIN(0000) 게이트: sessionStorage 유지, 탭 닫으면 재인증
+  - 게임 상태 제어: 투표 열기/닫기, 엔딩 공개/숨기기 (Supabase `game_state` 테이블)
+  - `/vote`: vote_open false면 잠김 UI, Realtime으로 즉시 해제
+  - `GameStateRedirect`: ending_open 활성화 시 전 참가자 기기 자동 /ending 이동
+  - 버그 수정: PinGate 키패드 버튼 ref 수정, 채널 이름 인스턴스별 고유화
+  - 신규 파일: `src/lib/useGameState.ts`, `src/components/GameStateRedirect.tsx`
+  - 수정 파일: `src/app/layout.tsx`, `src/app/admin/page.tsx`, `src/app/vote/page.tsx`
 
 ## 구조 확정 사항
 
@@ -91,14 +100,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 
 ## 작업중
 
-- [x] 관리자 게임 진행 제어 기능 (reset 페이지 통합)
-  - `/admin` 비밀번호 게이트 추가 (PIN: 0000, sessionStorage 유지)
-  - 게임 상태 제어: 투표 열기/닫기, 엔딩 공개/숨기기
-  - Supabase `game_state` 테이블 기반 Realtime 전파
-  - `/vote` 페이지: vote_open이 false면 잠김 UI 표시
-  - `GameStateRedirect`: ending_open이 true로 바뀌면 모든 참가자 기기 자동 /ending 이동
-  - 변경 파일: `src/lib/useGameState.ts` (신규), `src/components/GameStateRedirect.tsx` (신규), `src/app/layout.tsx`, `src/app/admin/page.tsx`, `src/app/vote/page.tsx`
-  - **필수**: Supabase SQL 에디터에서 game_state 테이블 생성 필요 (아래 SQL 참고)
+- [ ] 없음
 
 ---
 
