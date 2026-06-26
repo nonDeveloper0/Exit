@@ -54,6 +54,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - INSERT → 즉시 카운트 반영, DELETE(reset) → 전체 재조회
   - 수집 개수 내림차순 랭킹 정렬, 1~3위 색상 구분, 내 조 강조
   - BottomNav에 '현황' 탭 추가 (5탭)
+- [x] 입장 시 joined 마커 기록 — 증거 0개도 현황에 표시
+  - 랜딩 입장 시 `team_evidence_items`에 `type='joined'` upsert
+  - 현황 페이지: joined 기록 있는 모든 조를 0개부터 표시
+  - reset 시 joined 레코드도 삭제 → 목록 자동 제거
 - [x] reset 페이지 관리자 기능 강화
   - Supabase 기록 있는 조 목록 자동 조회
   - 조별 개별 초기화 + 전체 일괄 초기화

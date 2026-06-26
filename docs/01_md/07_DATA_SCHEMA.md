@@ -51,12 +51,14 @@ export const LOCATIONS = {
 ```sql
 CREATE TABLE team_evidence_items (
   pair_id     TEXT NOT NULL,           -- 조 번호 (숫자 문자열, 예: "1", "2")
-  evidence_id TEXT NOT NULL,           -- 증거 ID: "E01" ~ "E10"
-  type        TEXT NOT NULL,           -- "collected"
+  evidence_id TEXT NOT NULL,           -- 증거 ID: "E01" ~ "E10", 또는 "_joined" (입장 마커)
+  type        TEXT NOT NULL,           -- "collected" | "joined"
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   PRIMARY KEY (pair_id, evidence_id, type)
 );
 ```
+
+- `type='joined'`, `evidence_id='_joined'`: 입장 시 기록되는 마커. 현황 페이지에서 증거 0개인 조도 표시하기 위해 사용.
 
 ## localStorage 키 (기기별 독립)
 
