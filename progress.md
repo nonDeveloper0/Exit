@@ -80,6 +80,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 
 ## 작업필요
 
+### 기능
+- [ ] 전체 조 실시간 수집 현황 표시
+  - Supabase에서 pair_id 필터 없이 전체 조회 → 조별 수집 개수 집계
+  - Realtime 구독도 전체 테이블로 확장 (현재는 자기 조만 구독)
+  - 표시 위치: 수사본부(`/home`) 또는 별도 현황 페이지
+
 ### 데이터 (이벤트 전 필수)
 - [ ] 중요 단서 비밀번호 확정 (`data.ts` → `LOCKED_EVIDENCE`)
 - [ ] 용의자 동기 공개 트리거 확정 (`data.ts` → `motiveRevealIds`)
