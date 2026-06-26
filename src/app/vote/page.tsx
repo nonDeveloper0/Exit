@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { SUSPECTS, VOTE_UNLOCK_COUNT } from "@/lib/data";
-import { getVote, castVote, getTeamInfo, getSubmitCount, incrementSubmitCount } from "@/lib/store";
+import { getVote, castVote, getTeamInfo } from "@/lib/store";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 import { useGameState } from "@/lib/useGameState";
 
@@ -24,30 +24,33 @@ async function submitToGoogleForm(teamNumber: string, leaderName: string, suspec
 
 export default function VotePage() {
   const { collected } = useTeamEvidence();
-  const { vote_open, loaded: gameStateLoaded } = useGameState();
-  const [selected, setSelected] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const { vote_round, loaded: gameStateLoaded } = useGameState();
+  const [selectedR1, setSelectedR1] = useState<string | null>(null);
+  const [selectedR2, setSelectedR2] = useState<string | null>(null);
+  const [submittedR1, setSubmittedR1] = useState(false);
+  const [submittedR2, setSubmittedR2] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [team, setTeam] = useState<{ teamNumber: string; leaderName: string } | null>(null);
-  const [submitCount, setSubmitCount] = useState(0);
 
   useEffect(() => {
-    const vote = getVote();
-    const teamInfo = getTeamInfo();
-    if (vote) { setSelected(vote); setSubmitted(true); }
-    setTeam(teamInfo);
-    setSubmitCount(getSubmitCount());
+    setTeam(getTeamInfo());
+    const v1 = getVote(1);
+    const v2 = getVote(2);
+    if (v1) { setSelectedR1(v1); setSubmittedR1(true); }
+    if (v2) { setSelectedR2(v2); setSubmittedR2(true); }
   }, []);
 
   const collectedCount = collected.length;
   const voteLocked = VOTE_UNLOCK_COUNT > 0 && collectedCount < VOTE_UNLOCK_COUNT;
 
-  if (gameStateLoaded && !vote_open) {
+  if (!gameStateLoaded) return null;
+
+  if (vote_round === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-4">
         <div className="space-y-1 text-center">
-          <div className="text-xs font-mono text-zinc-500 tracking-widest uppercase">Final Deduction</div>
-          <h1 className="text-2xl font-bold text-zinc-100">최종 추리</h1>
+          <div className="text-xs font-mono text-zinc-500 tracking-widest uppercase">Deduction</div>
+          <h1 className="text-2xl font-bold text-zinc-100">추리 제출</h1>
         </div>
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8 text-center space-y-3 w-full max-w-sm">
           <div className="w-3 h-3 rounded-full bg-zinc-600 mx-auto animate-pulse" />
@@ -58,6 +61,17 @@ export default function VotePage() {
     );
   }
 
+  const isRound1 = vote_round === 1;
+  const selected = isRound1 ? selectedR1 : selectedR2;
+  const submitted = isRound1 ? submittedR1 : submittedR2;
+  const setSelected = isRound1 ? setSelectedR1 : setSelectedR2;
+  const setSubmitted = isRound1
+    ? (v: boolean) => setSubmittedR1(v)
+    : (v: boolean) => setSubmittedR2(v);
+
+  const roundLabel = isRound1 ? "중간 추리" : "최종 추리";
+  const roundLabelEn = isRound1 ? "Mid Deduction" : "Final Deduction";
+
   async function handleSubmit() {
     if (!selected || !team) return;
     setSubmitting(true);
@@ -66,9 +80,7 @@ export default function VotePage() {
     } catch {
       // no-cors 응답은 읽을 수 없으나 제출은 정상 처리됨
     }
-    castVote(selected);
-    incrementSubmitCount();
-    setSubmitCount((c) => c + 1);
+    castVote(vote_round as 1 | 2, selected);
     setSubmitted(true);
     setSubmitting(false);
   }
@@ -79,32 +91,23 @@ export default function VotePage() {
       <div className="flex flex-col gap-4 p-4 pt-6">
         <div className="space-y-1">
           <div className="text-xs font-mono text-amber-400 tracking-widest uppercase">
-            추리 제출 완료
+            {roundLabelEn} — 완료
           </div>
-          <h1 className="text-2xl font-bold text-zinc-100">투표 완료</h1>
+          <h1 className="text-2xl font-bold text-zinc-100">{roundLabel} 완료</h1>
         </div>
 
         <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-8 text-center space-y-2">
-          <p className="text-sm text-zinc-400">{team?.teamNumber}조의 최종 선택</p>
+          <p className="text-sm text-zinc-400">{team?.teamNumber}조의 {isRound1 ? "중간" : "최종"} 선택</p>
           <p className="text-5xl font-black text-emerald-400">{selected}</p>
           <p className="text-base font-semibold text-zinc-200">{votedSuspect?.role}</p>
           <p className="text-xs text-zinc-500 pt-1">조장: {team?.leaderName}</p>
         </div>
 
         <p className="text-sm text-zinc-500 text-center">
-          모든 조의 추리가 끝나면 진실이 공개됩니다.
+          {isRound1
+            ? "최종 투표가 열리면 다시 선택할 수 있습니다."
+            : "모든 조의 추리가 끝나면 진실이 공개됩니다."}
         </p>
-
-        {submitCount < 2 ? (
-          <button
-            onClick={() => setSubmitted(false)}
-            className="text-xs text-zinc-600 hover:text-zinc-400 text-center mt-2"
-          >
-            다시 선택하기 ({2 - submitCount}회 남음)
-          </button>
-        ) : (
-          <p className="text-xs text-zinc-700 text-center mt-2">제출 횟수를 모두 사용했습니다</p>
-        )}
       </div>
     );
   }
@@ -113,10 +116,10 @@ export default function VotePage() {
     <div className="flex flex-col gap-4 p-4 pt-6">
       <div className="space-y-1">
         <div className="text-xs font-mono text-amber-400 tracking-widest uppercase">
-          Final Deduction
+          {roundLabelEn}
         </div>
-        <h1 className="text-2xl font-bold text-zinc-100">최종 추리</h1>
-        <p className="text-sm text-zinc-500">범인은 누구인가? 조의 최종 결론을 선택하세요.</p>
+        <h1 className="text-2xl font-bold text-zinc-100">{roundLabel}</h1>
+        <p className="text-sm text-zinc-500">범인은 누구인가? 조의 {isRound1 ? "중간" : "최종"} 결론을 선택하세요.</p>
         {team && (
           <p className="text-xs text-zinc-600 font-mono">{team.teamNumber}조 · {team.leaderName}</p>
         )}
@@ -173,14 +176,14 @@ export default function VotePage() {
           : voteLocked
           ? `증거 ${VOTE_UNLOCK_COUNT - collectedCount}개 추가 수집 시 제출 가능`
           : selected
-          ? `용의자 ${selected} — 범인으로 지목`
+          ? `용의자 ${selected} — ${isRound1 ? "중간" : "최종"} 추리 제출`
           : "용의자를 선택하세요"}
       </button>
 
       <p className="text-xs text-zinc-600 text-center">
-        정답 제출은 단 2회만 가능합니다.<br/>
-        남은 제출 횟수: <span className="text-zinc-400 font-medium">{Math.max(0, 2 - submitCount)}회</span><br/>
-        충분한 증거를 수집한 후 신중하게 판단하여 제출하세요
+        {isRound1
+          ? "중간 추리입니다. 최종 투표가 열리면 다시 선택할 수 있습니다."
+          : "최종 추리입니다. 신중하게 판단하여 제출하세요."}
       </p>
     </div>
   );

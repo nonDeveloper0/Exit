@@ -75,6 +75,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 버그 수정: PinGate 키패드 버튼 ref 수정, 채널 이름 인스턴스별 고유화
   - 신규 파일: `src/lib/useGameState.ts`, `src/components/GameStateRedirect.tsx`
   - 수정 파일: `src/app/layout.tsx`, `src/app/admin/page.tsx`, `src/app/vote/page.tsx`
+- [x] 투표 2라운드 분리 — 중간 투표 / 최종 투표 독립 제어
+  - Supabase `game_state`에 `vote_round integer` 컬럼 추가 (0=닫힘, 1=중간, 2=최종)
+  - 어드민: 기존 토글 → 중간 투표 열기 / 최종 투표 열기 / 닫기 3버튼
+  - 각 라운드 제출 결과 localStorage에 독립 저장 (`exit2026_vote_r1`, `exit2026_vote_r2`)
+  - 수정 파일: `src/lib/store.ts`, `src/lib/useGameState.ts`, `src/app/admin/page.tsx`, `src/app/vote/page.tsx`
 
 ## 구조 확정 사항
 
@@ -101,6 +106,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 ## 작업중
 
 - [ ] 없음
+
 
 ---
 

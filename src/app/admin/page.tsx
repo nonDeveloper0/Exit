@@ -85,11 +85,11 @@ function PinGate({ onSuccess }: { onSuccess: () => void }) {
 }
 
 function AdminPanel() {
-  const { vote_open, ending_open, loaded } = useGameState();
+  const { vote_round, ending_open, loaded } = useGameState();
   const [teams, setTeams] = useState<TeamRow[]>([]);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [myPairId, setMyPairId] = useState<string | null>(null);
-  const [togglingVote, setTogglingVote] = useState(false);
+  const [settingVoteRound, setSettingVoteRound] = useState(false);
   const [togglingEnding, setTogglingEnding] = useState(false);
 
   useEffect(() => {
@@ -120,13 +120,13 @@ function AdminPanel() {
     fetchTeams();
   }, [fetchTeams]);
 
-  async function toggleVote() {
-    setTogglingVote(true);
+  async function setVoteRound(round: 0 | 1 | 2) {
+    setSettingVoteRound(true);
     await supabase
       .from("game_state")
-      .update({ vote_open: !vote_open })
+      .update({ vote_round: round })
       .eq("id", "singleton");
-    setTogglingVote(false);
+    setSettingVoteRound(false);
   }
 
   async function toggleEnding() {
@@ -172,25 +172,41 @@ function AdminPanel() {
           <p className="text-sm text-zinc-600 py-2">상태 불러오는 중...</p>
         ) : (
           <>
-            {/* Vote toggle */}
-            <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-              <div className="space-y-0.5">
-                <p className="text-sm font-bold text-zinc-200">최종 투표</p>
-                <p className={`text-xs font-mono ${vote_open ? "text-emerald-400" : "text-zinc-500"}`}>
-                  {vote_open ? "● 열림" : "○ 닫힘"}
-                </p>
+            {/* Vote round control */}
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold text-zinc-200">투표 라운드</p>
+                  <p className={`text-xs font-mono ${
+                    vote_round === 1 ? "text-emerald-400" : vote_round === 2 ? "text-amber-400" : "text-zinc-500"
+                  }`}>
+                    {vote_round === 0 ? "○ 닫힘" : vote_round === 1 ? "● 중간 투표 진행 중" : "● 최종 투표 진행 중"}
+                  </p>
+                </div>
               </div>
-              <button
-                onClick={toggleVote}
-                disabled={togglingVote}
-                className={`rounded px-5 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                  vote_open
-                    ? "border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                    : "bg-emerald-500 text-zinc-900 hover:bg-emerald-400"
-                }`}
-              >
-                {togglingVote ? "..." : vote_open ? "투표 닫기" : "투표 열기"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setVoteRound(1)}
+                  disabled={settingVoteRound || vote_round === 1}
+                  className="flex-1 rounded px-3 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-emerald-500 text-zinc-900 hover:bg-emerald-400"
+                >
+                  {settingVoteRound ? "..." : "중간 투표 열기"}
+                </button>
+                <button
+                  onClick={() => setVoteRound(2)}
+                  disabled={settingVoteRound || vote_round === 2}
+                  className="flex-1 rounded px-3 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-amber-400 text-zinc-900 hover:bg-amber-300"
+                >
+                  {settingVoteRound ? "..." : "최종 투표 열기"}
+                </button>
+                <button
+                  onClick={() => setVoteRound(0)}
+                  disabled={settingVoteRound || vote_round === 0}
+                  className="rounded px-3 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                >
+                  {settingVoteRound ? "..." : "닫기"}
+                </button>
+              </div>
             </div>
 
             {/* Ending toggle */}
