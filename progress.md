@@ -91,7 +91,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 
 ## 작업중
 
-- [ ] 없음
+- [x] 관리자 게임 진행 제어 기능 (reset 페이지 통합)
+  - `/admin` 비밀번호 게이트 추가 (PIN: 0000, sessionStorage 유지)
+  - 게임 상태 제어: 투표 열기/닫기, 엔딩 공개/숨기기
+  - Supabase `game_state` 테이블 기반 Realtime 전파
+  - `/vote` 페이지: vote_open이 false면 잠김 UI 표시
+  - `GameStateRedirect`: ending_open이 true로 바뀌면 모든 참가자 기기 자동 /ending 이동
+  - 변경 파일: `src/lib/useGameState.ts` (신규), `src/components/GameStateRedirect.tsx` (신규), `src/app/layout.tsx`, `src/app/admin/page.tsx`, `src/app/vote/page.tsx`
+  - **필수**: Supabase SQL 에디터에서 game_state 테이블 생성 필요 (아래 SQL 참고)
 
 ---
 

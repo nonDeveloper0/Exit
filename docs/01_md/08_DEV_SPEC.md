@@ -15,9 +15,19 @@ DB / Realtime: Supabase
 |------|------|------|
 | pair_id | TEXT | 조 번호 (숫자 문자열, 예: "1", "2") — Primary Key의 일부 |
 | evidence_id | TEXT | 증거 ID ("E01" 등) — Primary Key의 일부 |
-| type | TEXT | "collected" — Primary Key의 일부 |
+| type | TEXT | "collected" 또는 "joined" — Primary Key의 일부 |
 | created_at | TIMESTAMPTZ | 수집 시각 |
 
+**테이블: `game_state`**
+
+| 컬럼 | 타입 | 설명 |
+|------|------|------|
+| id | TEXT | Primary Key, 항상 "singleton" |
+| vote_open | BOOLEAN | 최종 투표 활성화 여부 (기본 false) |
+| ending_open | BOOLEAN | 엔딩 공개 여부 (기본 false) |
+| updated_at | TIMESTAMPTZ | 마지막 변경 시각 |
+
+- 단일 행 (`id = 'singleton'`) 으로 관리
 - Realtime 활성화됨 (`supabase_realtime` publication)
 - RLS 비활성화 (인증 없는 이벤트용 앱)
 
@@ -69,7 +79,7 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
 | `/ranking` | 전체 조 실시간 수사 현황 랭킹 |
 | `/vote` | 최종 투표 (용의자 선택 → Google Form, 최대 2회) |
 | `/ending` | 엔딩 (반전 공개 — 모세 이야기) |
-| `/reset` | 관리자 초기화 (조별 개별 또는 전체 일괄) |
+| `/admin` | 관리자 패널 (PIN 0000) — 게임 진행 제어(투표/엔딩) + 조별 증거 초기화 |
 
 ## 상태 저장 위치
 
@@ -79,3 +89,5 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
 | 조 번호 / 조장 이름 | localStorage (기기별) |
 | 투표 내용 | localStorage (기기별) |
 | 제출 횟수 | localStorage (기기별) |
+| 게임 진행 상태 (투표/엔딩 열림) | Supabase `game_state` (전체 공유, Realtime) |
+| 관리자 인증 | sessionStorage (탭 단위, PIN 0000) |

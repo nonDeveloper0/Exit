@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { SUSPECTS, VOTE_UNLOCK_COUNT } from "@/lib/data";
 import { getVote, castVote, getTeamInfo, getSubmitCount, incrementSubmitCount } from "@/lib/store";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
+import { useGameState } from "@/lib/useGameState";
 
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSclsS9dAFGB2YgYNMNYd8NVQ5tBbdUBYwUF9tWosu5patyHXg/formResponse";
@@ -23,6 +24,7 @@ async function submitToGoogleForm(teamNumber: string, leaderName: string, suspec
 
 export default function VotePage() {
   const { collected } = useTeamEvidence();
+  const { vote_open, loaded: gameStateLoaded } = useGameState();
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -39,6 +41,22 @@ export default function VotePage() {
 
   const collectedCount = collected.length;
   const voteLocked = VOTE_UNLOCK_COUNT > 0 && collectedCount < VOTE_UNLOCK_COUNT;
+
+  if (gameStateLoaded && !vote_open) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-4">
+        <div className="space-y-1 text-center">
+          <div className="text-xs font-mono text-zinc-500 tracking-widest uppercase">Final Deduction</div>
+          <h1 className="text-2xl font-bold text-zinc-100">최종 추리</h1>
+        </div>
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8 text-center space-y-3 w-full max-w-sm">
+          <div className="w-3 h-3 rounded-full bg-zinc-600 mx-auto animate-pulse" />
+          <p className="text-base font-semibold text-zinc-300">아직 투표가 열리지 않았습니다</p>
+          <p className="text-sm text-zinc-500">운영진의 안내에 따라 조금만 기다려 주세요.</p>
+        </div>
+      </div>
+    );
+  }
 
   async function handleSubmit() {
     if (!selected || !team) return;
