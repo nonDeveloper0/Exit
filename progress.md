@@ -92,5 +92,3 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 - [ ] 중요 단서 비밀번호 확정 (`data.ts` → `LOCKED_EVIDENCE`)
 - [ ] 용의자 동기 공개 트리거 확정 (`data.ts` → `motiveRevealIds`)
 
-### 배포 전 제거
-- [ ] `/reset` 페이지 삭제 (`src/app/reset/page.tsx`) — 테스트용, 실제 이벤트 배포 시 제거
