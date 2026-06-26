@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
@@ -15,6 +15,7 @@ interface TeamRow {
 function PinGate({ onSuccess }: { onSuccess: () => void }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function handleChange(value: string) {
     const digits = value.replace(/\D/g, "").slice(0, 4);
@@ -57,6 +58,7 @@ function PinGate({ onSuccess }: { onSuccess: () => void }) {
 
       {/* Hidden input */}
       <input
+        ref={inputRef}
         type="tel"
         inputMode="numeric"
         pattern="[0-9]*"
@@ -69,10 +71,7 @@ function PinGate({ onSuccess }: { onSuccess: () => void }) {
 
       {/* Tap to focus trigger */}
       <button
-        onClick={(e) => {
-          const input = (e.currentTarget.closest("div")?.querySelector("input")) as HTMLInputElement | null;
-          input?.focus();
-        }}
+        onClick={() => inputRef.current?.focus()}
         className="text-xs text-zinc-600 border border-zinc-800 rounded px-4 py-2"
       >
         숫자 키패드 열기

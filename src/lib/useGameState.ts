@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabase";
 
 export interface GameState {
@@ -6,9 +6,12 @@ export interface GameState {
   ending_open: boolean;
 }
 
+let channelCounter = 0;
+
 export function useGameState() {
   const [state, setState] = useState<GameState>({ vote_open: false, ending_open: false });
   const [loaded, setLoaded] = useState(false);
+  const channelName = useRef(`game_state_${++channelCounter}`).current;
 
   useEffect(() => {
     supabase
@@ -22,7 +25,7 @@ export function useGameState() {
       });
 
     const channel = supabase
-      .channel("game_state_changes")
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "game_state" },
