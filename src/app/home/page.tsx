@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EVIDENCE, QR_CODES } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
+import { useAllTeamsProgress } from "@/lib/useAllTeamsProgress";
+import { getTeamInfo } from "@/lib/store";
 
 export default function MainPage() {
   const { collected } = useTeamEvidence();
+  const { sorted: allTeams, total } = useAllTeamsProgress();
+  const [myPairId, setMyPairId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const team = getTeamInfo();
+    if (team) setMyPairId(team.teamNumber);
+  }, []);
 
   const progress = EVIDENCE.length > 0 ? (collected.length / EVIDENCE.length) * 100 : 0;
 
@@ -77,6 +86,40 @@ export default function MainPage() {
           <li>용의자 파일을 검토한다</li>
           <li>범인을 선택하고 최종 추리를 제출한다</li>
         </ol>
+      </div>
+
+      {/* All Teams Progress */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-wider">전체 조 수사 현황</h2>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        </div>
+        {allTeams.length === 0 ? (
+          <p className="text-xs text-zinc-600 py-2">아직 수집 중인 조가 없습니다.</p>
+        ) : (
+          <div className="space-y-2">
+            {allTeams.map(([pairId, count]) => {
+              const isMe = pairId === myPairId;
+              const pct = Math.round((count / total) * 100);
+              return (
+                <div key={pairId} className={`rounded-lg border p-3 space-y-1.5 ${isMe ? "border-amber-500/30 bg-amber-500/5" : "border-zinc-800 bg-zinc-900"}`}>
+                  <div className="flex items-center justify-between">
+                    <span className={`text-xs font-mono font-bold ${isMe ? "text-amber-400" : "text-zinc-400"}`}>
+                      {pairId}조{isMe && " (나)"}
+                    </span>
+                    <span className="text-xs font-mono text-zinc-500">{count} / {total}</span>
+                  </div>
+                  <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ${isMe ? "bg-amber-400" : "bg-zinc-600"}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* QR Map */}
