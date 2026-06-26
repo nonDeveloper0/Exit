@@ -54,9 +54,7 @@ export function useAllTeamsProgress() {
   }, [fetchAll]);
 
   const total = EVIDENCE.length;
-  const sorted = Object.entries(teams).sort(
-    (a, b) => parseInt(a[0]) - parseInt(b[0])
-  );
+  const sorted = Object.entries(teams).sort((a, b) => b[1] - a[1]);
 
   return { sorted, total };
 }
