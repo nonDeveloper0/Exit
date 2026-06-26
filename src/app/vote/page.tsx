@@ -54,8 +54,8 @@ export default function VotePage() {
         </div>
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8 text-center space-y-3 w-full max-w-sm">
           <div className="w-3 h-3 rounded-full bg-zinc-600 mx-auto animate-pulse" />
-          <p className="text-base font-semibold text-zinc-300">아직 투표가 열리지 않았습니다</p>
-          <p className="text-sm text-zinc-500">운영진의 안내에 따라 조금만 기다려 주세요.</p>
+          <p className="text-base font-semibold text-zinc-300">곧 1차 투표가 열릴 예정입니다.</p>
+          <p className="text-sm text-zinc-500">투표 전 최대한 단서를 모아 범인을 찾으세요.</p>
         </div>
       </div>
     );

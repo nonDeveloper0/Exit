@@ -23,7 +23,6 @@ function PinGate({ onSuccess }: { onSuccess: () => void }) {
     setError(false);
     if (digits.length === 4) {
       if (digits === ADMIN_PASSWORD) {
-        sessionStorage.setItem("admin_auth", "1");
         onSuccess();
       } else {
         setError(true);
@@ -297,12 +296,6 @@ function AdminPanel() {
 
 export default function ResetPage() {
   const [authenticated, setAuthenticated] = useState(false);
-
-  useEffect(() => {
-    if (sessionStorage.getItem("admin_auth") === "1") {
-      setAuthenticated(true);
-    }
-  }, []);
 
   if (!authenticated) {
     return <PinGate onSuccess={() => setAuthenticated(true)} />;
