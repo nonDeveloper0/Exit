@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { EVIDENCE, QR_CODES } from "@/lib/data";
+import { EVIDENCE, LOCATIONS, QR_CODES } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 export default function MainPage() {
@@ -79,34 +79,43 @@ export default function MainPage() {
         </ol>
       </div>
 
-      {/* QR Map */}
+      {/* Location Evidence Status */}
       <div className="space-y-2">
-        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-wider">QR 수집 현황</h2>
-        <div className="grid grid-cols-6 gap-2">
-          {QR_CODES.map((qr, index) => {
-            const qrEvidence = EVIDENCE.filter((e) => qr.evidenceIds.includes(e.id));
-            const hasCollected = qrEvidence.some((e) => collected.includes(e.id));
-            const allCollected = qrEvidence.every((e) => collected.includes(e.id));
+        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-wider">장소별 단서 현황</h2>
+        <div className="space-y-2">
+          {Object.entries(LOCATIONS).map(([key, locationName], index) => {
+            const evidenceIds = [
+              ...new Set(
+                QR_CODES.filter((qr) => qr.location === locationName).flatMap((qr) => qr.evidenceIds)
+              ),
+            ];
+            const total = evidenceIds.length;
+            const collectedCount = evidenceIds.filter((id) => collected.includes(id)).length;
+            const allDone = total > 0 && collectedCount === total;
+            const someDone = collectedCount > 0;
 
             return (
               <div
-                key={qr.id}
-                className={`rounded border p-3 flex flex-col items-center gap-1 ${
-                  allCollected
+                key={key}
+                className={`rounded-lg border p-3 flex items-center justify-between ${
+                  allDone
                     ? "border-emerald-500/30 bg-emerald-500/5"
-                    : hasCollected
+                    : someDone
                     ? "border-amber-500/30 bg-amber-500/5"
                     : "border-zinc-800 bg-zinc-900"
                 }`}
               >
-                <span className="text-xs font-mono text-zinc-500">QR{index + 1}</span>
-                {allCollected ? (
-                  <span className="text-xs text-emerald-400">✓</span>
-                ) : hasCollected ? (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-                )}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono text-zinc-500">장소#{index + 1}</span>
+                  <span className="text-sm text-zinc-300">{locationName}</span>
+                </div>
+                <span
+                  className={`text-xs font-mono font-bold ${
+                    allDone ? "text-emerald-400" : someDone ? "text-amber-400" : "text-zinc-500"
+                  }`}
+                >
+                  단서 {collectedCount}/{total}
+                </span>
               </div>
             );
           })}
