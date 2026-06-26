@@ -49,10 +49,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - QR당 증거 1~2개 직접 연결 (`QR_CODES` 배열)
   - 장소명 변수화: `LOCATIONS` 상수 — 한 곳만 수정하면 전체 반영
   - `Evidence`에서 `qrId` 제거, `QR_LOCATIONS` 제거
-- [x] 전체 조 실시간 수사 현황 (수사본부 홈)
+- [x] 전체 조 실시간 수사 현황 — 별도 `/ranking` 페이지
   - `useAllTeamsProgress` 훅: 전체 조 증거 수집 수 실시간 조회
   - INSERT → 즉시 카운트 반영, DELETE(reset) → 전체 재조회
-  - 내 조 amber 강조, 다른 조 회색 진행 바
+  - 수집 개수 내림차순 랭킹 정렬, 1~3위 색상 구분, 내 조 강조
+  - BottomNav에 '현황' 탭 추가 (5탭)
 - [x] reset 페이지 관리자 기능 강화
   - Supabase 기록 있는 조 목록 자동 조회
   - 조별 개별 초기화 + 전체 일괄 초기화

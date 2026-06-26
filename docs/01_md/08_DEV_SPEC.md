@@ -66,6 +66,7 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
 | `/qr/[slug]` | QR 증거 수집 (slug: 6자 opaque, 1~2개 증거) |
 | `/evidence` | 수집한 증거 보관함 |
 | `/suspects` | 용의자 카드 (A, B, C, D, E — 5명) |
+| `/ranking` | 전체 조 실시간 수사 현황 랭킹 |
 | `/vote` | 최종 투표 (용의자 선택 → Google Form, 최대 2회) |
 | `/ending` | 엔딩 (반전 공개 — 모세 이야기) |
 | `/reset` | 관리자 초기화 (조별 개별 또는 전체 일괄) |
