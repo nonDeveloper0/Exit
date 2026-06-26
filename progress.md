@@ -49,6 +49,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - QR당 증거 1~2개 직접 연결 (`QR_CODES` 배열)
   - 장소명 변수화: `LOCATIONS` 상수 — 한 곳만 수정하면 전체 반영
   - `Evidence`에서 `qrId` 제거, `QR_LOCATIONS` 제거
+- [x] 전체 조 실시간 수사 현황 (수사본부 홈)
+  - `useAllTeamsProgress` 훅: 전체 조 증거 수집 수 실시간 조회
+  - INSERT → 즉시 카운트 반영, DELETE(reset) → 전체 재조회
+  - 내 조 amber 강조, 다른 조 회색 진행 바
+- [x] reset 페이지 관리자 기능 강화
+  - Supabase 기록 있는 조 목록 자동 조회
+  - 조별 개별 초기화 + 전체 일괄 초기화
+  - 내 기기 조 reset 시 localStorage도 함께 삭제
 
 ## 구조 확정 사항
 
@@ -56,7 +64,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 - **조 확장**: 코드 수정 없이 가능 (숫자 자유 입력)
 - **실시간 동기화**: Supabase Realtime — 한 쪽이 수집하면 상대방 화면에 즉시 반영
 - **unlock 로컬 전용**: 비밀번호 잠금 해제 상태는 Supabase에 저장하지 않음
-- **reset 범위**: 현재 로그인된 조의 Supabase 데이터 + 기기 localStorage
+- **reset 범위**: 관리자가 조별 선택 또는 전체 일괄. 해당 조 Supabase 데이터 삭제. 현재 기기 조면 localStorage도 삭제
 - **QR 구조**: QR_CODES 배열에서 slug → 장소(LOCATIONS 변수) + 증거 ID 목록 관리
 
 ### QR 배치 현황
@@ -79,12 +87,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 ---
 
 ## 작업필요
-
-### 기능
-- [ ] 전체 조 실시간 수집 현황 표시
-  - Supabase에서 pair_id 필터 없이 전체 조회 → 조별 수집 개수 집계
-  - Realtime 구독도 전체 테이블로 확장 (현재는 자기 조만 구독)
-  - 표시 위치: 수사본부(`/home`) 또는 별도 현황 페이지
 
 ### 데이터 (이벤트 전 필수)
 - [ ] 중요 단서 비밀번호 확정 (`data.ts` → `LOCKED_EVIDENCE`)
