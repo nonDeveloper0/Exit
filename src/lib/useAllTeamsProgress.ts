@@ -10,12 +10,12 @@ export function useAllTeamsProgress() {
   const fetchAll = useCallback(async () => {
     const { data } = await supabase
       .from("team_evidence_items")
-      .select("pair_id, evidence_id")
-      .eq("type", "collected");
+      .select("pair_id, type");
     if (data) {
       const counts: Record<string, number> = {};
       data.forEach((r) => {
-        counts[r.pair_id] = (counts[r.pair_id] || 0) + 1;
+        if (!(r.pair_id in counts)) counts[r.pair_id] = 0;
+        if (r.type === "collected") counts[r.pair_id]++;
       });
       setTeams(counts);
     }
@@ -31,7 +31,11 @@ export function useAllTeamsProgress() {
         { event: "INSERT", schema: "public", table: "team_evidence_items" },
         (payload) => {
           const item = payload.new as { pair_id: string; type: string };
-          if (item.type === "collected") {
+          if (item.type === "joined") {
+            setTeams((prev) =>
+              item.pair_id in prev ? prev : { ...prev, [item.pair_id]: 0 }
+            );
+          } else if (item.type === "collected") {
             setTeams((prev) => ({
               ...prev,
               [item.pair_id]: (prev[item.pair_id] || 0) + 1,

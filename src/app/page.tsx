@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getTeamInfo, saveTeamInfo } from "@/lib/store";
+import { supabase } from "@/lib/supabase";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -17,10 +18,17 @@ export default function LandingPage() {
     }
   }, []);
 
-  function handleEnter() {
+  async function handleEnter() {
     const num = parseInt(teamNumber);
     if (!num || num < 1 || !leaderName.trim()) return;
-    saveTeamInfo(String(num), leaderName.trim());
+    const pairId = String(num);
+    saveTeamInfo(pairId, leaderName.trim());
+    await supabase
+      .from("team_evidence_items")
+      .upsert(
+        { pair_id: pairId, evidence_id: "_joined", type: "joined" },
+        { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
+      );
     router.push("/home");
   }
 
