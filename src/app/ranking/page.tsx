@@ -5,12 +5,12 @@ import { useAllTeamsProgress } from "@/lib/useAllTeamsProgress";
 import { getTeamInfo } from "@/lib/store";
 
 export default function RankingPage() {
-  const { sorted, total } = useAllTeamsProgress();
-  const [myPairId, setMyPairId] = useState<string | null>(null);
+  const { groups, total } = useAllTeamsProgress();
+  const [myTeamId, setMyTeamId] = useState<string | null>(null);
 
   useEffect(() => {
     const team = getTeamInfo();
-    if (team) setMyPairId(team.teamNumber);
+    if (team) setMyTeamId(team.teamNumber);
   }, []);
 
   return (
@@ -23,15 +23,15 @@ export default function RankingPage() {
         <p className="text-sm text-zinc-500">전체 조 증거 수집 실시간 순위</p>
       </div>
 
-      {sorted.length === 0 ? (
+      {groups.length === 0 ? (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-10 text-center">
           <p className="text-sm text-zinc-500">아직 수집 중인 조가 없습니다.</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {sorted.map(([pairId, count], index) => {
-            const isMe = pairId === myPairId;
-            const pct = Math.round((count / total) * 100);
+          {groups.map((group, index) => {
+            const isMe = myTeamId !== null && group.teamIds.includes(myTeamId);
+            const pct = total > 0 ? Math.round((group.count / total) * 100) : 0;
             const rank = index + 1;
             const rankColor =
               rank === 1 ? "text-amber-400" :
@@ -41,7 +41,7 @@ export default function RankingPage() {
 
             return (
               <div
-                key={pairId}
+                key={group.label}
                 className={`rounded-lg border p-4 space-y-2 ${
                   isMe
                     ? "border-amber-500/40 bg-amber-500/5"
@@ -55,10 +55,10 @@ export default function RankingPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className={`text-sm font-bold ${isMe ? "text-amber-400" : "text-zinc-200"}`}>
-                        {pairId}조{isMe && " (나)"}
+                        {group.label}{isMe && " (나)"}
                       </span>
                       <span className="text-xs font-mono text-zinc-400">
-                        {count} / {total}
+                        {group.count} / {total}
                       </span>
                     </div>
                     <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
