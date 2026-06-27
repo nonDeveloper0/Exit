@@ -101,6 +101,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - `useTeamEvidence`: 자기 팀 + 파트너 팀 동시 구독, 매핑 변경 즉시 반영
   - `/admin` 조 매핑 섹션: 짝 추가/해제 UI, Supabase에 실시간 저장
   - 수정 파일: `src/lib/useTeamEvidence.ts`, `src/app/admin/page.tsx`
+- [x] 수사 현황 — 매핑된 조 묶어서 표시 (1조 + 3조)
+  - `useAllTeamsProgress`: pairings 구독, 짝 팀 증거 합집합으로 count 계산
+  - 랭킹 페이지: `groups` 단위 렌더링, 내 팀 포함 시 (나) 강조
+  - 매핑 변경 즉시 반영 (Supabase Realtime)
+  - 수정 파일: `src/lib/useAllTeamsProgress.ts`, `src/app/ranking/page.tsx`
 
 ## 구조 확정 사항
 
