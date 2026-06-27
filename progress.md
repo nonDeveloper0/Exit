@@ -80,6 +80,27 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 어드민: 기존 토글 → 중간 투표 열기 / 최종 투표 열기 / 닫기 3버튼
   - 각 라운드 제출 결과 localStorage에 독립 저장 (`exit2026_vote_r1`, `exit2026_vote_r2`)
   - 수정 파일: `src/lib/store.ts`, `src/lib/useGameState.ts`, `src/app/admin/page.tsx`, `src/app/vote/page.tsx`
+- [x] 잠금 증거 비밀번호 해제 시 자동 수집
+  - 기존: 비밀번호 해제 후 '수집' 버튼 별도 클릭 필요
+  - 변경: 비밀번호 정답 입력 즉시 자동 수집, 잠금 증거에 '수집' 버튼 미표시
+  - 수정 파일: `src/app/qr/[id]/QrPageClient.tsx`
+- [x] 증거 음성 힌트 재생 기능
+  - `Evidence`에 `audioUrl?: string` 필드 추가
+  - 음성 파일: `public/audio/` 폴더에 업로드 후 `audioUrl: "/audio/파일명"` 등록
+  - 재생 중 다른 증거 재생 시 자동 정지
+  - 수정 파일: `src/lib/data.ts`, `src/app/qr/[id]/QrPageClient.tsx`
+- [x] 증거 영상 힌트 재생 기능
+  - `Evidence`에 `videoUrl?: string` 필드 추가
+  - 영상 파일: `public/video/` 폴더에 업로드 후 `videoUrl: "/video/파일명"` 등록
+  - 버튼 클릭 시 카드 안에 인라인 플레이어 펼침/닫기 토글
+  - 수정 파일: `src/lib/data.ts`, `src/app/qr/[id]/QrPageClient.tsx`
+- [x] CLAUDE.md — 새 기능 구현 시 EDIT_GUIDE.md 업데이트 규칙 추가
+- [x] 관리자 패널 — 조 매핑 (짝짓기) 기능
+  - 관리자가 두 조를 짝으로 지정하면 서로 증거 실시간 공유
+  - `game_state.pairings` JSONB 컬럼 추가 (Supabase SQL: ALTER TABLE)
+  - `useTeamEvidence`: 자기 팀 + 파트너 팀 동시 구독, 매핑 변경 즉시 반영
+  - `/admin` 조 매핑 섹션: 짝 추가/해제 UI, Supabase에 실시간 저장
+  - 수정 파일: `src/lib/useTeamEvidence.ts`, `src/app/admin/page.tsx`
 
 ## 구조 확정 사항
 

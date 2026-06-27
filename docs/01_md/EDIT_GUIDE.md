@@ -14,12 +14,62 @@
   title: "목격자 진술",              // ← 증거 제목
   description: "당일 밤 현장 인근...", // ← 증거 설명
   imageUrl: "/evidence.png",          // ← 이미지 (없으면 이 줄 삭제)
+  audioUrl: "/audio/E01.mp3",         // ← 음성 힌트 (없으면 이 줄 삭제)
 },
 ```
 
 **이미지 추가 방법:**
 1. 이미지 파일을 `public/` 폴더에 넣는다 (예: `public/cctv.png`)
 2. 해당 evidence에 `imageUrl: "/cctv.png"` 추가
+
+---
+
+## 1-1. 증거 음성 힌트 추가
+
+**파일:** `src/lib/data.ts` + `public/audio/` 폴더
+
+**음성 파일 등록 방법:**
+1. 음성 파일을 `public/audio/` 폴더에 넣는다 (예: `public/audio/E01.mp3`)
+2. 해당 evidence에 `audioUrl: "/audio/E01.mp3"` 추가
+
+```ts
+{
+  id: "E01",
+  title: "목격자 진술",
+  description: "당일 밤 현장 인근...",
+  audioUrl: "/audio/E01.mp3",   // ← 이 줄 추가
+},
+```
+
+- `audioUrl`이 없는 증거 → 재생 버튼 자체가 표시되지 않음
+- 재생 중 다른 증거의 재생 버튼을 누르면 이전 것이 자동으로 정지됨
+- 잠긴 증거는 비밀번호 해제 후에만 재생 버튼이 보임
+- 지원 포맷: `.mp3`, `.m4a`, `.wav` (모바일 호환성 기준 `.mp3` 권장)
+
+---
+
+## 1-2. 증거 영상 힌트 추가
+
+**파일:** `src/lib/data.ts` + `public/video/` 폴더
+
+**영상 파일 등록 방법:**
+1. 영상 파일을 `public/video/` 폴더에 넣는다 (예: `public/video/E03.mp4`)
+2. 해당 evidence에 `videoUrl: "/video/E03.mp4"` 추가
+
+```ts
+{
+  id: "E03",
+  title: "통화기록",
+  description: "사건 당일 피해자와 C 사이의...",
+  videoUrl: "/video/E03.mp4",   // ← 이 줄 추가
+},
+```
+
+- `videoUrl`이 없는 증거 → "영상 힌트 보기" 버튼 자체가 표시되지 않음
+- 버튼을 누르면 카드 안에 영상 플레이어가 펼쳐지고, 다시 누르면 닫힘
+- 잠긴 증거는 비밀번호 해제 후에만 영상 버튼이 보임
+- 지원 포맷: `.mp4` 권장 (모바일 Safari 호환성 기준)
+- 음성 힌트(`audioUrl`)와 영상 힌트(`videoUrl`) 동시에 등록 가능
 
 ---
 

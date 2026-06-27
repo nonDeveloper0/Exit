@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Evidence, LOCKED_EVIDENCE, EVIDENCE_QUIZ } from "@/lib/data";
@@ -16,6 +16,24 @@ export default function QrPageClient({ qrId, location, evidence }: Props) {
   const { collected, unlocked, collect, unlock } = useTeamEvidence();
   const [passwords, setPasswords] = useState<Record<string, string>>({});
   const [wrongIds, setWrongIds] = useState<string[]>([]);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [videoOpenId, setVideoOpenId] = useState<string | null>(null);
+
+  function handlePlay(e: Evidence) {
+    if (!e.audioUrl) return;
+    if (playingId === e.id) {
+      audioRef.current?.pause();
+      setPlayingId(null);
+      return;
+    }
+    audioRef.current?.pause();
+    const audio = new Audio(e.audioUrl);
+    audioRef.current = audio;
+    audio.play();
+    setPlayingId(e.id);
+    audio.onended = () => setPlayingId(null);
+  }
 
   async function handleCollect(id: string) {
     await collect(id);
@@ -104,7 +122,7 @@ export default function QrPageClient({ qrId, location, evidence }: Props) {
                       <div className="shrink-0 rounded bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-400">
                         완료
                       </div>
-                    ) : !showLockUI ? (
+                    ) : !showLockUI && !isLocked ? (
                       <button
                         onClick={() => handleCollect(e.id)}
                         className="shrink-0 rounded bg-amber-400 px-4 py-1.5 text-xs font-bold text-zinc-900 hover:bg-amber-300 active:scale-95 transition-all"
@@ -157,6 +175,57 @@ export default function QrPageClient({ qrId, location, evidence }: Props) {
                       <p className="text-xs text-zinc-400 font-mono leading-relaxed">
                         {e.description}
                       </p>
+                      {e.videoUrl && (
+                        <div className="space-y-2">
+                          <button
+                            onClick={() => setVideoOpenId(videoOpenId === e.id ? null : e.id)}
+                            className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all active:scale-95 ${
+                              videoOpenId === e.id
+                                ? "border-amber-400/50 bg-amber-400/10 text-amber-400"
+                                : "border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-zinc-600"
+                            }`}
+                          >
+                            <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                              <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm12.553 1.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                            </svg>
+                            {videoOpenId === e.id ? "영상 닫기" : "영상 힌트 보기"}
+                          </button>
+                          {videoOpenId === e.id && (
+                            <video
+                              src={e.videoUrl}
+                              controls
+                              playsInline
+                              className="w-full rounded-lg"
+                            />
+                          )}
+                        </div>
+                      )}
+                      {e.audioUrl && (
+                        <button
+                          onClick={() => handlePlay(e)}
+                          className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all active:scale-95 ${
+                            playingId === e.id
+                              ? "border-amber-400/50 bg-amber-400/10 text-amber-400"
+                              : "border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-zinc-600"
+                          }`}
+                        >
+                          {playingId === e.id ? (
+                            <>
+                              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v4a1 1 0 11-2 0V8z" clipRule="evenodd" />
+                              </svg>
+                              재생 중
+                            </>
+                          ) : (
+                            <>
+                              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                              </svg>
+                              음성 힌트 재생
+                            </>
+                          )}
+                        </button>
+                      )}
                     </>
                   )}
                 </div>

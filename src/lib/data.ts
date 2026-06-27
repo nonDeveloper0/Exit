@@ -3,6 +3,8 @@ export interface Evidence {
   title: string;
   description: string;
   imageUrl?: string;
+  audioUrl?: string;
+  videoUrl?: string;
 }
 
 export interface Suspect {

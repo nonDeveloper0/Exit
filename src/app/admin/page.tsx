@@ -90,10 +90,25 @@ function AdminPanel() {
   const [myPairId, setMyPairId] = useState<string | null>(null);
   const [settingVoteRound, setSettingVoteRound] = useState(false);
   const [togglingEnding, setTogglingEnding] = useState(false);
+  const [pairings, setPairings] = useState<Record<string, string>>({});
+  const [pairA, setPairA] = useState("");
+  const [pairB, setPairB] = useState("");
+  const [savingPair, setSavingPair] = useState(false);
 
   useEffect(() => {
     const team = getTeamInfo();
     if (team) setMyPairId(team.teamNumber);
+  }, []);
+
+  useEffect(() => {
+    supabase
+      .from("game_state")
+      .select("pairings")
+      .eq("id", "singleton")
+      .single()
+      .then(({ data }) => {
+        if (data?.pairings) setPairings(data.pairings as Record<string, string>);
+      });
   }, []);
 
   const fetchTeams = useCallback(async () => {
@@ -118,6 +133,38 @@ function AdminPanel() {
   useEffect(() => {
     fetchTeams();
   }, [fetchTeams]);
+
+  // 중복 없는 쌍 목록 (1↔3, 3↔1 중 하나만)
+  const currentPairs: [string, string][] = [];
+  const seen = new Set<string>();
+  for (const [a, b] of Object.entries(pairings)) {
+    const key = [a, b].sort().join("-");
+    if (!seen.has(key)) {
+      seen.add(key);
+      currentPairs.push([a, b]);
+    }
+  }
+
+  async function addPairing() {
+    const a = pairA.trim();
+    const b = pairB.trim();
+    if (!a || !b || a === b) return;
+    setSavingPair(true);
+    const newPairings = { ...pairings, [a]: b, [b]: a };
+    await supabase.from("game_state").update({ pairings: newPairings }).eq("id", "singleton");
+    setPairings(newPairings);
+    setPairA("");
+    setPairB("");
+    setSavingPair(false);
+  }
+
+  async function removePairing(a: string, b: string) {
+    const newPairings = { ...pairings };
+    delete newPairings[a];
+    delete newPairings[b];
+    await supabase.from("game_state").update({ pairings: newPairings }).eq("id", "singleton");
+    setPairings(newPairings);
+  }
 
   async function setVoteRound(round: 0 | 1 | 2) {
     setSettingVoteRound(true);
@@ -236,6 +283,68 @@ function AdminPanel() {
             )}
           </>
         )}
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-zinc-800" />
+
+      {/* Team pairing */}
+      <div className="space-y-3">
+        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">조 매핑</h2>
+        <p className="text-xs text-zinc-600">짝이 된 두 조는 서로의 증거를 실시간 공유합니다.</p>
+
+        {/* Current pairs */}
+        {currentPairs.length > 0 ? (
+          <div className="space-y-2">
+            {currentPairs.map(([a, b]) => (
+              <div
+                key={`${a}-${b}`}
+                className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-3"
+              >
+                <p className="text-sm font-bold text-zinc-200">{a}조 ↔ {b}조</p>
+                <button
+                  onClick={() => removePairing(a, b)}
+                  className="text-xs text-red-400 border border-red-500/30 bg-red-500/10 rounded px-3 py-1.5 hover:bg-red-500/20 transition-all"
+                >
+                  해제
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-600 py-2">현재 매핑된 조가 없습니다.</p>
+        )}
+
+        {/* Add new pair */}
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+          <p className="text-xs text-zinc-500">새 짝 추가</p>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={pairA}
+              onChange={(e) => setPairA(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addPairing()}
+              placeholder="조 번호"
+              className="w-20 rounded bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 text-center focus:outline-none focus:border-amber-400"
+            />
+            <span className="text-zinc-500 text-sm">↔</span>
+            <input
+              type="text"
+              value={pairB}
+              onChange={(e) => setPairB(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addPairing()}
+              placeholder="조 번호"
+              className="w-20 rounded bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 text-center focus:outline-none focus:border-amber-400"
+            />
+            <button
+              onClick={addPairing}
+              disabled={savingPair || !pairA.trim() || !pairB.trim() || pairA.trim() === pairB.trim()}
+              className="flex-1 rounded bg-amber-400 px-3 py-2 text-sm font-bold text-zinc-900 hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            >
+              {savingPair ? "..." : "매핑"}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Divider */}
