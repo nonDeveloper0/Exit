@@ -104,12 +104,12 @@ export default function SuspectsPage() {
       </div>
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-center space-y-2">
-        <p className="text-xs text-zinc-500">증거를 충분히 검토한 뒤 최종 추리를 제출하세요.</p>
+        <p className="text-xs text-zinc-500">증거를 충분히 검토한 뒤 범인을 지목하세요.</p>
         <Link
           href="/vote"
           className="inline-block text-sm text-amber-400 hover:text-amber-300 font-medium"
         >
-          최종 추리 제출 →
+          범인 지목하기 →
         </Link>
       </div>
     </div>
