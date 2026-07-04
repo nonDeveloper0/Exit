@@ -106,6 +106,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 랭킹 페이지: `groups` 단위 렌더링, 내 팀 포함 시 (나) 강조
   - 매핑 변경 즉시 반영 (Supabase Realtime)
   - 수정 파일: `src/lib/useAllTeamsProgress.ts`, `src/app/ranking/page.tsx`
+- [x] 문서 최신화 — ARCHITECTURE/README/DATA_SCHEMA/DEV_SPEC/UI_SPEC를 현재 코드에 맞춤
+  - Supabase 중심 구조, 라우트 9개, vote_round/pairings, localStorage 키 등 반영
+- [x] 사용자 편의 기능 3종
+  - 용의자 관련 단서 연결: `Suspect.relatedEvidenceIds` 추가, 용의자 파일에 관련 단서 표시 (수집=제목 공개 / 미수집=🔒)
+  - 증거 수집 토스트: 같은 조 다른 기기가 수집 시 상단 알림, 내 수집은 억제 (`collectSignal.ts`)
+  - 수집 피드백: 카드 팝 애니메이션 + 진동(안드로이드; iOS는 애니메이션만)
+  - 신규 파일: `src/lib/collectSignal.ts`, `src/components/TeamEvidenceToast.tsx`
+  - 수정 파일: `src/lib/data.ts`, `src/app/suspects/page.tsx`, `src/lib/useTeamEvidence.ts`, `src/app/layout.tsx`, `src/app/globals.css`, `src/app/qr/[id]/QrPageClient.tsx`
 
 ## 구조 확정 사항
 

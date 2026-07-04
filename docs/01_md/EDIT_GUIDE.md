@@ -144,6 +144,24 @@ export const QR_CODES: QrCode[] = [
 
 ---
 
+## 5-1. 용의자 관련 단서 연결
+
+**파일:** `src/lib/data.ts` → `SUSPECTS` 배열의 `relatedEvidenceIds`
+
+각 용의자의 `relatedEvidenceIds`에 관련 증거 ID를 넣으면, 용의자 파일(`/suspects`)을 펼쳤을 때 "관련 단서" 목록이 표시된다.
+
+```ts
+{ id: "A", relatedEvidenceIds: ["E04", "E07", "E08", "E09"], ... }
+```
+
+- 수집한 단서 → 제목 공개 (🔎 강조)
+- 미수집 단서 → "🔒 미확보 단서"로 표시 (제목은 감춤, 개수만 노출)
+- `relatedEvidenceIds: []` — 관련 단서 섹션 자체가 표시되지 않음
+
+> ⚠️ 초기값은 증거 설명을 근거로 넣은 초안입니다. 특히 **D(경비원)는 가리키는 증거가 없어 비어 있고, B(현장 소장)/E(경호실장)는 연결이 얕습니다.** 필요 시 매핑을 조정하세요.
+
+---
+
 ## 6. 중요 단서 비밀번호 잠금
 
 **파일:** `src/lib/data.ts` → `LOCKED_EVIDENCE` 객체

@@ -47,3 +47,22 @@ body {
     0 0 40px rgba(245, 158, 11, 0.3),
     0 0 120px rgba(245, 158, 11, 0.1);
 }
+
+@keyframes toast-in {
+  0% { opacity: 0; transform: translateY(-12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.25s ease-out;
+}
+
+@keyframes collect-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.03); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.6); }
+  100% { transform: scale(1); }
+}
+
+.animate-collect-pop {
+  animation: collect-pop 0.5s ease-out;
+}

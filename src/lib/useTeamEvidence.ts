@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "./supabase";
 import { getTeamInfo } from "./store";
+import { markSelfCollect } from "./collectSignal";
 
 let channelCounter = 0;
 
@@ -107,6 +108,7 @@ export function useTeamEvidence() {
   const collect = useCallback(
     async (id: string) => {
       if (!ownTeamId || collectedRef.current.includes(id)) return;
+      markSelfCollect(`${ownTeamId}:${id}`);
       setCollected((prev) => (prev.includes(id) ? prev : [...prev, id]));
       await supabase
         .from("team_evidence_items")

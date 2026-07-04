@@ -19,6 +19,7 @@ export default function QrPageClient({ qrId, location, evidence }: Props) {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [videoOpenId, setVideoOpenId] = useState<string | null>(null);
+  const [poppedId, setPoppedId] = useState<string | null>(null);
 
   function handlePlay(e: Evidence) {
     if (!e.audioUrl) return;
@@ -36,6 +37,9 @@ export default function QrPageClient({ qrId, location, evidence }: Props) {
   }
 
   async function handleCollect(id: string) {
+    navigator.vibrate?.(30); // 안드로이드 진동 (iOS Safari 미지원)
+    setPoppedId(id);
+    setTimeout(() => setPoppedId((prev) => (prev === id ? null : prev)), 500);
     await collect(id);
   }
 
@@ -98,6 +102,8 @@ export default function QrPageClient({ qrId, location, evidence }: Props) {
                 <div
                   key={e.id}
                   className={`rounded-lg border p-4 space-y-3 transition-colors ${
+                    poppedId === e.id ? "animate-collect-pop " : ""
+                  }${
                     isCollected
                       ? "border-emerald-500/30 bg-emerald-500/5"
                       : showLockUI
