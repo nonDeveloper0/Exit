@@ -104,26 +104,26 @@ export default function SuspectsPage() {
                         {s.relatedEvidenceIds.map((id) => {
                           const isCollected = collected.includes(id);
                           const ev = EVIDENCE.find((e) => e.id === id);
+                          if (isCollected) {
+                            return (
+                              <Link
+                                key={id}
+                                href={`/evidence?focus=${id}`}
+                                className="flex items-center gap-2 rounded px-3 py-2 text-xs bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition-colors"
+                              >
+                                <span>🔎</span>
+                                <span className="font-medium">{ev?.title ?? id}</span>
+                                <span className="ml-auto text-amber-400/50 font-mono">증거함 →</span>
+                              </Link>
+                            );
+                          }
                           return (
                             <div
                               key={id}
-                              className={`flex items-center gap-2 rounded px-3 py-2 text-xs ${
-                                isCollected
-                                  ? "bg-amber-500/10 text-amber-300"
-                                  : "bg-zinc-800/60 text-zinc-600"
-                              }`}
+                              className="flex items-center gap-2 rounded px-3 py-2 text-xs bg-zinc-800/60 text-zinc-600"
                             >
-                              {isCollected ? (
-                                <>
-                                  <span>🔎</span>
-                                  <span className="font-medium">{ev?.title ?? id}</span>
-                                </>
-                              ) : (
-                                <>
-                                  <span>🔒</span>
-                                  <span>미확보 단서</span>
-                                </>
-                              )}
+                              <span>🔒</span>
+                              <span>미확보 단서</span>
                             </div>
                           );
                         })}

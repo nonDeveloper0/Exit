@@ -114,6 +114,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 수집 피드백: 카드 팝 애니메이션 + 진동(안드로이드; iOS는 애니메이션만)
   - 신규 파일: `src/lib/collectSignal.ts`, `src/components/TeamEvidenceToast.tsx`
   - 수정 파일: `src/lib/data.ts`, `src/app/suspects/page.tsx`, `src/lib/useTeamEvidence.ts`, `src/app/layout.tsx`, `src/app/globals.css`, `src/app/qr/[id]/QrPageClient.tsx`
+- [x] 용의자 관련 단서 → 증거함 딥링크
+  - 용의자 파일에서 수집한 관련 단서 클릭 시 `/evidence?focus=E0X`로 이동
+  - 증거함: focus 단서 자동 펼침 + 스크롤 + 앰버 링 강조(1.6초), useSearchParams는 Suspense로 래핑
+  - 수정 파일: `src/app/suspects/page.tsx`, `src/app/evidence/page.tsx`
 
 ## 구조 확정 사항
 

@@ -1,14 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { EVIDENCE } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
-export default function EvidencePage() {
+function EvidenceContent() {
   const { collected } = useTeamEvidence();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
+
+  const searchParams = useSearchParams();
+  const focusId = searchParams.get("focus");
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const focusedRef = useRef<string | null>(null);
+
+  // 용의자 페이지에서 넘어온 focus 단서를 펼치고 스크롤 + 강조
+  useEffect(() => {
+    if (!focusId || focusedRef.current === focusId || !collected.includes(focusId)) return;
+    focusedRef.current = focusId;
+    setExpanded(focusId);
+    setHighlightId(focusId);
+    document
+      .getElementById(`evidence-${focusId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const t = setTimeout(() => setHighlightId(null), 1600);
+    return () => clearTimeout(t);
+  }, [focusId, collected]);
 
   const progress = EVIDENCE.length > 0 ? (collected.length / EVIDENCE.length) * 100 : 0;
 
@@ -49,7 +68,10 @@ export default function EvidencePage() {
           return (
             <div
               key={e.id}
-              className={`rounded-lg border transition-all ${
+              id={`evidence-${e.id}`}
+              className={`scroll-mt-20 rounded-lg border transition-all ${
+                highlightId === e.id ? "ring-2 ring-amber-400 " : ""
+              }${
                 isCollected
                   ? "border-zinc-700 bg-zinc-900"
                   : "border-zinc-800 bg-zinc-900/40"
@@ -143,5 +165,13 @@ export default function EvidencePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function EvidencePage() {
+  return (
+    <Suspense>
+      <EvidenceContent />
+    </Suspense>
   );
 }
