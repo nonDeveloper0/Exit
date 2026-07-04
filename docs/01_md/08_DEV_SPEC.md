@@ -23,8 +23,9 @@ DB / Realtime: Supabase
 | 컬럼 | 타입 | 설명 |
 |------|------|------|
 | id | TEXT | Primary Key, 항상 "singleton" |
-| vote_open | BOOLEAN | 최종 투표 활성화 여부 (기본 false) |
+| vote_round | INTEGER | 투표 라운드 (0=닫힘, 1=중간 투표, 2=최종 투표, 기본 0) |
 | ending_open | BOOLEAN | 엔딩 공개 여부 (기본 false) |
+| pairings | JSONB | 조 매핑 (양방향, 예: `{"1":"3","3":"1"}`, 기본 `{}`) |
 | updated_at | TIMESTAMPTZ | 마지막 변경 시각 |
 
 - 단일 행 (`id = 'singleton'`) 으로 관리
@@ -56,13 +57,15 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
 ```
 / 랜딩에서 조 번호(숫자) + 조장 이름 입력 → localStorage 저장
     ↓
-/vote 접속 (팀 정보 자동 표시)
+관리자가 라운드 열기 (중간=1 / 최종=2)
+    ↓
+/vote 접속 (팀 정보 자동 표시, 닫힘이면 잠김 UI)
     ↓
 용의자 선택 (A / B / C / D / E)
     ↓
 제출 → Google Form 전송 (entry: 197462467, 1747885092, 795452093)
     ↓
-최대 2회 제출 가능 (재제출 시 Google Sheets에 새 행 추가됨)
+라운드별 최대 2회 제출 가능, 라운드별 선택은 localStorage에 독립 저장
     ↓
 운영자가 Google Sheets에서 조별 최신 행 확인
 ```
@@ -87,7 +90,6 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
 |--------|--------|
 | 증거 수집 | Supabase (조 단위 공유) |
 | 조 번호 / 조장 이름 | localStorage (기기별) |
-| 투표 내용 | localStorage (기기별) |
-| 제출 횟수 | localStorage (기기별) |
-| 게임 진행 상태 (투표/엔딩 열림) | Supabase `game_state` (전체 공유, Realtime) |
+| 투표 내용 (라운드별) | localStorage `exit2026_vote_r1` / `exit2026_vote_r2` (기기별) |
+| 게임 진행 상태 (투표 라운드/엔딩/조 매핑) | Supabase `game_state` (전체 공유, Realtime) |
 | 관리자 인증 | sessionStorage (탭 단위, PIN 0000) |
