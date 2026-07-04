@@ -31,6 +31,13 @@ export const EVIDENCE_QUIZ: Record<string, string> = {
   E01: "퀴즈 문제를 여기에 입력하세요.",
 };
 
+// 공통 단서: 어느 조든 처음 찾으면 전체 조에 공개되고 전체 공지 토스트가 뜬다.
+// 여기에 증거 ID를 넣으면 그 증거는 "조별 증거"가 아니라 "전역 공유 증거"로 동작한다.
+export const COMMON_EVIDENCE_IDS: string[] = ["E10"];
+
+// 공통 단서를 저장하는 가상의 조 ID (실제 조 번호와 겹치지 않아야 함)
+export const GLOBAL_PAIR_ID = "__global";
+
 // 장소 이름 — 수정 시 여기서만 변경
 export const LOCATIONS = {
   L1: "살해 현장",

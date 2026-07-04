@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "./supabase";
 import { getTeamInfo } from "./store";
 import { markSelfCollect } from "./collectSignal";
+import { COMMON_EVIDENCE_IDS, GLOBAL_PAIR_ID } from "./data";
 
 let channelCounter = 0;
 
@@ -60,7 +61,8 @@ export function useTeamEvidence() {
       return;
     }
 
-    const teamIds = [ownTeamId];
+    // 항상 공통 단서 저장소(GLOBAL_PAIR_ID)를 함께 구독 → 어느 조가 찾든 전원에 반영
+    const teamIds = [ownTeamId, GLOBAL_PAIR_ID];
     if (partnerId && partnerId !== ownTeamId) teamIds.push(partnerId);
 
     supabase
@@ -108,12 +110,15 @@ export function useTeamEvidence() {
   const collect = useCallback(
     async (id: string) => {
       if (!ownTeamId || collectedRef.current.includes(id)) return;
-      markSelfCollect(`${ownTeamId}:${id}`);
+      // 공통 단서는 전역 저장소에 기록 → 전체 조에 공개 + 전체 공지. 일반 증거는 내 조에 기록.
+      const isCommon = COMMON_EVIDENCE_IDS.includes(id);
+      const targetPair = isCommon ? GLOBAL_PAIR_ID : ownTeamId;
+      if (!isCommon) markSelfCollect(`${ownTeamId}:${id}`);
       setCollected((prev) => (prev.includes(id) ? prev : [...prev, id]));
       await supabase
         .from("team_evidence_items")
         .upsert(
-          { pair_id: ownTeamId, evidence_id: id, type: "collected" },
+          { pair_id: targetPair, evidence_id: id, type: "collected" },
           { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
         );
     },

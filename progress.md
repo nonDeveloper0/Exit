@@ -118,6 +118,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 용의자 파일에서 수집한 관련 단서 클릭 시 `/evidence?focus=E0X`로 이동
   - 증거함: focus 단서 자동 펼침 + 스크롤 + 앰버 링 강조(1.6초), useSearchParams는 Suspense로 래핑
   - 수정 파일: `src/app/suspects/page.tsx`, `src/app/evidence/page.tsx`
+- [x] 공통 단서 — 전체 공개 + 전체 공지
+  - `COMMON_EVIDENCE_IDS`에 지정한 증거는 조별이 아니라 전역 공유 증거로 동작
+  - 어느 조든 처음 수집하면: 전체 조 증거함에 공개 + 전 참가자 빨간 전체 공지 토스트
+  - 저장: `pair_id='__global'` (모든 조가 구독). 첫 발견 1회 공지는 DB 유니크 제약으로 보장
+  - 랭킹/관리자 조 목록에서 `__global` 제외, 랭킹 카운트엔 공통 단서를 각 조에 합산
+  - EDIT_GUIDE 6-2절 추가
+  - 수정 파일: `src/lib/data.ts`, `src/lib/useTeamEvidence.ts`, `src/components/TeamEvidenceToast.tsx`, `src/lib/useAllTeamsProgress.ts`, `src/app/admin/page.tsx`
 
 ## 구조 확정 사항
 

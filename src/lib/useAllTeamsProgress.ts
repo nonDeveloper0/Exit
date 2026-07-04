@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "./supabase";
-import { EVIDENCE } from "./data";
+import { EVIDENCE, GLOBAL_PAIR_ID } from "./data";
 
 export interface TeamGroup {
   label: string;     // "1조 + 3조" or "2조"
@@ -91,6 +91,9 @@ export function useAllTeamsProgress() {
     return () => { supabase.removeChannel(channel); };
   }, [fetchAll]);
 
+  // 공통 단서(전역 저장소)는 모든 조에 합산하고, 조 목록에서는 제외
+  const globalIds = teamEvidence[GLOBAL_PAIR_ID] ?? [];
+
   // 매핑된 조는 묶어서 그룹화, 증거는 합집합으로 계산
   const groups: TeamGroup[] = [];
   const seenTeams = new Set<string>();
@@ -106,13 +109,14 @@ export function useAllTeamsProgress() {
     seenTeams.add(a);
     seenTeams.add(b);
 
-    const combined = new Set([...(teamEvidence[a] ?? []), ...(teamEvidence[b] ?? [])]);
+    const combined = new Set([...(teamEvidence[a] ?? []), ...(teamEvidence[b] ?? []), ...globalIds]);
     groups.push({ label: `${a}조 + ${b}조`, teamIds: [a, b], count: combined.size });
   }
 
   for (const teamId of Object.keys(teamEvidence)) {
-    if (seenTeams.has(teamId)) continue;
-    groups.push({ label: `${teamId}조`, teamIds: [teamId], count: teamEvidence[teamId].length });
+    if (teamId === GLOBAL_PAIR_ID || seenTeams.has(teamId)) continue;
+    const combined = new Set([...teamEvidence[teamId], ...globalIds]);
+    groups.push({ label: `${teamId}조`, teamIds: [teamId], count: combined.size });
   }
 
   groups.sort((a, b) => b.count - a.count);

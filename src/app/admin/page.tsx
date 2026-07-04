@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
+import { GLOBAL_PAIR_ID } from "@/lib/data";
 
 const ADMIN_PASSWORD = "0000";
 
@@ -120,6 +121,7 @@ function AdminPanel() {
     if (data) {
       const counts: Record<string, number> = {};
       data.forEach((r) => {
+        if (r.pair_id === GLOBAL_PAIR_ID) return; // 공통 단서 저장소는 조 목록에서 제외
         counts[r.pair_id] = (counts[r.pair_id] || 0) + 1;
       });
       setTeams(
