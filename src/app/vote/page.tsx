@@ -24,20 +24,16 @@ async function submitToGoogleForm(teamNumber: string, leaderName: string, suspec
 
 export default function VotePage() {
   const { collected } = useTeamEvidence();
-  const { vote_round, loaded: gameStateLoaded } = useGameState();
-  const [selectedR1, setSelectedR1] = useState<string | null>(null);
-  const [selectedR2, setSelectedR2] = useState<string | null>(null);
-  const [submittedR1, setSubmittedR1] = useState(false);
-  const [submittedR2, setSubmittedR2] = useState(false);
+  const { voteOpen, loaded: gameStateLoaded } = useGameState();
+  const [selected, setSelected] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [team, setTeam] = useState<{ teamNumber: string; leaderName: string } | null>(null);
 
   useEffect(() => {
     setTeam(getTeamInfo());
-    const v1 = getVote(1);
-    const v2 = getVote(2);
-    if (v1) { setSelectedR1(v1); setSubmittedR1(true); }
-    if (v2) { setSelectedR2(v2); setSubmittedR2(true); }
+    const v = getVote();
+    if (v) { setSelected(v); setSubmitted(true); }
   }, []);
 
   const collectedCount = collected.length;
@@ -45,7 +41,7 @@ export default function VotePage() {
 
   if (!gameStateLoaded) return null;
 
-  if (vote_round === 0) {
+  if (!voteOpen) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-4">
         <div className="space-y-1 text-center">
@@ -54,23 +50,12 @@ export default function VotePage() {
         </div>
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8 text-center space-y-3 w-full max-w-sm">
           <div className="w-3 h-3 rounded-full bg-zinc-600 mx-auto animate-pulse" />
-          <p className="text-base font-semibold text-zinc-300">곧 1차 투표가 열릴 예정입니다.</p>
+          <p className="text-base font-semibold text-zinc-300">곧 최종 투표가 열릴 예정입니다.</p>
           <p className="text-sm text-zinc-500">투표 전 최대한 단서를 모아 범인을 찾으세요.</p>
         </div>
       </div>
     );
   }
-
-  const isRound1 = vote_round === 1;
-  const selected = isRound1 ? selectedR1 : selectedR2;
-  const submitted = isRound1 ? submittedR1 : submittedR2;
-  const setSelected = isRound1 ? setSelectedR1 : setSelectedR2;
-  const setSubmitted = isRound1
-    ? (v: boolean) => setSubmittedR1(v)
-    : (v: boolean) => setSubmittedR2(v);
-
-  const roundLabel = isRound1 ? "중간 추리" : "최종 추리";
-  const roundLabelEn = isRound1 ? "Mid Deduction" : "Final Deduction";
 
   async function handleSubmit() {
     if (!selected || !team) return;
@@ -80,7 +65,7 @@ export default function VotePage() {
     } catch {
       // no-cors 응답은 읽을 수 없으나 제출은 정상 처리됨
     }
-    castVote(vote_round as 1 | 2, selected);
+    castVote(selected);
     setSubmitted(true);
     setSubmitting(false);
   }
@@ -91,22 +76,20 @@ export default function VotePage() {
       <div className="flex flex-col gap-4 p-4 pt-6">
         <div className="space-y-1">
           <div className="text-xs font-mono text-amber-400 tracking-widest uppercase">
-            {roundLabelEn} — 완료
+            Final Deduction — 완료
           </div>
-          <h1 className="text-2xl font-bold text-zinc-100">{roundLabel} 완료</h1>
+          <h1 className="text-2xl font-bold text-zinc-100">최종 추리 완료</h1>
         </div>
 
         <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-8 text-center space-y-2">
-          <p className="text-sm text-zinc-400">{team?.teamNumber}조의 {isRound1 ? "중간" : "최종"} 선택</p>
+          <p className="text-sm text-zinc-400">{team?.teamNumber}조의 최종 선택</p>
           <p className="text-5xl font-black text-emerald-400">{selected}</p>
           <p className="text-base font-semibold text-zinc-200">{votedSuspect?.name}</p>
           <p className="text-xs text-zinc-500 pt-1">조장: {team?.leaderName}</p>
         </div>
 
         <p className="text-sm text-zinc-500 text-center">
-          {isRound1
-            ? "최종 투표가 열리면 다시 선택할 수 있습니다."
-            : "모든 조의 추리가 끝나면 진실이 공개됩니다."}
+          모든 조의 추리가 끝나면 진실이 공개됩니다.
         </p>
       </div>
     );
@@ -116,10 +99,10 @@ export default function VotePage() {
     <div className="flex flex-col gap-4 p-4 pt-6">
       <div className="space-y-1">
         <div className="text-xs font-mono text-amber-400 tracking-widest uppercase">
-          {roundLabelEn}
+          Final Deduction
         </div>
-        <h1 className="text-2xl font-bold text-zinc-100">{roundLabel}</h1>
-        <p className="text-sm text-zinc-500">범인은 누구인가? 조의 {isRound1 ? "중간" : "최종"} 결론을 선택하세요.</p>
+        <h1 className="text-2xl font-bold text-zinc-100">최종 추리</h1>
+        <p className="text-sm text-zinc-500">범인은 누구인가? 조의 최종 결론을 선택하세요.</p>
         {team && (
           <p className="text-xs text-zinc-600 font-mono">{team.teamNumber}조 · {team.leaderName}</p>
         )}
@@ -176,14 +159,12 @@ export default function VotePage() {
           : voteLocked
           ? `증거 ${VOTE_UNLOCK_COUNT - collectedCount}개 추가 수집 시 제출 가능`
           : selected
-          ? `용의자 ${selected} — ${isRound1 ? "중간" : "최종"} 추리 제출`
+          ? `용의자 ${selected} — 최종 추리 제출`
           : "용의자를 선택하세요"}
       </button>
 
       <p className="text-xs text-zinc-600 text-center">
-        {isRound1
-          ? "중간 추리입니다. 최종 투표가 열리면 다시 선택할 수 있습니다."
-          : "최종 추리입니다. 신중하게 판단하여 제출하세요."}
+        최종 추리는 한 번만 제출할 수 있습니다. 신중하게 판단하여 제출하세요.
       </p>
     </div>
   );

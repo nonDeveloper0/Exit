@@ -1,14 +1,13 @@
-const VOTE_R1_KEY = "exit2026_vote_r1";
-const VOTE_R2_KEY = "exit2026_vote_r2";
+const VOTE_KEY = "exit2026_vote_final";
 const TEAM_KEY = "exit2026_team";
 
-export function getVote(round: 1 | 2): string | null {
+export function getVote(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(round === 1 ? VOTE_R1_KEY : VOTE_R2_KEY);
+  return localStorage.getItem(VOTE_KEY);
 }
 
-export function castVote(round: 1 | 2, suspectId: string): void {
-  localStorage.setItem(round === 1 ? VOTE_R1_KEY : VOTE_R2_KEY, suspectId);
+export function castVote(suspectId: string): void {
+  localStorage.setItem(VOTE_KEY, suspectId);
 }
 
 export function getTeamInfo(): { teamNumber: string; leaderName: string } | null {
@@ -26,10 +25,11 @@ export function saveTeamInfo(teamNumber: string, leaderName: string): void {
 }
 
 export function resetAll(): void {
-  localStorage.removeItem(VOTE_R1_KEY);
-  localStorage.removeItem(VOTE_R2_KEY);
+  localStorage.removeItem(VOTE_KEY);
   localStorage.removeItem(TEAM_KEY);
   // 이전 버전 localStorage 키 정리
+  localStorage.removeItem("exit2026_vote_r1");
+  localStorage.removeItem("exit2026_vote_r2");
   localStorage.removeItem("exit2026_vote");
   localStorage.removeItem("exit2026_submit_count");
   localStorage.removeItem("exit2026_evidence");

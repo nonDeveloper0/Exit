@@ -19,7 +19,7 @@
 /home               → 수사본부 메인 (사건 개요, 증거 수집 진행률, QR 수집 현황)
 /evidence           → 증거함 (수집된 증거 목록, 조 공유 실시간 반영)
 /suspects           → 용의자 파일 (A, B, C, D, E 카드)
-/vote               → 최종 추리 (중간/최종 2라운드, 용의자 선택 → Google Form, 라운드별 최대 2회)
+/vote               → 최종 추리 (용의자 선택 → Google Form, 1회 제출)
 /ranking            → 수사 현황 (전체 조 실시간 랭킹, 매핑된 조는 묶어서 표시)
 /ending             → 엔딩 (모세 반전 공개)
 /qr/[id]            → QR 증거 수집 페이지 (6자 opaque slug, 총 6개)
@@ -39,7 +39,7 @@ src/
 │   ├── home/page.tsx           — 수사본부 메인 (Client Component)
 │   ├── evidence/page.tsx       — 증거함
 │   ├── suspects/page.tsx       — 용의자 파일 (5인)
-│   ├── vote/page.tsx           — 최종 추리 (2라운드)
+│   ├── vote/page.tsx           — 최종 추리 (1회 제출)
 │   ├── ranking/page.tsx        — 수사 현황 랭킹
 │   ├── ending/page.tsx         — 엔딩
 │   ├── qr/[id]/
@@ -51,10 +51,10 @@ src/
 │   └── GameStateRedirect.tsx   — ending_open 활성화 시 전 참가자 기기 자동 /ending 이동
 └── lib/
     ├── data.ts                 — 정적 데이터 (EVIDENCE, SUSPECTS, QR_CODES, LOCATIONS 등)
-    ├── store.ts                — localStorage 헬퍼 (조 정보, 투표 라운드별 기록)
+    ├── store.ts                — localStorage 헬퍼 (조 정보, 투표 기록)
     ├── supabase.ts             — Supabase 클라이언트
     ├── useTeamEvidence.ts      — 내 조 + 매핑된 파트너 조 증거 실시간 구독/수집
-    ├── useGameState.ts         — vote_round / ending_open 구독
+    ├── useGameState.ts         — voteOpen / ending_open 구독
     └── useAllTeamsProgress.ts  — 전체 조 진행 현황 + 매핑 그룹화 (랭킹)
 ```
 
@@ -85,7 +85,7 @@ src/
 | `team_evidence_items` | `(pair_id, evidence_id, type)` | 조별 증거 수집. type = `collected` \| `joined` (`_joined` 마커는 증거 0개 조 표시용) |
 | `game_state` | `id = "singleton"` | 게임 진행 상태 단일 행 |
 
-`game_state` 컬럼: `vote_round`(0=닫힘 / 1=중간 / 2=최종), `ending_open`(boolean), `pairings`(JSONB, 조 짝짓기 `{ "1": "3", "3": "1" }`).
+`game_state` 컬럼: `vote_round`(0=닫힘 / 2=최종 투표 열림 — 중간 투표는 폐지되어 1은 미사용), `ending_open`(boolean), `pairings`(JSONB, 조 짝짓기 `{ "1": "3", "3": "1" }`).
 
 ### localStorage (기기별 상태)
 
@@ -94,8 +94,7 @@ src/
 | 키 | 값 | 설명 |
 |----|-----|------|
 | `exit2026_team` | `JSON` | 조 번호 + 조장 이름 (랜딩에서 저장) |
-| `exit2026_vote_r1` | `string` | 중간 투표(1라운드)에서 선택한 용의자 id |
-| `exit2026_vote_r2` | `string` | 최종 투표(2라운드)에서 선택한 용의자 id |
+| `exit2026_vote_final` | `string` | 최종 투표에서 선택한 용의자 id (1회 제출) |
 
 ### sessionStorage
 

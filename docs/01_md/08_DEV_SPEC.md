@@ -23,7 +23,7 @@ DB / Realtime: Supabase
 | 컬럼 | 타입 | 설명 |
 |------|------|------|
 | id | TEXT | Primary Key, 항상 "singleton" |
-| vote_round | INTEGER | 투표 라운드 (0=닫힘, 1=중간 투표, 2=최종 투표, 기본 0) |
+| vote_round | INTEGER | 최종 투표 상태 (0=닫힘, 2=최종 투표 열림, 기본 0. 중간 투표 폐지로 1은 미사용) |
 | ending_open | BOOLEAN | 엔딩 공개 여부 (기본 false) |
 | pairings | JSONB | 조 매핑 (양방향, 예: `{"1":"3","3":"1"}`, 기본 `{}`) |
 | updated_at | TIMESTAMPTZ | 마지막 변경 시각 |
@@ -90,6 +90,6 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
 |--------|--------|
 | 증거 수집 | Supabase (조 단위 공유) |
 | 조 번호 / 조장 이름 | localStorage (기기별) |
-| 투표 내용 (라운드별) | localStorage `exit2026_vote_r1` / `exit2026_vote_r2` (기기별) |
+| 투표 내용 | localStorage `exit2026_vote_final` (기기별, 1회 제출) |
 | 게임 진행 상태 (투표 라운드/엔딩/조 매핑) | Supabase `game_state` (전체 공유, Realtime) |
 | 관리자 인증 | sessionStorage (탭 단위, PIN 0000) |

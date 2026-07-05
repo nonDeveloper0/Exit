@@ -2,14 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabase";
 
 export interface GameState {
-  vote_round: 0 | 1 | 2;
+  voteOpen: boolean;
   ending_open: boolean;
 }
 
 let channelCounter = 0;
 
 export function useGameState() {
-  const [state, setState] = useState<GameState>({ vote_round: 0, ending_open: false });
+  const [state, setState] = useState<GameState>({ voteOpen: false, ending_open: false });
   const [loaded, setLoaded] = useState(false);
   const channelName = useRef(`game_state_${++channelCounter}`).current;
 
@@ -20,7 +20,7 @@ export function useGameState() {
       .eq("id", "singleton")
       .single()
       .then(({ data }) => {
-        if (data) setState({ vote_round: data.vote_round as 0 | 1 | 2, ending_open: data.ending_open });
+        if (data) setState({ voteOpen: (data.vote_round ?? 0) !== 0, ending_open: data.ending_open });
         setLoaded(true);
       });
 
@@ -30,8 +30,8 @@ export function useGameState() {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "game_state" },
         (payload) => {
-          const r = payload.new as { vote_round: 0 | 1 | 2; ending_open: boolean };
-          setState({ vote_round: r.vote_round, ending_open: r.ending_open });
+          const r = payload.new as { vote_round: number | null; ending_open: boolean };
+          setState({ voteOpen: (r.vote_round ?? 0) !== 0, ending_open: r.ending_open });
         }
       )
       .subscribe();
