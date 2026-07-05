@@ -125,6 +125,16 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 랭킹/관리자 조 목록에서 `__global` 제외, 랭킹 카운트엔 공통 단서를 각 조에 합산
   - EDIT_GUIDE 6-2절 추가
   - 수정 파일: `src/lib/data.ts`, `src/lib/useTeamEvidence.ts`, `src/components/TeamEvidenceToast.tsx`, `src/lib/useAllTeamsProgress.ts`, `src/app/admin/page.tsx`
+- [x] 단서 15종 — 용의자별 고유 3개씩 배정
+  - 증거 5종 추가 (E11~E15): 이중 장부(B), 내부고발 문건(E), 경호팀 무전(E), 해고 통보서(D), 임금 체불 내역(D)
+  - 각 용의자 `relatedEvidenceIds`를 고유 3개로 재배정 (기존 공유 E02·E09 제거) — A/B/C/D/E 모두 3개씩, 총 15개
+  - 신규 5종을 기존 QR에 연결 (QR3에 E12·E13, QR4에 E14·E15, QR5에 E11) — 물리 배치는 운영자 조정 필요
+  - 수정 파일: `src/lib/data.ts`, `docs/01_md/04_EVIDENCE.md`
+- [x] 용의자 이름 추가 (나사장/채소장/나팀장/이대리/김사원)
+  - `Suspect`에 `name` 필드 추가. `codename`("용의자 A")은 상단 라벨로 유지, 큰 제목을 `role` → `name`으로 교체
+  - 용의자 카드 펼침 뷰의 "역할" 줄 삭제 (role은 데이터로만 유지, 카드 미표시)
+  - 투표 화면도 일관성 위해 큰 라벨 role → name (선택 목록 + 제출 완료 화면)
+  - 수정 파일: `src/lib/data.ts`, `src/app/suspects/page.tsx`, `src/app/vote/page.tsx`, 문서 3종
 
 ## 구조 확정 사항
 
@@ -141,9 +151,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 |----|------|------|------|
 | QR1 | x4k9m2 | 살해 현장 | E01 |
 | QR2 | p7n3q8 | 살해 현장 | E09, E02 |
-| QR3 | h6t4c3 | CCTV 관제실 | E03, E04 |
-| QR4 | b2r5w1 | 주차장 | E05, E06 |
-| QR5 | m1d7k5 | 창고 | E07, E08 |
+| QR3 | h6t4c3 | CCTV 관제실 | E03, E04, E12, E13 |
+| QR4 | b2r5w1 | 주차장 | E05, E06, E14, E15 |
+| QR5 | m1d7k5 | 창고 | E07, E08, E11 |
 | QR6 | n4v8z3 | 창고 | E10 |
 
 ---

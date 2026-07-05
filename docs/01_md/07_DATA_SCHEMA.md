@@ -16,8 +16,9 @@
 ```ts
 {
   id: string;                              // "A" | "B" | "C" | "D" | "E"
-  codename: string;                        // "용의자 A"
-  role: string;                            // 직책
+  codename: string;                        // "용의자 A" (카드 상단 라벨)
+  name: string;                            // 이름, 예: "나사장" (카드 큰 제목)
+  role: string;                            // 직책 (데이터용, 카드 미표시)
   motive: string;                          // 실제 동기 (motiveRevealIds 충족 시 공개)
   motiveRevealIds: string[];               // 이 증거들을 모두 수집해야 motive 표시 (빈 배열 = 항상 숨김)
   description: string;                     // 상세 설명

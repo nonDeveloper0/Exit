@@ -46,7 +46,7 @@ export default function SuspectsPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-mono text-zinc-500">{s.codename}</span>
                     </div>
-                    <h2 className="text-lg font-bold text-zinc-100">{s.role}</h2>
+                    <h2 className="text-lg font-bold text-zinc-100">{s.name}</h2>
                   </div>
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-black shrink-0 ${SUSPECT_AVATAR_CLASS}`}
@@ -80,12 +80,6 @@ export default function SuspectsPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex gap-3">
                       <span className="text-zinc-500 w-12 shrink-0 font-mono text-xs pt-0.5">
-                        역할
-                      </span>
-                      <span className="text-zinc-300">{s.role}</span>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="text-zinc-500 w-12 shrink-0 font-mono text-xs pt-0.5">
                         동기
                       </span>
                       <span className="text-zinc-300">{getDisplayMotive(s, collected)}</span>
@@ -99,7 +93,10 @@ export default function SuspectsPage() {
 
                   {s.relatedEvidenceIds.length > 0 && (
                     <div className="space-y-1.5">
-                      <span className="text-zinc-500 font-mono text-xs">관련 단서</span>
+                      <span className="text-zinc-500 font-mono text-xs">
+                        관련 단서 ({s.relatedEvidenceIds.filter((id) => collected.includes(id)).length}/
+                        {s.relatedEvidenceIds.length})
+                      </span>
                       <div className="space-y-1.5">
                         {s.relatedEvidenceIds.map((id) => {
                           const isCollected = collected.includes(id);

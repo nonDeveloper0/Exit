@@ -10,6 +10,7 @@ export interface Evidence {
 export interface Suspect {
   id: string;
   codename: string;
+  name: string;
   role: string;
   motive: string;
   motiveRevealIds: string[]; // 이 증거들을 모두 수집하면 motive 공개
@@ -105,16 +106,42 @@ export const EVIDENCE: Evidence[] = [
     title: "비밀문서",
     description: "C가 회장에게 보낸 서한 일부. '더 이상 두고 볼 수 없습니다'라는 문구만 해독 가능.",
   },
+  {
+    id: "E11",
+    title: "이중 장부",
+    description: "현장 자재 대금이 이중으로 기록된 장부. B와 피해자 사이 수년간의 비자금 거래 정황이 드러난다.",
+  },
+  {
+    id: "E12",
+    title: "내부고발 문건",
+    description: "피해자가 외부에 넘기려던 조직 비리 자료. E가 이 문건의 존재를 사전에 파악하고 있었던 정황이 확인됨.",
+  },
+  {
+    id: "E13",
+    title: "경호팀 무전 기록",
+    description: "사건 당일 밤, E가 경호팀에 '뒷정리'를 지시한 무전 기록. 지시 직후 해당 시간대 통신이 일괄 삭제됐다.",
+  },
+  {
+    id: "E14",
+    title: "해고 통보서",
+    description: "사건 이틀 전 피해자 명의로 D에게 전달된 일방적 해고 통보서. 사유란은 공란으로 처리됐다.",
+  },
+  {
+    id: "E15",
+    title: "임금 체불 내역",
+    description: "D의 지난 수개월치 임금이 미지급된 내역과 야간 근무일지. 사건 당일에도 정문 근무가 기록돼 있다.",
+  },
 ];
 
 export const SUSPECTS: Suspect[] = [
   {
     id: "A",
     codename: "용의자 A",
+    name: "나사장",
     role: "노동자 대표",
     motive: "반복적인 폭행과 착취에 대한 복수",
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E07", "E08"])
-    relatedEvidenceIds: ["E04", "E07", "E08", "E09"],
+    relatedEvidenceIds: ["E04", "E07", "E08"],
     description:
       "현장 노동자들의 리더. 피해자에게 수차례 부당한 폭행과 징계를 받아왔다. 사건 당일 현장에 있었음을 인정했다.",
     motiveLevel: "높음",
@@ -122,10 +149,11 @@ export const SUSPECTS: Suspect[] = [
   {
     id: "B",
     codename: "용의자 B",
+    name: "채소장",
     role: "현장 소장",
     motive: "비리 은폐",
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E02", "E06"])
-    relatedEvidenceIds: ["E02", "E09"],
+    relatedEvidenceIds: ["E01", "E09", "E11"],
     description:
       "공사 현장의 실질적 책임자. 피해자와 수년간 부당 거래를 해온 것으로 알려져 있다. 사건 관련 서류를 사전에 은폐한 정황이 있다.",
     motiveLevel: "중간",
@@ -133,10 +161,11 @@ export const SUSPECTS: Suspect[] = [
   {
     id: "C",
     codename: "용의자 C",
+    name: "나팀장",
     role: "회장 아들",
     motive: "불명확 — 조사 중", // TODO: 동기 확정 후 교체
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E10"])
-    relatedEvidenceIds: ["E03", "E06", "E09", "E10"],
+    relatedEvidenceIds: ["E03", "E06", "E10"],
     description:
       "회장의 아들이라는 것 외에 신원 대부분이 비공개. 사건 당일 현장에 있었으며, 사건 직후 잠적. 연락 두절.",
     motiveLevel: "불명",
@@ -144,10 +173,11 @@ export const SUSPECTS: Suspect[] = [
   {
     id: "D",
     codename: "용의자 D",
+    name: "이대리",
     role: "경비원",
     motive: "해고 통보와 임금 체불에 대한 원한",
     motiveRevealIds: [],
-    relatedEvidenceIds: [], // TODO: D를 가리키는 증거가 아직 없음 — 필요 시 증거 추가/연결
+    relatedEvidenceIds: ["E05", "E14", "E15"],
     description:
       "공사 현장 정문 담당 경비원. 사건 당일 야간 근무 중이었으며 현장 출입을 직접 통제하는 위치에 있었다. 피해자로부터 수개월간 임금을 받지 못했고, 사건 이틀 전 일방적인 해고를 통보받은 것으로 확인됐다.",
     motiveLevel: "중간",
@@ -155,10 +185,11 @@ export const SUSPECTS: Suspect[] = [
   {
     id: "E",
     codename: "용의자 E",
+    name: "김사원",
     role: "경호실장",
     motive: "피해자의 내부 고발 차단 — 조직 비리 은폐",
     motiveRevealIds: [],
-    relatedEvidenceIds: ["E02"],
+    relatedEvidenceIds: ["E02", "E12", "E13"],
     description:
       "회장 직속 경호실장. 현장 CCTV 관리 권한을 보유하고 있으며, 삭제된 영상 구간의 접근 이력이 그의 계정에서 발견됐다. 사건 당일 행적에 대해 일관성 없는 진술을 반복하고 있다.",
     motiveLevel: "높음",
@@ -168,8 +199,8 @@ export const SUSPECTS: Suspect[] = [
 export const QR_CODES: QrCode[] = [
   { id: "x4k9m2", location: LOCATIONS.L1, evidenceIds: ["E01"] },
   { id: "p7n3q8", location: LOCATIONS.L1, evidenceIds: ["E09", "E02"] },
-  { id: "h6t4c3", location: LOCATIONS.L2, evidenceIds: ["E03", "E04"] },
-  { id: "b2r5w1", location: LOCATIONS.L3, evidenceIds: ["E05", "E06"] },
-  { id: "m1d7k5", location: LOCATIONS.L4, evidenceIds: ["E07", "E08"] },
+  { id: "h6t4c3", location: LOCATIONS.L2, evidenceIds: ["E03", "E04", "E12", "E13"] },
+  { id: "b2r5w1", location: LOCATIONS.L3, evidenceIds: ["E05", "E06", "E14", "E15"] },
+  { id: "m1d7k5", location: LOCATIONS.L4, evidenceIds: ["E07", "E08", "E11"] },
   { id: "n4v8z3", location: LOCATIONS.L4, evidenceIds: ["E10"] },
 ];

@@ -99,7 +99,7 @@ export default function VotePage() {
         <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-8 text-center space-y-2">
           <p className="text-sm text-zinc-400">{team?.teamNumber}조의 {isRound1 ? "중간" : "최종"} 선택</p>
           <p className="text-5xl font-black text-emerald-400">{selected}</p>
-          <p className="text-base font-semibold text-zinc-200">{votedSuspect?.role}</p>
+          <p className="text-base font-semibold text-zinc-200">{votedSuspect?.name}</p>
           <p className="text-xs text-zinc-500 pt-1">조장: {team?.leaderName}</p>
         </div>
 
@@ -148,7 +148,7 @@ export default function VotePage() {
               </div>
               <div className="space-y-0.5">
                 <p className="text-xs font-mono text-zinc-500">{s.codename}</p>
-                <p className="text-base font-bold text-zinc-100">{s.role}</p>
+                <p className="text-base font-bold text-zinc-100">{s.name}</p>
                 <p className="text-xs text-zinc-500">{s.motive}</p>
               </div>
             </div>
