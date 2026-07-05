@@ -15,6 +15,7 @@ export interface Suspect {
   motive: string;
   motiveRevealIds: string[]; // 이 증거들을 모두 수집하면 motive 공개
   relatedEvidenceIds: string[]; // 이 용의자와 관련된 단서 (용의자 파일에 표시)
+  interrogationTriggerId?: string; // 이 증거를 수집하면 이 용의자의 '심문권' 획득 (QR 확정 후 지정)
   description: string;
   motiveLevel: "높음" | "중간" | "낮음" | "불명";
 }
@@ -142,6 +143,7 @@ export const SUSPECTS: Suspect[] = [
     motive: "반복적인 폭행과 착취에 대한 복수",
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E07", "E08"])
     relatedEvidenceIds: ["E04", "E07", "E08"],
+    interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
       "현장 노동자들의 리더. 피해자에게 수차례 부당한 폭행과 징계를 받아왔다. 사건 당일 현장에 있었음을 인정했다.",
     motiveLevel: "높음",
@@ -154,6 +156,7 @@ export const SUSPECTS: Suspect[] = [
     motive: "비리 은폐",
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E02", "E06"])
     relatedEvidenceIds: ["E01", "E09", "E11"],
+    interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
       "공사 현장의 실질적 책임자. 피해자와 수년간 부당 거래를 해온 것으로 알려져 있다. 사건 관련 서류를 사전에 은폐한 정황이 있다.",
     motiveLevel: "중간",
@@ -166,6 +169,7 @@ export const SUSPECTS: Suspect[] = [
     motive: "불명확 — 조사 중", // TODO: 동기 확정 후 교체
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E10"])
     relatedEvidenceIds: ["E03", "E06", "E10"],
+    interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
       "회장의 아들이라는 것 외에 신원 대부분이 비공개. 사건 당일 현장에 있었으며, 사건 직후 잠적. 연락 두절.",
     motiveLevel: "불명",
@@ -178,6 +182,7 @@ export const SUSPECTS: Suspect[] = [
     motive: "해고 통보와 임금 체불에 대한 원한",
     motiveRevealIds: [],
     relatedEvidenceIds: ["E05", "E14", "E15"],
+    interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
       "공사 현장 정문 담당 경비원. 사건 당일 야간 근무 중이었으며 현장 출입을 직접 통제하는 위치에 있었다. 피해자로부터 수개월간 임금을 받지 못했고, 사건 이틀 전 일방적인 해고를 통보받은 것으로 확인됐다.",
     motiveLevel: "중간",
@@ -190,6 +195,7 @@ export const SUSPECTS: Suspect[] = [
     motive: "피해자의 내부 고발 차단 — 조직 비리 은폐",
     motiveRevealIds: [],
     relatedEvidenceIds: ["E02", "E12", "E13"],
+    interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
       "회장 직속 경호실장. 현장 CCTV 관리 권한을 보유하고 있으며, 삭제된 영상 구간의 접근 이력이 그의 계정에서 발견됐다. 사건 당일 행적에 대해 일관성 없는 진술을 반복하고 있다.",
     motiveLevel: "높음",

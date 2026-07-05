@@ -135,6 +135,19 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 용의자 카드 펼침 뷰의 "역할" 줄 삭제 (role은 데이터로만 유지, 카드 미표시)
   - 투표 화면도 일관성 위해 큰 라벨 role → name (선택 목록 + 제출 완료 화면)
   - 수정 파일: `src/lib/data.ts`, `src/app/suspects/page.tsx`, `src/app/vote/page.tsx`, 문서 3종
+- [x] 중간투표 제거 — 최종투표 1회 제출만 유지
+  - 어드민: 3버튼(중간/최종/닫기) → 2버튼(최종 투표 열기 / 닫기)
+  - 앱 레벨 상태를 `vote_round`(0/1/2) → `voteOpen`(boolean)로 단순화. DB 컬럼 `vote_round`는 유지(마이그레이션 불필요), 열림=2·닫힘=0만 사용
+  - localStorage 투표 키 단일화: `exit2026_vote_r1`/`_r2` → `exit2026_vote_final` (구 키는 reset 시 정리)
+  - 투표 페이지: 라운드 분기(중간/최종) 전부 제거, "최종 추리" 단일 흐름 + "한 번만 제출" 안내
+  - 수정 파일: `src/lib/store.ts`, `src/lib/useGameState.ts`, `src/app/admin/page.tsx`, `src/app/vote/page.tsx`, 문서 4종
+- [x] 용의자 심문권 기능
+  - `Suspect.interrogationTriggerId` 추가 — 지정 증거 수집 시 해당 용의자 심문권 획득 (현재 전부 undefined 휴면, QR 확정 후 지정)
+  - 획득: 조 전체 공유(수집 목록 합집합), 짝 조도 함께 획득
+  - 제시: 용의자 카드 관련 단서 아래 심문권 티켓(용의자·조 번호) → 배우가 `심문 사용`(확인 1단계) → 사용완료·버튼 비활성
+  - 사용완료에 사용 시각·사용한 조 표시 (예: `11:04 1조 사용완료`) — 오류 오해 방지
+  - 1회 소모 상태는 `team_evidence_items`의 `type='interrogation_used'`(evidence_id=용의자ID)로 저장. 조/짝 조 공유, 랭킹 미집계, reset 시 자동 삭제 (DB 스키마 변경 불필요)
+  - 수정 파일: `src/lib/data.ts`, `src/lib/useTeamEvidence.ts`, `src/app/suspects/page.tsx`, 문서 4종(EDIT_GUIDE 5-2절 추가)
 
 ## 구조 확정 사항
 

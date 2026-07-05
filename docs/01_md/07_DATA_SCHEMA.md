@@ -21,6 +21,8 @@
   role: string;                            // 직책 (데이터용, 카드 미표시)
   motive: string;                          // 실제 동기 (motiveRevealIds 충족 시 공개)
   motiveRevealIds: string[];               // 이 증거들을 모두 수집해야 motive 표시 (빈 배열 = 항상 숨김)
+  relatedEvidenceIds: string[];            // 관련 단서 (용의자당 고유 3개), 카드에 목록 표시
+  interrogationTriggerId?: string;         // 이 증거 수집 시 심문권 획득 (미지정 = 심문권 UI 숨김)
   description: string;                     // 상세 설명
   motiveLevel: "높음" | "중간" | "낮음" | "불명";
 }
@@ -54,14 +56,15 @@ export const LOCATIONS = {
 ```sql
 CREATE TABLE team_evidence_items (
   pair_id     TEXT NOT NULL,           -- 조 번호 (숫자 문자열, 예: "1", "2")
-  evidence_id TEXT NOT NULL,           -- 증거 ID: "E01" ~ "E10", 또는 "_joined" (입장 마커)
-  type        TEXT NOT NULL,           -- "collected" | "joined"
+  evidence_id TEXT NOT NULL,           -- 증거 ID: "E01" ~, "_joined"(입장 마커), 또는 심문권은 용의자 ID("A"~"E")
+  type        TEXT NOT NULL,           -- "collected" | "joined" | "interrogation_used"
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   PRIMARY KEY (pair_id, evidence_id, type)
 );
 ```
 
 - `type='joined'`, `evidence_id='_joined'`: 입장 시 기록되는 마커. 현황 페이지에서 증거 0개인 조도 표시하기 위해 사용.
+- `type='interrogation_used'`, `evidence_id=용의자 ID`: 해당 용의자 심문권을 사용(소모)했다는 마커. 조 전체·짝 조가 공유하며 랭킹 집계에서는 제외됨.
 - `pair_id='__global'`: 공통 단서(`COMMON_EVIDENCE_IDS`) 저장소. 어느 조가 찾든 이 가상 조에 기록되고, 모든 조가 이 pair_id를 함께 구독해 전체 공개된다. 랭킹/관리자 조 목록에서는 제외됨.
 
 ## Supabase 테이블: `game_state`
@@ -71,7 +74,7 @@ CREATE TABLE team_evidence_items (
 ```sql
 CREATE TABLE game_state (
   id          TEXT PRIMARY KEY,         -- 항상 "singleton"
-  vote_round  INTEGER NOT NULL DEFAULT 0, -- 0=닫힘, 1=중간 투표, 2=최종 투표
+  vote_round  INTEGER NOT NULL DEFAULT 0, -- 0=닫힘, 2=최종 투표 열림 (중간 투표 폐지, 1 미사용)
   ending_open BOOLEAN NOT NULL DEFAULT false, -- 엔딩 공개 여부
   pairings    JSONB DEFAULT '{}',       -- 조 매핑 (양방향), 예: {"1":"3","3":"1"}
   updated_at  TIMESTAMPTZ DEFAULT NOW()
@@ -85,5 +88,4 @@ CREATE TABLE game_state (
 | 키 | 저장 내용 |
 |----|-----------|
 | `exit2026_team` | 조 정보 JSON (예: `{"teamNumber":"1","leaderName":"홍길동"}`) |
-| `exit2026_vote_r1` | 중간 투표(1라운드)에서 선택한 용의자 ID (예: `"C"`) |
-| `exit2026_vote_r2` | 최종 투표(2라운드)에서 선택한 용의자 ID |
+| `exit2026_vote_final` | 최종 투표에서 선택한 용의자 ID (예: `"C"`, 1회 제출) |

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { SUSPECTS, EVIDENCE, type Suspect } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
+import { getTeamInfo } from "@/lib/store";
 
 const SUSPECT_AVATAR_CLASS = "bg-zinc-700 text-zinc-300";
 
@@ -14,9 +15,23 @@ function getDisplayMotive(s: Suspect, collected: string[]): string {
   return "불명확 — 조사 중";
 }
 
+function formatUsedTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
 export default function SuspectsPage() {
-  const { collected } = useTeamEvidence();
+  const { collected, interrogationUsed, markInterrogationUsed } = useTeamEvidence();
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [teamNumber, setTeamNumber] = useState<string | null>(null);
+  const [confirmUseId, setConfirmUseId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setTeamNumber(getTeamInfo()?.teamNumber ?? null);
+  }, []);
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
@@ -31,6 +46,11 @@ export default function SuspectsPage() {
       <div className="space-y-3">
         {SUSPECTS.map((s) => {
           const isExpanded = expanded === s.id;
+          const interrogationEarned = s.interrogationTriggerId
+            ? collected.includes(s.interrogationTriggerId)
+            : false;
+          const interrogationUse = interrogationUsed.find((u) => u.suspectId === s.id);
+          const interrogationDone = !!interrogationUse;
 
           return (
             <div
@@ -125,6 +145,75 @@ export default function SuspectsPage() {
                           );
                         })}
                       </div>
+                    </div>
+                  )}
+
+                  {s.interrogationTriggerId && (
+                    <div className="space-y-1.5">
+                      <span className="text-zinc-500 font-mono text-xs">심문권</span>
+                      {!interrogationEarned ? (
+                        <div className="flex items-center gap-2 rounded px-3 py-3 text-xs bg-zinc-800/60 text-zinc-600">
+                          <span>🔒</span>
+                          <span>특정 단서를 찾으면 이 용의자의 심문권을 얻습니다</span>
+                        </div>
+                      ) : interrogationDone ? (
+                        <div className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/60 px-3 py-3 text-zinc-500">
+                          <span className="text-lg">✅</span>
+                          <div>
+                            <p className="text-sm font-bold text-zinc-300">
+                              {interrogationUse &&
+                                `${formatUsedTime(interrogationUse.usedAt)} ${interrogationUse.teamId}조 사용완료`}
+                            </p>
+                            <p className="text-xs">이미 사용된 심문권입니다 (정상)</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-xs font-mono text-red-300/70 tracking-widest uppercase">
+                                Interrogation Pass
+                              </p>
+                              <p className="text-lg font-black text-red-200">🎫 심문권</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-bold text-zinc-100">{s.name}</p>
+                              <p className="text-xs font-mono text-zinc-400">
+                                {s.codename} · {teamNumber ? `${teamNumber}조` : "-"}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-xs text-red-200/70">
+                            용의자(배우)에게 이 화면을 제시하세요. 배우가 사용 처리하면 다시 사용할 수 없습니다.
+                          </p>
+                          {confirmUseId === s.id ? (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  markInterrogationUsed(s.id);
+                                  setConfirmUseId(null);
+                                }}
+                                className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white hover:bg-red-400 transition-colors"
+                              >
+                                사용 처리 (되돌릴 수 없음)
+                              </button>
+                              <button
+                                onClick={() => setConfirmUseId(null)}
+                                className="rounded border border-zinc-600 bg-zinc-800 px-4 py-2.5 text-sm font-bold text-zinc-300 hover:bg-zinc-700 transition-colors"
+                              >
+                                취소
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmUseId(s.id)}
+                              className="w-full rounded bg-red-500/90 py-2.5 text-sm font-bold text-white hover:bg-red-500 transition-colors"
+                            >
+                              심문 사용 (배우 전용)
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

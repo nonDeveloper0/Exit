@@ -8,6 +8,12 @@ import { COMMON_EVIDENCE_IDS, GLOBAL_PAIR_ID } from "./data";
 
 let channelCounter = 0;
 
+export interface InterrogationUse {
+  suspectId: string; // evidence_id (용의자 ID)
+  teamId: string;    // 사용한 조 (pair_id)
+  usedAt: string;    // 사용 시각 (ISO)
+}
+
 export function useTeamEvidence() {
   const [ownTeamId] = useState<string | null>(() => {
     const team = getTeamInfo();
@@ -16,6 +22,7 @@ export function useTeamEvidence() {
   const [partnerId, setPartnerId] = useState<string | null>(null);
   const [collected, setCollected] = useState<string[]>([]);
   const [unlocked, setUnlocked] = useState<string[]>([]);
+  const [interrogationUsed, setInterrogationUsed] = useState<InterrogationUse[]>([]);
   const [loading, setLoading] = useState(true);
   const collectedRef = useRef<string[]>([]);
   const unlockedRef = useRef<string[]>([]);
@@ -67,13 +74,17 @@ export function useTeamEvidence() {
 
     supabase
       .from("team_evidence_items")
-      .select("evidence_id")
+      .select("evidence_id, type, pair_id, created_at")
       .in("pair_id", teamIds)
-      .eq("type", "collected")
+      .in("type", ["collected", "interrogation_used"])
       .then(({ data }) => {
         if (data) {
-          const ids = [...new Set(data.map((r) => r.evidence_id))];
-          setCollected(ids);
+          setCollected([...new Set(data.filter((r) => r.type === "collected").map((r) => r.evidence_id))]);
+          setInterrogationUsed(
+            data
+              .filter((r) => r.type === "interrogation_used")
+              .map((r) => ({ suspectId: r.evidence_id, teamId: r.pair_id, usedAt: r.created_at }))
+          );
         }
         setLoading(false);
       });
@@ -90,10 +101,21 @@ export function useTeamEvidence() {
             filter: `pair_id=eq.${tid}`,
           },
           (payload) => {
-            const item = payload.new as { evidence_id: string; type: string };
+            const item = payload.new as {
+              evidence_id: string;
+              type: string;
+              pair_id: string;
+              created_at: string;
+            };
             if (item.type === "collected") {
               setCollected((prev) =>
                 prev.includes(item.evidence_id) ? prev : [...prev, item.evidence_id]
+              );
+            } else if (item.type === "interrogation_used") {
+              setInterrogationUsed((prev) =>
+                prev.some((u) => u.suspectId === item.evidence_id && u.teamId === item.pair_id)
+                  ? prev
+                  : [...prev, { suspectId: item.evidence_id, teamId: item.pair_id, usedAt: item.created_at }]
               );
             }
           }
@@ -130,5 +152,24 @@ export function useTeamEvidence() {
     setUnlocked((prev) => (prev.includes(id) ? prev : [...prev, id]));
   }, []);
 
-  return { collected, unlocked, loading, collect, unlock };
+  // 심문권 사용 처리 — 내 조로 기록. 짝 조도 구독 중이므로 함께 사용완료로 반영됨.
+  const markInterrogationUsed = useCallback(
+    async (suspectId: string) => {
+      if (!ownTeamId) return;
+      setInterrogationUsed((prev) =>
+        prev.some((u) => u.suspectId === suspectId && u.teamId === ownTeamId)
+          ? prev
+          : [...prev, { suspectId, teamId: ownTeamId, usedAt: new Date().toISOString() }]
+      );
+      await supabase
+        .from("team_evidence_items")
+        .upsert(
+          { pair_id: ownTeamId, evidence_id: suspectId, type: "interrogation_used" },
+          { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
+        );
+    },
+    [ownTeamId]
+  );
+
+  return { collected, unlocked, interrogationUsed, loading, collect, unlock, markInterrogationUsed };
 }
