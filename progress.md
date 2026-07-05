@@ -148,6 +148,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 사용완료에 사용 시각·사용한 조 표시 (예: `11:04 1조 사용완료`) — 오류 오해 방지
   - 1회 소모 상태는 `team_evidence_items`의 `type='interrogation_used'`(evidence_id=용의자ID)로 저장. 조/짝 조 공유, 랭킹 미집계, reset 시 자동 삭제 (DB 스키마 변경 불필요)
   - 수정 파일: `src/lib/data.ts`, `src/lib/useTeamEvidence.ts`, `src/app/suspects/page.tsx`, 문서 4종(EDIT_GUIDE 5-2절 추가)
+- [x] 장소명 변경 + QR 15개 재배치
+  - `LOCATIONS`: 자재 물류창고(사건현장)/나사장 집무실/나팀장 사무실/채소장 연구실
+  - `QR_CODES`: 6개 → 15개. 자재 물류창고 6 + 각 방 3. 증거 1종당 QR 1개
+  - 매핑: 나사장 집무실=A(E04·E07·E08), 나팀장 사무실=C(E03·E06·E10), 채소장 연구실=B(E01·E09·E11), 자재 물류창고=D·E(E05·E14·E15·E02·E12·E13)
+  - 새 slug 9개 생성(†) — 인쇄 QR과 일치/교체 필요
+  - 수정 파일: `src/lib/data.ts`, `docs/01_md/05_QR_MAP.md`, `progress.md`
+- [ ] (기획 보류) 조장 권한 분리 — 조장만 수집/투표/심문, 조원은 뷰어. `docs/01_md/09_LEADER_ROLE_PLAN.md` 참고
 
 ## 구조 확정 사항
 
@@ -158,16 +165,27 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 - **reset 범위**: 관리자가 조별 선택 또는 전체 일괄. 해당 조 Supabase 데이터 삭제. 현재 기기 조면 localStorage도 삭제
 - **QR 구조**: QR_CODES 배열에서 slug → 장소(LOCATIONS 변수) + 증거 ID 목록 관리
 
-### QR 배치 현황
+### QR 배치 현황 (총 15개, 증거 1종당 QR 1개)
 
-| QR | slug | 장소 | 증거 |
-|----|------|------|------|
-| QR1 | x4k9m2 | 살해 현장 | E01 |
-| QR2 | p7n3q8 | 살해 현장 | E09, E02 |
-| QR3 | h6t4c3 | CCTV 관제실 | E03, E04, E12, E13 |
-| QR4 | b2r5w1 | 주차장 | E05, E06, E14, E15 |
-| QR5 | m1d7k5 | 창고 | E07, E08, E11 |
-| QR6 | n4v8z3 | 창고 | E10 |
+| slug | 장소 | 증거 |
+|------|------|------|
+| x4k9m2 | 자재 물류창고 | E02 |
+| p7n3q8 | 자재 물류창고 | E12 |
+| c8v3k1 † | 자재 물류창고 | E13 |
+| d2m9x4 † | 자재 물류창고 | E05 |
+| f5r7t2 † | 자재 물류창고 | E14 |
+| g1h6n8 † | 자재 물류창고 | E15 |
+| h6t4c3 | 나사장 집무실 | E04 |
+| j4w2b5 † | 나사장 집무실 | E07 |
+| k9p3z6 † | 나사장 집무실 | E08 |
+| b2r5w1 | 나팀장 사무실 | E03 |
+| q7s1d3 † | 나팀장 사무실 | E06 |
+| t6y8m2 † | 나팀장 사무실 | E10 |
+| m1d7k5 | 채소장 연구실 | E01 |
+| n4v8z3 | 채소장 연구실 | E09 |
+| w3n5k7 † | 채소장 연구실 | E11 |
+
+† = 새로 생성한 slug (9개). 인쇄 QR과 일치시키거나 원하는 값으로 교체 필요.
 
 ---
 

@@ -79,10 +79,10 @@
 
 ```ts
 export const LOCATIONS = {
-  L1: "살해 현장",    // ← 여기만 바꾸면 해당 장소 QR 페이지 전체에 반영
-  L2: "CCTV 관제실",
-  L3: "주차장",
-  L4: "창고",
+  L1: "자재 물류창고", // ← 여기만 바꾸면 해당 장소 QR 페이지 전체에 반영 (사건 현장)
+  L2: "나사장 집무실",
+  L3: "나팀장 사무실",
+  L4: "채소장 연구실",
 } as const;
 ```
 
@@ -93,18 +93,19 @@ export const LOCATIONS = {
 **파일:** `src/lib/data.ts` → `QR_CODES` 배열
 
 ```ts
+// 총 15개: 자재 물류창고 6 + 나사장 집무실/나팀장 사무실/채소장 연구실 각 3. 증거 1종당 QR 1개
 export const QR_CODES: QrCode[] = [
-  { id: "x4k9m2", location: LOCATIONS.L1, evidenceIds: ["E01"] },
-  { id: "p7n3q8", location: LOCATIONS.L1, evidenceIds: ["E09", "E02"] },
-  { id: "h6t4c3", location: LOCATIONS.L2, evidenceIds: ["E03", "E04"] },
-  { id: "b2r5w1", location: LOCATIONS.L3, evidenceIds: ["E05", "E06"] },
-  { id: "m1d7k5", location: LOCATIONS.L4, evidenceIds: ["E07", "E08"] },
-  { id: "n4v8z3", location: LOCATIONS.L4, evidenceIds: ["E10"] },
+  { id: "x4k9m2", location: LOCATIONS.L1, evidenceIds: ["E02"] },
+  { id: "h6t4c3", location: LOCATIONS.L2, evidenceIds: ["E04"] },
+  { id: "b2r5w1", location: LOCATIONS.L3, evidenceIds: ["E03"] },
+  { id: "m1d7k5", location: LOCATIONS.L4, evidenceIds: ["E01"] },
+  // ... 전체 15개는 05_QR_MAP.md 표 참고
 ];
 ```
 
-- `evidenceIds` 배열에 증거 ID를 1~2개 넣는다
-- `id`(slug)는 절대 변경 금지 — QR 코드 URL과 연결됨
+- `evidenceIds` 배열에 증거 ID를 넣는다 (현재는 QR당 1개, 여러 개도 가능)
+- `id`(slug)는 인쇄된 QR 코드 URL과 일치해야 함 — 확정 후 변경 금지
+- 05_QR_MAP.md의 † 표시 slug 9개는 새로 생성한 값 → 인쇄 QR과 일치시키거나 교체할 것
 
 ---
 
