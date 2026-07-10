@@ -154,7 +154,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 매핑: 나사장 집무실=A(E04·E07·E08), 나팀장 사무실=C(E03·E06·E10), 채소장 연구실=B(E01·E09·E11), 자재 물류창고=D·E(E05·E14·E15·E02·E12·E13)
   - 새 slug 9개 생성(†) — 인쇄 QR과 일치/교체 필요
   - 수정 파일: `src/lib/data.ts`, `docs/01_md/05_QR_MAP.md`, `progress.md`
-- [ ] (기획 보류) 조장 권한 분리 — 조장만 수집/투표/심문, 조원은 뷰어. `docs/01_md/09_LEADER_ROLE_PLAN.md` 참고
+- [x] 조장 권한 분리 기획 폐기 — 조원/조장 구분 없이 모든 기기가 능동 기능(수집/투표/심문) 사용하는 기존 방식 유지. 기획 문서(`09_LEADER_ROLE_PLAN.md`) 삭제. (조장 이름 입력 기능은 그대로 유지)
 
 ## 구조 확정 사항
 
