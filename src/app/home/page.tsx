@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EVIDENCE, LOCATIONS, QR_CODES } from "@/lib/data";
+import { getVote } from "@/lib/store";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 export default function MainPage() {
   const { collected } = useTeamEvidence();
+  const [finalVote, setFinalVote] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFinalVote(getVote());
+  }, []);
 
   const progress = EVIDENCE.length > 0 ? (collected.length / EVIDENCE.length) * 100 : 0;
+  const investigationClosed = !!finalVote;
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
@@ -17,7 +24,7 @@ export default function MainPage() {
           Special Investigation Unit
         </div>
         <h1 className="text-2xl font-bold text-zinc-100 leading-tight">
-          NS건설
+          녹산건설
           <br />
           공사 현장 살인사건
         </h1>
@@ -27,9 +34,17 @@ export default function MainPage() {
       {/* Case Brief */}
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
-          <span className="text-xs font-mono text-red-400 uppercase tracking-wider">
-            수사 진행 중
+          <span
+            className={`w-2 h-2 rounded-full animate-pulse shrink-0 ${
+              investigationClosed ? "bg-red-500" : "bg-emerald-500"
+            }`}
+          />
+          <span
+            className={`text-xs font-mono uppercase tracking-wider ${
+              investigationClosed ? "text-red-400" : "text-emerald-400"
+            }`}
+          >
+            {investigationClosed ? "수사 종료" : "수사 진행 중"}
           </span>
         </div>
         <div className="space-y-2 text-sm text-zinc-300">
@@ -39,7 +54,7 @@ export default function MainPage() {
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">장소</span>
-            <span>NS건설 공사 현장 B2 구역</span>
+            <span>녹산건설 공사 현장 B2 구역</span>
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">용의자</span>
