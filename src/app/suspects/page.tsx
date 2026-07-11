@@ -2,11 +2,20 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { SUSPECTS, EVIDENCE, type Suspect } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 import { getTeamInfo } from "@/lib/store";
 
-const SUSPECT_AVATAR_CLASS = "bg-zinc-700 text-zinc-300";
+// 이미지가 없을 때 표시하는 기본 용의자 실루엣 (머그샷 흉상)
+function SuspectSilhouette({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 80" className={className} fill="currentColor" aria-hidden="true">
+      <circle cx="32" cy="27" r="14" />
+      <path d="M6 80c0-15 11.6-25 26-25s26 10 26 25z" />
+    </svg>
+  );
+}
 
 function getDisplayMotive(s: Suspect, collected: string[]): string {
   if (s.motiveRevealIds.length > 0 && s.motiveRevealIds.every((id) => collected.includes(id))) {
@@ -59,39 +68,55 @@ export default function SuspectsPage() {
             >
               <button
                 onClick={() => setExpanded(isExpanded ? null : s.id)}
-                className="w-full text-left p-4"
+                className="w-full text-left p-3 flex items-stretch gap-3"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-mono text-zinc-500">{s.codename}</span>
-                    </div>
-                    <h2 className="text-lg font-bold text-zinc-100">{s.name}</h2>
-                  </div>
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-black shrink-0 ${SUSPECT_AVATAR_CLASS}`}
-                  >
+                {/* 머그샷: 이미지 있으면 사진, 없으면 기본 실루엣 */}
+                <div className="relative w-[68px] shrink-0 self-stretch min-h-[92px] overflow-hidden rounded-md border border-zinc-700 bg-zinc-950 [background-image:repeating-linear-gradient(0deg,transparent,transparent_11px,rgba(255,255,255,0.05)_11px,rgba(255,255,255,0.05)_12px)]">
+                  {s.imageUrl ? (
+                    <Image
+                      src={s.imageUrl}
+                      alt={s.name}
+                      fill
+                      sizes="68px"
+                      className="object-cover object-top"
+                    />
+                  ) : (
+                    <SuspectSilhouette className="absolute bottom-0 left-1/2 w-[58px] h-[72px] -translate-x-1/2 text-zinc-700" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <span className="absolute top-0 left-0 rounded-br-md bg-amber-500 px-1.5 py-0.5 text-[11px] font-black leading-none text-zinc-950">
                     {s.id}
-                  </div>
+                  </span>
                 </div>
 
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-xs text-zinc-500">
-                    {isExpanded ? "접기" : "파일 열기"}
+                {/* 정보 */}
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">
+                    {s.codename}
                   </span>
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className={`w-4 h-4 text-zinc-500 transition-transform ${
-                      isExpanded ? "rotate-180" : ""
-                    }`}
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <h2 className="mt-0.5 text-lg font-bold leading-tight text-zinc-100">{s.name}</h2>
+                  <span className="mt-1 inline-flex w-fit items-center rounded border border-zinc-700 px-1.5 py-0.5 text-[10px] font-mono tracking-wider text-zinc-500">
+                    CASE FILE
+                  </span>
+
+                  <div className="mt-auto flex items-center justify-between pt-2">
+                    <span className="text-xs text-zinc-500">
+                      {isExpanded ? "접기" : "파일 열기"}
+                    </span>
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className={`w-4 h-4 text-zinc-500 transition-transform ${
+                        isExpanded ? "rotate-180" : ""
+                      }`}
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
                 </div>
               </button>
 

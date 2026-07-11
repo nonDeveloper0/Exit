@@ -14,7 +14,7 @@
   title: "목격자 진술",              // ← 증거 제목
   description: "당일 밤 현장 인근...", // ← 증거 설명
   imageUrl: "/evidence.png",          // ← 이미지 (없으면 이 줄 삭제)
-  audioUrl: "/audio/E01.mp3",         // ← 음성 힌트 (없으면 이 줄 삭제)
+  audioUrl: "/audio/E01.mp3",         // ← 음성 힌트 (없으면 이 줄 삭제)c
 },
 ```
 
@@ -140,8 +140,14 @@ export const QR_CODES: QrCode[] = [
   motive: "반복적인 폭행과 착취에 대한 복수",  // ← 동기 한 줄
   description: "현장 노동자들의 리더...",      // ← 상세 설명
   motiveLevel: "높음",             // ← "높음" | "중간" | "낮음" | "불명"
+  imageUrl: "/suspect-a.png",      // ← 용의자 사진/실루엣 (없으면 이 줄 삭제 → 기본 실루엣 표시)
 },
 ```
+
+**용의자 사진(실루엣) 추가 방법:**
+1. 이미지 파일을 `public/` 폴더에 넣는다 (예: `public/suspect-a.png`). 세로 비율(약 3:4)이 카드 머그샷 틀에 잘 맞는다.
+2. 해당 용의자에 `imageUrl: "/suspect-a.png"` 추가.
+3. `imageUrl`이 없으면 카드에 기본 흉상 실루엣이 자동으로 표시된다.
 
 ---
 
@@ -282,7 +288,7 @@ export const COMMON_EVIDENCE_IDS: string[] = ["E10"];  // 예시 — 원하는 �
 | 항목 | 위치 |
 |------|------|
 | 피해자 | `<span>현장 관리자 (신원 확인됨)</span>` |
-| 장소 | `<span>NS건설 공사 현장 B2 구역</span>` |
+| 장소 | `<span>녹산건설 자재 물류창고</span>` |
 | 용의자 | `<span>A, B, C, D, E — 5인</span>` |
 | 사건 요약 | `노동자를 폭행하던 피해자와 몸싸움이...` |
 
@@ -293,7 +299,7 @@ export const COMMON_EVIDENCE_IDS: string[] = ["E10"];  // 예시 — 원하는 �
 **파일:** `src/app/ending/page.tsx`
 
 - 모세 정체 공개 텍스트: `C의 진짜 이름은 모세입니다.` 부분
-- 이야기 대조표: `["NS건설 공사 현장", "고대 이집트"]` 배열 수정
+- 이야기 대조표: `["녹산건설 공사 현장", "고대 이집트"]` 배열 수정
 - 마무리 멘트: `여러분은 지금 모세의 이야기를 살았습니다.`
 
 ---
@@ -325,7 +331,7 @@ export const VOTE_UNLOCK_COUNT = 0; // ← 이 숫자를 바꾼다
 ```ts
 export const metadata: Metadata = {
   title: "EXIT SEASON1",
-  description: "NS건설 공사 현장 살인사건 특별 수사",
+  description: "녹산건설 공사 현장 살인사건 특별 수사",
 };
 ```
 

@@ -161,6 +161,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 - [x] 수신전화 받기 UX → 밀어서 받기 슬라이더
   - 첫 화면 `받기` 버튼(탭) → 밀어서 받기(노브 85% 이상 끌면 연결, 탭만으론 안 받아짐). pointer 이벤트 터치/마우스 공용, `거절`은 하단 텍스트로 유지
   - 수정 파일: `src/components/IncomingCallOverlay.tsx`, `src/app/globals.css`(`slide-hint`)
+- [x] 범용 연출 훅 `useBroadcastEvent` 추출 — 모듈화 뼈대
+  - `useIncomingCall`(전화 전용)을 `(evidenceId, type)` 마커 기반 범용 훅으로 일반화 → A그룹(문자/경보/방송) 재사용 기반
+  - `useIncomingCall`은 범용 훅 위 얇은 래퍼로 재구성. 기존 3개 export 시그니처 유지 → 소비처(`IncomingCallOverlay`, `/admin`) 무변경
+  - 신규 파일: `src/lib/useBroadcastEvent.ts` / 수정: `src/lib/useIncomingCall.ts`, `docs/01_md/12_MODULE_CATALOG.md`(§3)
+- [x] 용의자 카드 디자인 개선 — 머그샷(수배 사진) 스타일 + 실루엣/이미지
+  - 밋밋한 아바타 원(글자) → 세로 머그샷 틀: 이미지 있으면 사진, 없으면 기본 흉상 실루엣(SVG)
+  - 신체측정 눈금 배경 + 하단 그라데이션 + 좌상단 앰버 ID 배지 + "CASE FILE" 태그로 사건파일 느낌
+  - `Suspect`에 `imageUrl?` 필드 추가 — `public/`에 파일 넣고 `imageUrl: "/파일명"` 지정 (없으면 실루엣)
+  - 수정 파일: `src/lib/data.ts`, `src/app/suspects/page.tsx`, `docs/01_md/EDIT_GUIDE.md`(4절)
 - [x] 수신전화 "음성 메시지" 증거 수집
   - `CALL01` 증거 추가: 전화 오디오 샘플(`public/audio/incoming-call.mp3`)을 `audioUrl`로 등록
   - 참가자가 밀어서 전화를 받는 즉시 해당 조 보관함에 자동 수집. 거절/미응답은 수집하지 않음
@@ -204,6 +213,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 
 - [ ] 단서 기획 (오프라인 헌팅 중심) — 방향 확정, 실제 단서 채우는 중
 - [ ] 디제틱 기기 UI 기획 — 방향 확정(`docs/01_md/11_DEVICE_UI_PLAN.md`), 수신전화 연출만 구현 완료
+- [ ] 모듈 카탈로그 — 후보 기능 문서화 완료(`docs/01_md/12_MODULE_CATALOG.md`), Codex가 골라 구현 예정
 
 
 ---

@@ -18,10 +18,11 @@ export interface Suspect {
   interrogationTriggerId?: string; // 이 증거를 수집하면 이 용의자의 '심문권' 획득 (QR 확정 후 지정)
   description: string;
   motiveLevel: "높음" | "중간" | "낮음" | "불명";
+  imageUrl?: string; // 용의자 사진/실루엣. public/에 파일 넣고 "/파일명" 지정. 없으면 기본 실루엣 표시
 }
 
 // 최종 추리 제출에 필요한 최소 증거  수 (0 = 제한 없음)
-export const VOTE_UNLOCK_COUNT = 1;
+export const VOTE_UNLOCK_COUNT = 0;
 
 // 비밀번호로 잠긴 증거 목록. { 증거ID: "비밀번호" } 형태로 지정.
 export const LOCKED_EVIDENCE: Record<string, string> = {
