@@ -44,6 +44,8 @@ export const GLOBAL_PAIR_ID = "__global";
 export const INCOMING_CALL_EVENT_ID = "_incoming_call";
 export const INCOMING_CALL_EVENT_TYPE = "incoming_call";
 export const INCOMING_CALL_AUDIO_URL = "/audio/incoming-call.mp3";
+export const INCOMING_CALL_EVIDENCE_ID = "CALL01";
+export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_ID];
 
 // 장소 이름 — 수정 시 여기서만 변경
 export const LOCATIONS = {
@@ -60,6 +62,12 @@ export interface QrCode {
 }
   
 export const EVIDENCE: Evidence[] = [
+  {
+    id: INCOMING_CALL_EVIDENCE_ID,
+    title: "음성 메시지",
+    description: "발신번호 표시제한 전화에서 들려온 음성 메시지. 다시 들을 수 있도록 증거함에 저장됐다.",
+    audioUrl: INCOMING_CALL_AUDIO_URL,
+  },
   {
     id: "E01",
     title: "목격자 진술",

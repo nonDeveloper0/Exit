@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>수신전화 연출 — 데모</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body { font-family: "Segoe UI", "Malgun Gothic", -apple-system, sans-serif; background: #000; color: #f1f5f9; overflow: hidden; }
+
+  .demo-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: #b45309; color: #fff; font-size: 11px; text-align: center; padding: 5px 8px; line-height: 1.5; }
+  .demo-banner b { color: #fde68a; }
+
+  .screen { position: absolute; inset: 0; padding-top: 30px; display: none; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* 대기 화면 — admin이 아직 안 걸었을 때 */
+  #idle { background: radial-gradient(ellipse at 50% 30%, rgba(30,41,59,.6), #05060a 70%); align-items: center; justify-content: center; text-align: center; gap: 16px; padding: 30px; }
+  #idle .glyph { font-size: 56px; opacity: .5; }
+  #idle p { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+  .fake-btn { margin-top: 8px; padding: 10px 18px; border-radius: 8px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #cbd5e1; font-size: 13px; }
+  .fake-btn:active { background: rgba(255,255,255,.14); }
+
+  /* 수신 화면 */
+  #incoming { background: linear-gradient(180deg, #0b1220 0%, #111827 55%, #05060a 100%); align-items: center; }
+  .inc-top { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; width: 100%; }
+  .inc-label { font-size: 13px; color: #93c5fd; letter-spacing: 2px; }
+  .caller-avatar { width: 116px; height: 116px; border-radius: 50%; background: linear-gradient(135deg,#7f1d1d,#450a0a); border: 2px solid rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center; font-size: 54px; animation: pulse 1.6s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.5)} 50%{box-shadow:0 0 0 22px rgba(248,113,113,0)} }
+  .caller-name { font-size: 27px; font-weight: 700; }
+  .caller-sub { font-size: 13px; color: #94a3b8; margin-top: -6px; }
+  .ringing { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+  .inc-actions { width: 100%; padding: 26px 40px 46px; display: flex; align-items: flex-end; justify-content: space-between; }
+  .call-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .call-btn .circle { width: 68px; height: 68px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; border: none; }
+  .call-btn .txt { font-size: 12px; color: #cbd5e1; }
+  .decline .circle { background: #dc2626; }
+  .accept .circle { background: #16a34a; animation: bob 1.2s infinite; }
+  @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+  .accept .circle:active { background: #15803d; }
+
+  /* 통화 중 */
+  #call { background: linear-gradient(180deg,#0f172a,#020617); align-items: center; }
+  .call-top { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 30px 0 14px; }
+  .call-top .caller-avatar { width: 84px; height: 84px; font-size: 40px; animation: none; }
+  .call-timer { font-size: 13px; color: #34d399; }
+  .wave { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 10px 30px; }
+  .wave span { width: 5px; border-radius: 3px; background: linear-gradient(#60a5fa,#818cf8); animation: wv 1s infinite ease-in-out; }
+  @keyframes wv { 0%,100%{height:12px} 50%{height:46px} }
+  .transcript { width: 100%; padding: 0 26px; min-height: 120px; }
+  .transcript .line { opacity: 0; transform: translateY(6px); transition: all .4s; background: rgba(148,163,184,.1); border-left: 3px solid #3b82f6; padding: 9px 12px; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
+  .transcript .line.show { opacity: 1; transform: none; }
+  .transcript .line .spk { display: block; font-size: 11px; color: #93c5fd; margin-bottom: 2px; }
+
+  .call-bottom { padding: 20px 40px 42px; display: flex; justify-content: center; }
+  .hangup { width: 66px; height: 66px; border-radius: 50%; background: #dc2626; border: none; font-size: 28px; }
+  .hangup:active { background: #b91c1c; }
+
+  /* 종료/수집 */
+  #ended { background: radial-gradient(ellipse at 50% 30%, rgba(6,78,59,.5), #05060a 70%); align-items: center; justify-content: center; text-align: center; gap: 18px; padding: 34px; }
+  #ended .glyph { font-size: 60px; }
+  #ended h2 { font-size: 21px; }
+  #ended p { font-size: 14px; color: #a7f3d0; line-height: 1.6; }
+  .collect-card { width: 100%; max-width: 320px; background: rgba(255,255,255,.05); border: 1px solid rgba(52,211,153,.35); border-radius: 12px; padding: 16px; text-align: left; }
+  .collect-card .tag { font-size: 11px; color: #34d399; letter-spacing: 1px; }
+  .collect-card .title { font-size: 16px; font-weight: 700; margin: 4px 0 6px; }
+  .collect-card .desc { font-size: 13px; color: #cbd5e1; line-height: 1.5; }
+  .replay { margin-top: 4px; padding: 11px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: #e5e7eb; font-size: 13px; }
+  .replay:active { background: rgba(255,255,255,.16); }
+
+  /* 전체공지 토스트 (선택) */
+  .broadcast { position: fixed; top: 34px; left: 10px; right: 10px; z-index: 800; background: #b91c1c; color: #fff; padding: 11px 14px; border-radius: 10px; font-size: 13px; box-shadow: 0 8px 30px rgba(0,0,0,.6); transform: translateY(-140%); transition: transform .45s; display: flex; gap: 8px; align-items: center; }
+  .broadcast.show { transform: none; }
+  .broadcast b { color: #fecaca; }
+</style>
+</head>
+<body>
+<div class="demo-banner">데모 — 실제 구현: <b>admin이 "전화 걸기"</b> 활성화 후 앱을 여는 기기마다 이 수신화면이 뜸. <b>받기 탭 = 오디오 재생 합법화</b></div>
+
+<!-- 1. 대기 -->
+<div class="screen active" id="idle">
+  <div class="glyph">🕵️</div>
+  <p>수사본부 대기 중…<br />제보 전화가 오면 이 화면에 표시됩니다.</p>
+  <button class="fake-btn" onclick="ring()">▶ (데모) admin이 전화 거는 상황 재생</button>
+</div>
+
+<!-- 2. 수신 -->
+<div class="screen" id="incoming">
+  <div class="inc-top">
+    <div class="inc-label">수신 전화</div>
+    <div class="caller-avatar">☎️</div>
+    <div class="caller-name">발신번호 표시제한</div>
+    <div class="caller-sub">피해자의 휴대폰</div>
+    <div class="ringing">벨이 울리는 중…</div>
+  </div>
+  <div class="inc-actions">
+    <div class="call-btn decline">
+      <button class="circle" onclick="decline()">✕</button>
+      <span class="txt">거절</span>
+    </div>
+    <div class="call-btn accept">
+      <button class="circle" onclick="accept()">📞</button>
+      <span class="txt">받기</span>
+    </div>
+  </div>
+</div>
+
+<!-- 3. 통화 중 -->
+<div class="screen" id="call">
+  <div class="call-top">
+    <div class="caller-avatar">☎️</div>
+    <div class="caller-name" style="font-size:18px">발신번호 표시제한</div>
+    <div class="call-timer" id="timer">00:00</div>
+  </div>
+  <div class="wave" id="wave"></div>
+  <div class="transcript" id="transcript"></div>
+  <div class="call-bottom">
+    <button class="hangup" onclick="endCall()">📵</button>
+  </div>
+</div>
+
+<!-- 4. 종료 + 수집 -->
+<div class="screen" id="ended">
+  <div class="glyph">✓</div>
+  <h2>통화 녹음 확보</h2>
+  <div class="collect-card">
+    <div class="tag">증거 수집됨 · 조 전체 공유</div>
+    <div class="title">☎️ 피해자 마지막 통화 녹음</div>
+    <div class="desc">사건 당일 밤, 피해자가 누군가와 다툰 통화. "약속한 돈… 오늘 안에… 그 사람한테 다 말할 거야."</div>
+  </div>
+  <button class="replay" onclick="replay()">🔁 다시 듣기</button>
+  <p style="font-size:12px;color:#64748b">증거함에 저장됨 — 언제든 다시 재생 가능</p>
+</div>
+
+<!-- 전체공지 토스트 -->
+<div class="broadcast" id="broadcast">🚨 <span><b>속보</b> — 피해자의 휴대폰으로 전화가 걸려오고 있습니다. 받아보세요.</span></div>
+
+<script>
+  const screens = { idle:0, incoming:0, call:0, ended:0 };
+  function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+  // 파형 막대 생성
+  const wave = document.getElementById('wave');
+  for(let i=0;i<11;i++){ const s=document.createElement('span'); s.style.animationDelay=(i*0.09)+'s'; wave.appendChild(s); }
+
+  const lines = [
+    { spk:'피해자', txt:'…여보세요. 이 시간에 무슨 일이야.' },
+    { spk:'상대 (음성 변조)', txt:'약속한 돈. 오늘 안에 넣으라고 했잖아.' },
+    { spk:'피해자', txt:'못 줘. 그리고… 나 다 알아. 장부도 봤어.' },
+    { spk:'상대 (음성 변조)', txt:'…경고했다. 후회하게 될 거야.' },
+    { spk:'피해자', txt:'그 사람한테 전부 말할 거야. 내일 아침에—' },
+  ];
+
+  let timerInt, revealTimeouts=[];
+  function ring(){
+    show('incoming');
+    const b=document.getElementById('broadcast'); b.classList.add('show');
+    setTimeout(()=>b.classList.remove('show'), 4500);
+  }
+  function decline(){ show('idle'); }
+
+  function accept(){
+    // 실제 구현: 여기서 audio.play() — "받기" 탭이 사용자 제스처라 모바일에서 재생 허용됨
+    show('call');
+    startTimer();
+    playTranscript();
+  }
+  function startTimer(){
+    let sec=0; const t=document.getElementById('timer'); t.textContent='00:00';
+    clearInterval(timerInt);
+    timerInt=setInterval(()=>{ sec++; t.textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0'); },1000);
+  }
+  function playTranscript(){
+    const tr=document.getElementById('transcript'); tr.innerHTML='';
+    revealTimeouts.forEach(clearTimeout); revealTimeouts=[];
+    lines.forEach((l,i)=>{
+      const div=document.createElement('div'); div.className='line';
+      div.innerHTML='<span class="spk">'+l.spk+'</span>'+l.txt;
+      tr.appendChild(div);
+      revealTimeouts.push(setTimeout(()=>div.classList.add('show'), 700+i*1900));
+    });
+    // 마지막 줄 후 자동 종료
+    revealTimeouts.push(setTimeout(endCall, 700+lines.length*1900+1200));
+  }
+  function endCall(){ clearInterval(timerInt); revealTimeouts.forEach(clearTimeout); show('ended'); }
+  function replay(){ accept(); }
+</script>
+</body>
+</html>

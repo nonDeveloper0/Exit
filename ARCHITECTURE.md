@@ -85,7 +85,7 @@ src/
 | `team_evidence_items` | `(pair_id, evidence_id, type)` | 조별 증거 수집. type = `collected` \| `joined` (`_joined` 마커는 증거 0개 조 표시용) |
 | `game_state` | `id = "singleton"` | 게임 진행 상태 단일 행 |
 
-`game_state` 컬럼: `vote_round`(0=닫힘 / 2=최종 투표 열림 — 중간 투표는 폐지되어 1은 미사용), `ending_open`(boolean), `pairings`(JSONB, 조 짝짓기 `{ "1": "3", "3": "1" }`).
+`game_state` 컬럼: `vote_round`(0=닫힘 / 2=최종 투표 열림), `ending_open`(boolean), `pairings`(JSONB, 조 짝짓기 `{ "1": "3", "3": "1" }`).
 
 ### localStorage (기기별 상태)
 

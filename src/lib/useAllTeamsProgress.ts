@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "./supabase";
-import { EVIDENCE, GLOBAL_PAIR_ID } from "./data";
+import { EVIDENCE, GLOBAL_PAIR_ID, RANKING_EXCLUDED_EVIDENCE_IDS } from "./data";
 
 export interface TeamGroup {
   label: string;     // "1조 + 3조" or "2조"
@@ -11,6 +11,7 @@ export interface TeamGroup {
 }
 
 let channelCounter = 0;
+const RANKING_EXCLUDED_IDS = new Set(RANKING_EXCLUDED_EVIDENCE_IDS);
 
 export function useAllTeamsProgress() {
   const [teamEvidence, setTeamEvidence] = useState<Record<string, string[]>>({});
@@ -50,7 +51,11 @@ export function useAllTeamsProgress() {
       const ev: Record<string, string[]> = {};
       data.forEach((r) => {
         if (!(r.pair_id in ev)) ev[r.pair_id] = [];
-        if (r.type === "collected" && !ev[r.pair_id].includes(r.evidence_id)) {
+        if (
+          r.type === "collected" &&
+          !RANKING_EXCLUDED_IDS.has(r.evidence_id) &&
+          !ev[r.pair_id].includes(r.evidence_id)
+        ) {
           ev[r.pair_id].push(r.evidence_id);
         }
       });
@@ -72,7 +77,7 @@ export function useAllTeamsProgress() {
             setTeamEvidence((prev) =>
               item.pair_id in prev ? prev : { ...prev, [item.pair_id]: [] }
             );
-          } else if (item.type === "collected") {
+          } else if (item.type === "collected" && !RANKING_EXCLUDED_IDS.has(item.evidence_id)) {
             setTeamEvidence((prev) => {
               const arr = prev[item.pair_id] ?? [];
               if (arr.includes(item.evidence_id)) return prev;
@@ -121,5 +126,5 @@ export function useAllTeamsProgress() {
 
   groups.sort((a, b) => b.count - a.count);
 
-  return { groups, total: EVIDENCE.length };
+  return { groups, total: EVIDENCE.filter((item) => !RANKING_EXCLUDED_IDS.has(item.id)).length };
 }

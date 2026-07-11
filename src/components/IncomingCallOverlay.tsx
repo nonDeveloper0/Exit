@@ -2,20 +2,30 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { INCOMING_CALL_AUDIO_URL } from "@/lib/data";
+import { INCOMING_CALL_AUDIO_URL, INCOMING_CALL_EVIDENCE_ID } from "@/lib/data";
 import { markIncomingCallHandled, useIncomingCall } from "@/lib/useIncomingCall";
 import { getTeamInfo } from "@/lib/store";
+import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 type CallScreen = "incoming" | "calling" | "ended";
 
 export default function IncomingCallOverlay() {
   const { active, eventId, loaded } = useIncomingCall();
+  const { collect } = useTeamEvidence();
   const pathname = usePathname();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [screen, setScreen] = useState<CallScreen>("incoming");
   const [seconds, setSeconds] = useState(0);
   const [audioError, setAudioError] = useState(false);
+
+  // 밀어서 받기 슬라이더
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const draggingRef = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartOffset = useRef(0);
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
 
   const canShow = pathname !== "/" && pathname !== "/admin" && pathname !== "/ending" && !!getTeamInfo();
   const visible = loaded && active && canShow && !!eventId;
@@ -25,11 +35,49 @@ export default function IncomingCallOverlay() {
       setScreen("incoming");
       setSeconds(0);
       setAudioError(false);
+      setDragX(0);
+      setDragging(false);
+      draggingRef.current = false;
       if (timerRef.current) clearInterval(timerRef.current);
       audioRef.current?.pause();
       audioRef.current = null;
     }
   }, [visible]);
+
+  const KNOB = 48; // 노브 지름(px) — 트랙 패딩(p-2=8px) 양쪽 제외
+  function getMaxX() {
+    const track = trackRef.current;
+    if (!track) return 0;
+    return track.clientWidth - KNOB - 16;
+  }
+
+  function onKnobDown(e: React.PointerEvent) {
+    draggingRef.current = true;
+    setDragging(true);
+    dragStartX.current = e.clientX;
+    dragStartOffset.current = dragX;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+
+  function onKnobMove(e: React.PointerEvent) {
+    if (!draggingRef.current) return;
+    const maxX = getMaxX();
+    const next = Math.min(Math.max(dragStartOffset.current + (e.clientX - dragStartX.current), 0), maxX);
+    setDragX(next);
+  }
+
+  function onKnobUp() {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    setDragging(false);
+    const maxX = getMaxX();
+    if (maxX > 0 && dragX >= maxX * 0.85) {
+      setDragX(maxX);
+      accept();
+    } else {
+      setDragX(0);
+    }
+  }
 
   useEffect(() => {
     return () => {
@@ -49,6 +97,7 @@ export default function IncomingCallOverlay() {
 
   async function accept() {
     markHandled();
+    void collect(INCOMING_CALL_EVIDENCE_ID);
     setAudioError(false);
     setScreen("calling");
     setSeconds(0);
@@ -102,28 +151,39 @@ export default function IncomingCallOverlay() {
             <p className="mt-8 text-xs font-mono tracking-widest text-zinc-500">전화 수신 중</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-12 px-12 pb-12">
+          <div className="px-8 pb-14">
+            <div
+              ref={trackRef}
+              className="relative flex h-16 items-center rounded-full border border-emerald-400/20 bg-zinc-900/80 p-2"
+            >
+              <span
+                className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm font-medium text-emerald-200/70 animate-slide-hint"
+                style={{ opacity: dragX > 8 ? 0 : undefined }}
+              >
+                밀어서 받기 →
+              </span>
+              <button
+                type="button"
+                onPointerDown={onKnobDown}
+                onPointerMove={onKnobMove}
+                onPointerUp={onKnobUp}
+                onPointerCancel={onKnobUp}
+                style={{ transform: `translateX(${dragX}px)` }}
+                className={`relative z-10 flex h-12 w-12 touch-none select-none items-center justify-center rounded-full bg-emerald-500 text-sm font-black tracking-wider text-white shadow-lg ${
+                  dragging ? "" : "transition-transform duration-200"
+                }`}
+                aria-label="밀어서 전화 받기"
+              >
+                받기
+              </button>
+            </div>
             <button
               type="button"
               onClick={decline}
-              className="flex flex-col items-center gap-3 active:scale-95"
+              className="mt-6 w-full text-center text-sm text-zinc-500 active:text-zinc-300"
               aria-label="전화 거절"
             >
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-red-600 text-2xl font-bold text-white shadow-lg">
-                X
-              </span>
-              <span className="text-sm text-zinc-300">거절</span>
-            </button>
-            <button
-              type="button"
-              onClick={accept}
-              className="flex flex-col items-center gap-3 active:scale-95"
-              aria-label="전화 받기"
-            >
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-sm font-black tracking-wider text-white shadow-lg animate-call-answer">
-                받기
-              </span>
-              <span className="text-sm text-zinc-300">받기</span>
+              거절
             </button>
           </div>
         </div>

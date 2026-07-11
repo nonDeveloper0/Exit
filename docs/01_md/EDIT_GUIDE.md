@@ -73,6 +73,24 @@
 
 ---
 
+## 1-3. 수신전화 음성 메시지 증거 수정
+
+**파일:** `src/lib/data.ts` + `public/audio/` 폴더
+
+수신전화를 받은 조에게 자동 수집되는 증거는 `CALL01`입니다.
+
+```ts
+export const INCOMING_CALL_AUDIO_URL = "/audio/incoming-call.mp3";
+export const INCOMING_CALL_EVIDENCE_ID = "CALL01";
+export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_ID];
+```
+
+- 오디오를 교체할 때는 새 파일을 `public/audio/`에 넣고 `INCOMING_CALL_AUDIO_URL`만 변경
+- 제목/설명은 `EVIDENCE` 배열의 `CALL01` 항목에서 수정
+- `CALL01`은 증거함에는 보이지만 랭킹 점수와 랭킹 total에서는 제외됨
+
+---
+
 ## 2. 장소명 수정
 
 **파일:** `src/lib/data.ts` → 상단 `LOCATIONS` 상수
@@ -293,13 +311,10 @@ export const VOTE_UNLOCK_COUNT = 0; // ← 이 숫자를 바꾼다
 
 ---
 
-## 10. 투표 제출 횟수 변경 (현재 2회)
+## 10. 최종 투표 제출 방식
 
-**파일:** `src/app/vote/page.tsx`
-
-```ts
-{submitCount < 2 ? (   // ← 2를 원하는 횟수로 변경
-```
+현재 최종 투표는 **기기별 1회 제출**로 고정되어 있습니다.
+제출 기록은 localStorage의 `exit2026_vote_final` 키에 저장됩니다.
 
 ---
 

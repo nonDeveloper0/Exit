@@ -158,6 +158,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 처리한 전화는 기기별 localStorage에 기록, 관리자가 다시 전화 걸면 새 이벤트로 재표시
   - 신규 파일: `src/components/IncomingCallOverlay.tsx`, `src/lib/useIncomingCall.ts`, `public/audio/incoming-call.mp3`
   - 수정 파일: `src/app/admin/page.tsx`, `src/app/layout.tsx`, `src/app/globals.css`, `src/lib/data.ts`, 문서 3종
+- [x] 수신전화 받기 UX → 밀어서 받기 슬라이더
+  - 첫 화면 `받기` 버튼(탭) → 밀어서 받기(노브 85% 이상 끌면 연결, 탭만으론 안 받아짐). pointer 이벤트 터치/마우스 공용, `거절`은 하단 텍스트로 유지
+  - 수정 파일: `src/components/IncomingCallOverlay.tsx`, `src/app/globals.css`(`slide-hint`)
+- [x] 수신전화 "음성 메시지" 증거 수집
+  - `CALL01` 증거 추가: 전화 오디오 샘플(`public/audio/incoming-call.mp3`)을 `audioUrl`로 등록
+  - 참가자가 밀어서 전화를 받는 즉시 해당 조 보관함에 자동 수집. 거절/미응답은 수집하지 않음
+  - 랭킹 집계와 랭킹 total에서는 `CALL01` 제외, 증거함에서는 다시 듣기 재사용
+  - 수정 파일: `src/lib/data.ts`, `src/components/IncomingCallOverlay.tsx`, `src/lib/useAllTeamsProgress.ts`
 
 ## 구조 확정 사항
 
