@@ -351,6 +351,32 @@ export const metadata: Metadata = {
 
 ---
 
+## 12. 디바이스 연출 화면 (아이패드 / 나사장 노트북)
+
+연출용 정적 HTML 화면을 참가자 UI에 노출하지 않고 운영자 기기에서만 띄우는 방식입니다.
+
+**파일 위치:** `public/screen/`
+- `public/screen/ipad.html` → 출입관리 아이패드 화면
+- `public/screen/laptop.html` → 나사장 노트북(윈도우) 화면
+
+**여는 방법 (운영자 기기에서 URL 직접 입력):**
+```
+https://(배포주소)/screen/ipad.html
+https://(배포주소)/screen/laptop.html
+```
+
+- 참가자 앱(홈·QR·증거함 등) 어디에도 링크가 없어 **UI로는 도달 불가**.
+- 단, `public/`의 정적 파일이라 **URL을 아는 사람은 열 수 있음**(은닉이지 차단 아님).
+  실제 잠금은 화면 안의 오프라인 비번(조별 비번, 엑셀 비번 등)이 담당.
+- URL 추측을 더 어렵게 하려면 파일명을 바꾸면 됨: `public/screen/x7k2-laptop.html`.
+
+**화면 내용 수정:** 위 HTML 파일을 직접 편집. 원본 목업은 `docs/02_mockups/`에 있음.
+
+> ⚠️ 현재는 **정적 화면(연출용)**입니다. "노트북/아이패드에서 연 걸 조 증거함에 자동 수집"
+> (Supabase 연동)은 미구현 — `11_DEVICE_UI_PLAN.md` / `13_PUZZLE_DESIGN.md` 참고.
+
+---
+
 ## 수정 후 배포 방법
 
 코드 수정 후 Claude Code에게 아래처럼 요청하면 됩니다:
