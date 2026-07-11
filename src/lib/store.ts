@@ -1,5 +1,17 @@
 const VOTE_KEY = "exit2026_vote_final";
 const TEAM_KEY = "exit2026_team";
+const CALL_DEVICE_KEY = "exit2026_call_device";
+
+// 수신전화 전용 기기(공기계) 지정 여부. 이 플래그가 켜진 기기에만 전화 오버레이가 뜬다.
+export function getIsCallDevice(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(CALL_DEVICE_KEY) === "1";
+}
+
+export function setCallDevice(on: boolean): void {
+  if (on) localStorage.setItem(CALL_DEVICE_KEY, "1");
+  else localStorage.removeItem(CALL_DEVICE_KEY);
+}
 
 export function getVote(): string | null {
   if (typeof window === "undefined") return null;

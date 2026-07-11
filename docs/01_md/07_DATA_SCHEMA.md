@@ -66,7 +66,7 @@ CREATE TABLE team_evidence_items (
 - `type='joined'`, `evidence_id='_joined'`: 입장 시 기록되는 마커. 현황 페이지에서 증거 0개인 조도 표시하기 위해 사용.
 - `type='interrogation_used'`, `evidence_id=용의자 ID`: 해당 용의자 심문권을 사용(소모)했다는 마커. 조 전체·짝 조가 공유하며 랭킹 집계에서는 제외됨.
 - `pair_id='__global'`: 공통 단서(`COMMON_EVIDENCE_IDS`) 저장소. 어느 조가 찾든 이 가상 조에 기록되고, 모든 조가 이 pair_id를 함께 구독해 전체 공개된다. 랭킹/관리자 조 목록에서는 제외됨.
-- `pair_id='__global'`, `evidence_id='_incoming_call'`, `type='incoming_call'`: 수신전화 연출 활성 마커. 이 행이 있으면 참가자 앱에 수신전화 UI가 표시되고, 삭제하면 종료된다.
+- `pair_id=대상 조 번호`, `evidence_id='_incoming_call'`, `type='incoming_call'`: 수신전화 연출 활성 마커. 공기계에서 전화를 받으면 이 `pair_id` 조에 `CALL01`이 수집되고, 마커를 삭제하면 전화가 종료된다.
 
 ## Supabase 테이블: `game_state`
 
@@ -91,6 +91,7 @@ CREATE TABLE game_state (
 | `exit2026_team` | 조 정보 JSON (예: `{"teamNumber":"1","leaderName":"홍길동"}`) |
 | `exit2026_vote_final` | 최종 투표에서 선택한 용의자 ID (예: `"C"`, 1회 제출) |
 | `exit2026_incoming_call_handled` | 처리한 수신전화 이벤트의 `created_at` 값. 같은 전화가 반복 표시되지 않도록 기기별 저장 |
+| `exit2026_call_device` | `/phone`에서 지정한 수신 전용 기기 여부 (`1`이면 활성) |
 ## Admin evidence release marker
 
 관리자 `/admin`의 `모든 단서 개방`은 별도 테이블이나 컬럼 없이 `team_evidence_items` 전역 마커를 사용한다.

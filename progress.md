@@ -192,25 +192,25 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 
 ### QR 배치 현황 (총 15개, 증거 1종당 QR 1개)
 
+> ⚠️ 항상 `src/lib/data.ts`의 `QR_CODES` 배열이 정본. 아래 표는 그 스냅샷.
+
 | slug | 장소 | 증거 |
 |------|------|------|
-| x4k9m2 | 자재 물류창고 | E02 |
-| p7n3q8 | 자재 물류창고 | E12 |
-| c8v3k1 † | 자재 물류창고 | E13 |
-| d2m9x4 † | 자재 물류창고 | E05 |
-| f5r7t2 † | 자재 물류창고 | E14 |
-| g1h6n8 † | 자재 물류창고 | E15 |
-| h6t4c3 | 나사장 집무실 | E04 |
-| j4w2b5 † | 나사장 집무실 | E07 |
-| k9p3z6 † | 나사장 집무실 | E08 |
-| b2r5w1 | 나팀장 사무실 | E03 |
-| q7s1d3 † | 나팀장 사무실 | E06 |
-| t6y8m2 † | 나팀장 사무실 | E10 |
-| m1d7k5 | 채소장 연구실 | E01 |
-| n4v8z3 | 채소장 연구실 | E09 |
-| w3n5k7 † | 채소장 연구실 | E11 |
-
-† = 새로 생성한 slug (9개). 인쇄 QR과 일치시키거나 원하는 값으로 교체 필요.
+| x4k9m2 | 자재 물류창고 | E07 |
+| p7n3q8 | 자재 물류창고 | E08 |
+| c8v3k1 | 자재 물류창고 | E09 |
+| d2m9x4 | 자재 물류창고 | E10 |
+| f5r7t2 | 자재 물류창고 | E11 |
+| g1h6n8 | 자재 물류창고 | E12 |
+| h6t4c3 | 나사장 집무실 | E01 |
+| j4w2b5 | 나사장 집무실 | E02 |
+| k9p3z6 | 나사장 집무실 | E03 |
+| b2r5w1 | 나팀장 사무실 | E04 |
+| q7s1d3 | 나팀장 사무실 | E05 |
+| t6y8m2 | 나팀장 사무실 | E06 |
+| m1d7k5 | 채소장 연구실 | E13 |
+| n4v8z3 | 채소장 연구실 | E14 |
+| w3n5k7 | 채소장 연구실 | E15 |
 
 ---
 
@@ -234,6 +234,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 - **조 구도**: 혼합 — 조별 기본 + 짝 조 공유(`pairings`=독극물 레시피) + 전체 공개(`COMMON_EVIDENCE`=방송)
 - **재활용**: `pairings`, `COMMON_EVIDENCE`, 심문권 그대로. 아직 코드 구현 전 = 기획 문서만 반영
 
+### 퀴즈/코드 답 입력 방식 (2026-07-12, 보류 결정)
+
+- **현 방식 유지**: 퀴즈(잠긴 증거)의 답 입력창은 **QR 페이지(`/qr/[slug]`)에만** 존재. 해당 증거에 연결된 QR로 들어가야 문제+비밀번호 입력창이 뜨고, 정답 입력 시 자동 수집됨 (`LOCKED_EVIDENCE` + `EVIDENCE_QUIZ`).
+- **증거함(`/evidence`)은 읽기 전용**: 미수집 증거는 `???` + 버튼 비활성. 여기서는 퀴즈를 풀 수 없음 (참여자 혼동 지점 — 의도된 동작).
+- **보류**: QR 없이 증거함 등에서 코드/퀴즈 답만으로 수집하는 **별도 진입점(코드 입력 게이트 일반화)** 은 나중에 다시 결정. 현재는 QR 경유만.
+
 ### 디제틱 기기 UI 기획 확정 (2026-07-11, 세션 한도로 중단된 논의 정리)
 
 상세: `docs/01_md/11_DEVICE_UI_PLAN.md`. 목업: `docs/02_mockups/device-{laptop,ipad}-demo.html`.
@@ -241,8 +247,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 - **전 기기 동시재생 폐기** (모바일 자동재생 차단·백그라운드 정지·iOS 진동/푸시 제약) → 물리 스피커가 주 채널
 - **속보 시스템**: admin 발행 → DB+Realtime. 잠긴 기기는 다시 열 때 안 본 속보 자동 표시 + 홈 아카이브 ("동시 도달" 대신 "놓치지 않음")
 - **수신전화 연출 확정**: 앱 여는 기기마다 수신전화 UI → "받기" 탭(제스처)으로 오디오 재생 합법화
-- **디제틱 기기**: 폰/실물 기기 웹페이지가 "기기 화면인 척". `/device/[id]`로 기존 `/qr` 확장, 해제=수집 통일
-- **나사장 노트북 = 실물 1대 + 2단 잠금**: ① 조별 비번(Exit 앱에서 문제 풀면 조별 발급, 신분증 역할) ② 비밀장부.xlsx 엑셀 비번(공통, 감사패). 협박메시지는 오프라인 단서로 이동. 세션 위생(N조 배지 + 90초 자동 재잠금)
+- **디제틱 기기**: 폰/실물 기기 웹페이지가 "기기 화면인 척". 수집 시점은 기기별로 명시하며, 현재 노트북은 잠금 해제가 아니라 PDF 열람 시 수집
+- **나팀장 노트북 = 실물 1대 + 1단 잠금**: 조 번호 드롭다운 + 공통 비밀번호 `980721`. 바탕화면의 지문감식 결과보고서 PDF를 여는 순간 선택한 조 보관함에 E16 저장. 짝 조는 `pairings` 합집합 조회로 단서함에 같이 표시. 세션 위생(N조 배지 + 90초 자동 재잠금)
 - **출입관리 아이패드**: 사원번호는 공통이라 신분 불가 → **방문 조 체크인 단계(A안)** 로 조 구분
 
 ---
@@ -258,15 +264,25 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 ### 데이터 (이벤트 전 필수)
 - [ ] 중요 단서 비밀번호 확정 (`data.ts` → `LOCKED_EVIDENCE`)
 - [ ] 용의자 동기 공개 트리거 확정 (`data.ts` → `motiveRevealIds`)
-- [ ] **지문감식 결과보고서(E16) 본문 작성 — 현재 비어있음.** 나사장 노트북 `public/screen/laptop.html`의
+- [ ] **지문감식 결과보고서(E16) 본문 작성 — 현재 비어있음.** 나팀장 노트북 `public/screen/laptop.html`의
   `<article class="pdf-page">`가 제목만 있고 본문은 `내용 준비 중` 상태. 단서팀 확정본으로 채우기.
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
-- [x] 나사장 노트북 디바이스 화면 구현 (`public/screen/laptop.html`, Vercel `/screen/laptop`)
+- [x] 수신전화 — 수신 전용 기기(공기계) 1대에만 오도록 변경 (B안, 2026-07-12)
+  - 기존: admin `전화 걸기` → 전역 마커라 **모든 참가자 기기가 같이 울림**
+  - 변경: 전화 오버레이는 **수신 전용 기기로 지정된 기기에만** 표시. admin 발행 로직(전역)은 그대로, "누가 받느냐"만 제한
+  - 지정 방법: 공기계 브라우저로 **`/phone`** 접속 → 그 기기가 수신 전용으로 지정(로컬 플래그 `exit2026_call_device`). `/phone` 하단 `수신 해제`로 끔. 여러 대 지정도 가능
+  - `/phone`은 시계 + "● 수신 대기 중" 상태의 대기 화면. 전화가 오면 이 화면 위로 기존 밀어서 받기 오버레이가 뜸
+  - 참여자가 숨겨진 공기계를 찾으면 스탭이 `/admin`에서 `전화 걸기` → 대상 조 번호 입력 → `확인` 순서로 발행한다. 공기계에서 받으면 지정 조에 `CALL01`이 수집된다.
+  - 공기계 자체는 조 로그인 없이 수신 전용 로컬 플래그만 가진 프롭 폰으로 운용한다.
+  - 신규 파일: `src/app/phone/page.tsx` / 수정: `src/lib/store.ts`(`getIsCallDevice`/`setCallDevice`), `src/components/IncomingCallOverlay.tsx`(표시 조건), `src/components/BottomNav.tsx`(`/phone` 네비 숨김), `docs/01_md/EDIT_GUIDE.md`(1-5절)
+
+- [x] 나팀장 노트북 디바이스 화면 구현 (`public/screen/laptop.html`, Vercel `/screen/laptop`)
   - 잠금: 조 번호 드롭다운(1~6조) + 공통 암호 `980721`. 고른 조가 수집 대상. 암호 마스킹(•) + 눈 아이콘 토글
   - 바탕화면에 `지문감식 결과보고서.pdf` 1개만(엑셀·죽은 파일 제거). 암호 없이 열람
-  - 열람 시 `supabase-js`(CDN)로 `team_evidence_items`에 실제 저장 → 선택한 조 증거함 실시간 반영
+  - 조 선택 + 공통 암호 성공만으로는 수집하지 않음. PDF 열람 시 `supabase-js`(CDN)로 `team_evidence_items`에 실제 저장 → 선택한 조 증거함 실시간 반영
+  - 짝 조는 별도 중복 저장 없이 `pairings` 기준으로 상대 조 기록을 함께 읽어 단서함에 표시
   - 새 증거 **E16 지문감식 결과보고서** 추가(`data.ts`). ⚠️ **보고서 본문은 비워둠 — 단서팀 확정본 필요**(위 작업필요 참조)
   - 정적 화면을 참가자 UI 미노출로 Vercel 서빙(`public/screen/`, `.html` 없이 접속 rewrite)
   - 수정 파일: `public/screen/laptop.html`, `src/lib/data.ts`, `next.config.ts`, `docs/01_md/EDIT_GUIDE.md`

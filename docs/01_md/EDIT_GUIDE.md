@@ -77,7 +77,7 @@
 
 **파일:** `src/lib/data.ts` + `public/audio/` 폴더
 
-수신전화를 받은 조에게 자동 수집되는 증거는 `CALL01`입니다.
+수신전화를 걸 때 관리자가 입력한 조에 자동 수집되는 증거는 `CALL01`입니다.
 
 ```ts
 export const INCOMING_CALL_AUDIO_URL = "/audio/incoming-call.mp3";
@@ -88,6 +88,7 @@ export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_I
 - 오디오를 교체할 때는 새 파일을 `public/audio/`에 넣고 `INCOMING_CALL_AUDIO_URL`만 변경
 - 제목/설명은 `EVIDENCE` 배열의 `CALL01` 항목에서 수정
 - `CALL01`은 증거함에는 보이지만 랭킹 점수와 랭킹 total에서는 제외됨
+- 전화는 **수신 전용 기기(공기계)** 에만 온다(→ 1-5). 공기계의 로그인 여부와 무관하게 관리자가 전화 발행 시 입력한 조에 `CALL01`이 수집된다.
 
 ---
 
@@ -102,6 +103,22 @@ export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_I
 - **울림 간격:** `startRingtone`의 `setInterval(cycle, 3000)` — 3000ms = 1초 울림 + 2초 쉼. 숫자를 줄이면 더 자주 울린다.
 - **진동 패턴:** `navigator.vibrate?.([500, 200, 500])` — `[진동ms, 멈춤ms, 진동ms]`. 진동을 빼려면 이 줄을 삭제.
 - **벨 음색:** `scheduleRing`의 `480 / 440`(Hz) 값 조정.
+
+---
+
+## 1-5. 수신 전용 기기(공기계) 지정
+
+**파일:** `src/app/phone/page.tsx`, `src/components/IncomingCallOverlay.tsx`, `src/lib/store.ts`
+
+전화는 **모든 참가자 기기가 아니라, 지정한 공기계 1대에만** 온다.
+
+- **지정 방법:** 공기계 브라우저로 **`/phone`** 에 접속한다. 접속하는 순간 그 기기가 "수신 전용 기기"로 지정되고(로컬 저장), "● 수신 대기 중" 표시가 뜬다.
+- **동작:** 이후 관리자 화면에서 `전화 걸기`를 누르면 이 기기 화면 위로 수신 화면(밀어서 받기)이 뜬다. 다른 참가자 기기에는 아무것도 뜨지 않는다.
+- **해제:** `/phone` 화면 하단 `수신 해제` 버튼을 누르면 그 기기는 더 이상 전화를 받지 않는다. (다른 기기를 공기계로 쓰려면 그 기기에서 `/phone`을 열면 됨 — 여러 대 지정도 가능)
+- **저장 위치:** 기기별 `localStorage` 플래그 `exit2026_call_device`. 조 로그인과 무관하며, 참가자 초기화(reset)에 영향받지 않는다.
+- 관리자에서 `전화 걸기`를 누른 뒤 전화를 찾은 조 번호를 입력하고 `확인`한다.
+- 공기계에서 전화를 받으면 관리자가 지정한 조에 `CALL01`이 수집된다. 공기계에 조 로그인을 할 필요는 없다.
+- `전화 종료`를 누르면 현재 수신전화 이벤트가 종료된다.
 
 ---
 

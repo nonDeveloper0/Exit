@@ -4,15 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { INCOMING_CALL_AUDIO_URL, INCOMING_CALL_EVIDENCE_ID } from "@/lib/data";
 import { markIncomingCallHandled, useIncomingCall } from "@/lib/useIncomingCall";
-import { getTeamInfo } from "@/lib/store";
-import { useTeamEvidence } from "@/lib/useTeamEvidence";
+import { getIsCallDevice } from "@/lib/store";
 import { armAudioUnlock, startRingtone, stopRingtone } from "@/lib/ringtone";
+import { supabase } from "@/lib/supabase";
 
 type CallScreen = "incoming" | "calling" | "ended";
 
 export default function IncomingCallOverlay() {
-  const { active, eventId, loaded } = useIncomingCall();
-  const { collect } = useTeamEvidence();
+  const { active, eventId, targetTeamId, loaded } = useIncomingCall();
   const pathname = usePathname();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -28,7 +27,8 @@ export default function IncomingCallOverlay() {
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
 
-  const canShow = pathname !== "/" && pathname !== "/admin" && pathname !== "/ending" && !!getTeamInfo();
+  // 전화는 수신 전용 기기(공기계, /phone에서 지정)에만 뜬다.
+  const canShow = pathname !== "/admin" && pathname !== "/ending" && getIsCallDevice();
   const visible = loaded && active && canShow && !!eventId;
 
   useEffect(() => {
@@ -109,7 +109,16 @@ export default function IncomingCallOverlay() {
   async function accept() {
     stopRingtone();
     markHandled();
-    void collect(INCOMING_CALL_EVIDENCE_ID);
+    if (targetTeamId) {
+      void supabase.from("team_evidence_items").upsert(
+        {
+          pair_id: targetTeamId,
+          evidence_id: INCOMING_CALL_EVIDENCE_ID,
+          type: "collected",
+        },
+        { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
+      );
+    }
     setAudioError(false);
     setScreen("calling");
     setSeconds(0);
