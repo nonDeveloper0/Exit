@@ -6,6 +6,7 @@ import { INCOMING_CALL_AUDIO_URL, INCOMING_CALL_EVIDENCE_ID } from "@/lib/data";
 import { markIncomingCallHandled, useIncomingCall } from "@/lib/useIncomingCall";
 import { getTeamInfo } from "@/lib/store";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
+import { armAudioUnlock, startRingtone, stopRingtone } from "@/lib/ringtone";
 
 type CallScreen = "incoming" | "calling" | "ended";
 
@@ -80,11 +81,21 @@ export default function IncomingCallOverlay() {
   }
 
   useEffect(() => {
+    armAudioUnlock();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       audioRef.current?.pause();
+      stopRingtone();
     };
   }, []);
+
+  // 수신 화면이 떠 있는 동안 벨소리·진동 (받기/거절/이탈 시 정지)
+  useEffect(() => {
+    if (visible && screen === "incoming") {
+      startRingtone();
+      return () => stopRingtone();
+    }
+  }, [visible, screen]);
 
   function markHandled() {
     if (eventId) markIncomingCallHandled(eventId);
@@ -96,6 +107,7 @@ export default function IncomingCallOverlay() {
   }
 
   async function accept() {
+    stopRingtone();
     markHandled();
     void collect(INCOMING_CALL_EVIDENCE_ID);
     setAudioError(false);

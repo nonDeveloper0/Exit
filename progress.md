@@ -175,6 +175,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 참가자가 밀어서 전화를 받는 즉시 해당 조 보관함에 자동 수집. 거절/미응답은 수집하지 않음
   - 랭킹 집계와 랭킹 total에서는 `CALL01` 제외, 증거함에서는 다시 듣기 재사용
   - 수정 파일: `src/lib/data.ts`, `src/components/IncomingCallOverlay.tsx`, `src/lib/useAllTeamsProgress.ts`
+- [x] 수신전화 벨소리 + 진동 (받기 전 수신 화면)
+  - 수신 화면이 뜬 동안 Web Audio로 합성한 전화벨을 반복 재생(받기/거절/이탈 시 정지)
+  - 진동은 `navigator.vibrate` — Android만 동작, iOS Safari는 웹 제약으로 무시
+  - **제약**: 자동재생 정책상 첫 사용자 터치에서 AudioContext 언락 필요(`armAudioUnlock`) + 앱이 화면에 떠 있을 때만 울림. 백그라운드/화면잠금은 불가
+  - 신규 파일: `src/lib/ringtone.ts` / 수정: `src/components/IncomingCallOverlay.tsx`, `docs/01_md/EDIT_GUIDE.md`(1-4절)
 
 ## 구조 확정 사항
 

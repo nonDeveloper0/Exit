@@ -91,6 +91,20 @@ export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_I
 
 ---
 
+## 1-4. 수신전화 벨소리 / 진동 조정
+
+**파일:** `src/lib/ringtone.ts`
+
+수신 화면이 뜨면 "받기" 전까지 벨소리(코드로 합성)가 울리고, Android는 진동도 온다.
+
+- **제약:** 벨소리는 참가자가 앱을 **한 번이라도 터치한 뒤 + 앱이 화면에 떠 있을 때만** 울린다(모바일 자동재생 정책). 백그라운드/화면잠금 상태면 안 울림. **진동은 Android만 되고 iPhone은 웹 제약으로 항상 무시된다.**
+- **음량:** `scheduleRing`의 `gain.gain ... (0.25 ...)`에서 `0.25`를 키우거나 줄인다(0~1).
+- **울림 간격:** `startRingtone`의 `setInterval(cycle, 3000)` — 3000ms = 1초 울림 + 2초 쉼. 숫자를 줄이면 더 자주 울린다.
+- **진동 패턴:** `navigator.vibrate?.([500, 200, 500])` — `[진동ms, 멈춤ms, 진동ms]`. 진동을 빼려면 이 줄을 삭제.
+- **벨 음색:** `scheduleRing`의 `480 / 440`(Hz) 값 조정.
+
+---
+
 ## 2. 장소명 수정
 
 **파일:** `src/lib/data.ts` → 상단 `LOCATIONS` 상수
