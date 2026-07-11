@@ -172,7 +172,7 @@ export const SUSPECTS: Suspect[] = [
     relatedEvidenceIds: ["E01", "E09", "E11"],
     interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
-      "공사 현장의 실질적 책임자. 피해자와 수년간 부당 거래를 해온 것으로 알려져 있다. 사건 관련 서류를 사전에 은폐한 정황이 있다.",
+      "물류창고의 실질적 책임자. 피해자와 수년간 부당 거래를 해온 것으로 알려져 있다. 사건 관련 서류를 사전에 은폐한 정황이 있다.",
     motiveLevel: "중간",
   },
   {
@@ -198,7 +198,7 @@ export const SUSPECTS: Suspect[] = [
     relatedEvidenceIds: ["E05", "E14", "E15"],
     interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
-      "공사 현장 정문 담당 경비원. 사건 당일 야간 근무 중이었으며 현장 출입을 직접 통제하는 위치에 있었다. 피해자로부터 수개월간 임금을 받지 못했고, 사건 이틀 전 일방적인 해고를 통보받은 것으로 확인됐다.",
+      "물류창고 정문 담당 경비원. 사건 당일 야간 근무 중이었으며 현장 출입을 직접 통제하는 위치에 있었다. 피해자로부터 수개월간 임금을 받지 못했고, 사건 이틀 전 일방적인 해고를 통보받은 것으로 확인됐다.",
     motiveLevel: "중간",
   },
   {

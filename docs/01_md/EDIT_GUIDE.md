@@ -345,7 +345,7 @@ export const VOTE_UNLOCK_COUNT = 0; // ← 이 숫자를 바꾼다
 ```ts
 export const metadata: Metadata = {
   title: "EXIT SEASON1",
-  description: "녹산건설 공사 현장 살인사건 특별 수사",
+  description: "녹산건설 물류창고 살인사건 특별 수사",
 };
 ```
 

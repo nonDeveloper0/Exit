@@ -18,7 +18,7 @@ export default function MainPage() {
         <h1 className="text-2xl font-bold text-zinc-100 leading-tight">
           녹산건설
           <br />
-          공사 현장 살인사건
+          물류창고 살인사건
         </h1>
         <p className="text-sm text-zinc-500">수사본부 • 2026</p>
       </div>
@@ -38,7 +38,7 @@ export default function MainPage() {
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">장소</span>
-            <span>녹산건설 공사 현장 B2 구역</span>
+            <span>녹산건설 물류창고 B2 구역</span>
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">용의자</span>
