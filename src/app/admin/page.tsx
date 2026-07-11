@@ -8,11 +8,28 @@ import { EVIDENCE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_T
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 
 const ADMIN_PASSWORD = "0000";
-const OPEN_ALL_EVIDENCE_SNAPSHOT_KEY = "exit2026_admin_open_all_evidence_snapshot";
+const OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE = "admin_open_all_snapshot";
+const OPEN_ALL_EVIDENCE_SNAPSHOT_PREFIX = "_open_all_evidence_snapshot:";
 
 interface TeamRow {
   pairId: string;
   count: number;
+}
+
+function encodeOpenAllEvidenceSnapshot(evidenceIds: string[]) {
+  return `${OPEN_ALL_EVIDENCE_SNAPSHOT_PREFIX}${encodeURIComponent(JSON.stringify(evidenceIds))}`;
+}
+
+function decodeOpenAllEvidenceSnapshot(evidenceId: string) {
+  if (!evidenceId.startsWith(OPEN_ALL_EVIDENCE_SNAPSHOT_PREFIX)) return null;
+
+  try {
+    const encoded = evidenceId.slice(OPEN_ALL_EVIDENCE_SNAPSHOT_PREFIX.length);
+    const parsed = JSON.parse(decodeURIComponent(encoded));
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : null;
+  } catch {
+    return null;
+  }
 }
 
 function PinGate({ onSuccess }: { onSuccess: () => void }) {
@@ -99,6 +116,7 @@ function AdminPanel() {
   const [rollingBackAllEvidence, setRollingBackAllEvidence] = useState(false);
   const [resettingAllEvidence, setResettingAllEvidence] = useState(false);
   const [openAllEvidenceSnapshot, setOpenAllEvidenceSnapshot] = useState<string[] | null>(null);
+  const [resetConfirmText, setResetConfirmText] = useState("");
   const [pairings, setPairings] = useState<Record<string, string>>({});
   const [pairA, setPairA] = useState("");
   const [pairB, setPairB] = useState("");
@@ -107,16 +125,51 @@ function AdminPanel() {
   useEffect(() => {
     const team = getTeamInfo();
     if (team) setMyPairId(team.teamNumber);
-
-    const savedSnapshot = localStorage.getItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY);
-    if (savedSnapshot) {
-      try {
-        setOpenAllEvidenceSnapshot(JSON.parse(savedSnapshot) as string[]);
-      } catch {
-        localStorage.removeItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY);
-      }
-    }
   }, []);
+
+  const fetchOpenAllEvidenceSnapshot = useCallback(async () => {
+    const { data } = await supabase
+      .from("team_evidence_items")
+      .select("evidence_id")
+      .eq("pair_id", GLOBAL_PAIR_ID)
+      .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE)
+      .maybeSingle();
+
+    setOpenAllEvidenceSnapshot(data ? decodeOpenAllEvidenceSnapshot(data.evidence_id as string) : null);
+  }, []);
+
+  useEffect(() => {
+    fetchOpenAllEvidenceSnapshot();
+
+    const channel = supabase
+      .channel("admin_open_all_evidence_snapshot")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "team_evidence_items",
+          filter: `pair_id=eq.${GLOBAL_PAIR_ID}`,
+        },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const oldRow = payload.old as { type?: string };
+            if (oldRow.type === OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE) setOpenAllEvidenceSnapshot(null);
+            return;
+          }
+
+          const newRow = payload.new as { evidence_id?: string; type?: string };
+          if (newRow.type === OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE && newRow.evidence_id) {
+            setOpenAllEvidenceSnapshot(decodeOpenAllEvidenceSnapshot(newRow.evidence_id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchOpenAllEvidenceSnapshot]);
 
   useEffect(() => {
     supabase
@@ -285,7 +338,20 @@ function AdminPanel() {
       .eq("type", "collected")
       .in("evidence_id", evidenceIds);
     const snapshot = (existingGlobalEvidence ?? []).map((row) => row.evidence_id as string);
-    localStorage.setItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY, JSON.stringify(snapshot));
+    await supabase
+      .from("team_evidence_items")
+      .delete()
+      .eq("pair_id", GLOBAL_PAIR_ID)
+      .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE);
+    await supabase.from("team_evidence_items").upsert(
+      {
+        pair_id: GLOBAL_PAIR_ID,
+        evidence_id: encodeOpenAllEvidenceSnapshot(snapshot),
+        type: OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE,
+        created_at: createdAt,
+      },
+      { onConflict: "pair_id,evidence_id,type" }
+    );
     setOpenAllEvidenceSnapshot(snapshot);
     await supabase.from("team_evidence_items").upsert(
       evidenceIds.map((evidenceId) => ({
@@ -305,7 +371,11 @@ function AdminPanel() {
     const snapshot = new Set(openAllEvidenceSnapshot);
     const idsToRemove = evidenceIds.filter((id) => !snapshot.has(id));
     if (idsToRemove.length === 0) {
-      localStorage.removeItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY);
+      await supabase
+        .from("team_evidence_items")
+        .delete()
+        .eq("pair_id", GLOBAL_PAIR_ID)
+        .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE);
       setOpenAllEvidenceSnapshot(null);
       return;
     }
@@ -317,21 +387,30 @@ function AdminPanel() {
       .eq("pair_id", GLOBAL_PAIR_ID)
       .eq("type", "collected")
       .in("evidence_id", idsToRemove);
-    localStorage.removeItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY);
+    await supabase
+      .from("team_evidence_items")
+      .delete()
+      .eq("pair_id", GLOBAL_PAIR_ID)
+      .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE);
     setOpenAllEvidenceSnapshot(null);
     setRollingBackAllEvidence(false);
   }
 
   async function resetAllEvidenceItems() {
-    if (!window.confirm("모든 조와 전역 공개 단서 기록을 초기화할까요?")) return;
+    if (resetConfirmText.trim() !== "초기화") return;
     setResettingAllEvidence(true);
     await supabase
       .from("team_evidence_items")
       .delete()
       .eq("type", "collected")
       .in("evidence_id", EVIDENCE.map((e) => e.id));
-    localStorage.removeItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY);
+    await supabase
+      .from("team_evidence_items")
+      .delete()
+      .eq("pair_id", GLOBAL_PAIR_ID)
+      .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE);
     setOpenAllEvidenceSnapshot(null);
+    setResetConfirmText("");
     resetAll();
     await fetchTeams();
     setResettingAllEvidence(false);
@@ -480,16 +559,25 @@ function AdminPanel() {
                 >
                   {rollingBackAllEvidence ? "되돌리는 중..." : "이전 상태로 되돌리기"}
                 </button>
-                <button
-                  onClick={resetAllEvidenceItems}
-                  disabled={openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
-                  className="rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                  {resettingAllEvidence ? "초기화 중..." : "단서 전체 초기화"}
-                </button>
+                <div className="space-y-2">
+                  <input
+                    value={resetConfirmText}
+                    onChange={(e) => setResetConfirmText(e.target.value)}
+                    placeholder="초기화 입력"
+                    disabled={openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
+                    className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-red-400 focus:outline-none disabled:opacity-40"
+                  />
+                  <button
+                    onClick={resetAllEvidenceItems}
+                    disabled={resetConfirmText.trim() !== "초기화" || openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
+                    className="w-full rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  >
+                    {resettingAllEvidence ? "초기화 중..." : "단서 전체 초기화"}
+                  </button>
+                </div>
               </div>
               <p className="text-[11px] leading-relaxed text-zinc-600">
-                되돌리기는 마지막 전체 개방으로 추가된 전역 공개 단서만 제거합니다. 전체 초기화는 모든 조의 수집 단서와 전역 공개 단서를 삭제합니다.
+                되돌리기는 마지막 전체 개방으로 추가된 전역 공개 단서만 제거합니다. 전체 초기화는 모든 조의 수집 단서와 전역 공개 단서를 삭제하며, 실행하려면 입력칸에 초기화를 입력해야 합니다.
               </p>
             </div>
           </>

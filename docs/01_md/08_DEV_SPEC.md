@@ -117,3 +117,10 @@ team_evidence_items에 전역 전화 이벤트 upsert
 | 수신전화 활성 상태 | Supabase `team_evidence_items` 전역 마커 |
 | 수신전화 처리 기록 | localStorage `exit2026_incoming_call_handled` |
 | 관리자 인증 | sessionStorage (탭 단위, PIN 0000) |
+## Admin evidence controls
+
+- `/admin`의 `모든 단서 개방`은 전체 evidence id를 `pair_id='__global'`, `type='collected'`로 upsert한다.
+- 개방 직전 전역 공개 상태는 `team_evidence_items`에 `type='admin_open_all_snapshot'` 전역 마커로 저장한다. 따라서 다른 관리자 기기에서도 `이전 상태로 되돌리기`가 가능하다.
+- `이전 상태로 되돌리기`는 마지막 전체 개방으로 추가된 전역 공개 단서만 제거한다.
+- `단서 전체 초기화`는 모든 조의 `type='collected'` 단서 기록과 전역 공개 단서, 스냅샷 마커를 삭제한다.
+- 실수 방지를 위해 `단서 전체 초기화`는 입력칸에 `초기화`를 직접 입력해야 실행된다.

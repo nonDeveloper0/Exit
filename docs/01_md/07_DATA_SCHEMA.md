@@ -91,3 +91,12 @@ CREATE TABLE game_state (
 | `exit2026_team` | 조 정보 JSON (예: `{"teamNumber":"1","leaderName":"홍길동"}`) |
 | `exit2026_vote_final` | 최종 투표에서 선택한 용의자 ID (예: `"C"`, 1회 제출) |
 | `exit2026_incoming_call_handled` | 처리한 수신전화 이벤트의 `created_at` 값. 같은 전화가 반복 표시되지 않도록 기기별 저장 |
+## Admin evidence release marker
+
+관리자 `/admin`의 `모든 단서 개방`은 별도 테이블이나 컬럼 없이 `team_evidence_items` 전역 마커를 사용한다.
+
+- `pair_id='__global'`
+- `type='admin_open_all_snapshot'`
+- `evidence_id='_open_all_evidence_snapshot:{encoded-json}'`
+
+`encoded-json`은 전체 개방 직전 이미 전역 공개되어 있던 evidence id 배열이다. `이전 상태로 되돌리기`는 이 스냅샷에 없던 전역 `type='collected'` 단서만 삭제한다. `단서 전체 초기화`는 모든 조의 `type='collected'` evidence id와 이 스냅샷 마커를 함께 삭제한다.

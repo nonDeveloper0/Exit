@@ -258,3 +258,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 ### 데이터 (이벤트 전 필수)
 - [ ] 중요 단서 비밀번호 확정 (`data.ts` → `LOCKED_EVIDENCE`)
 - [ ] 용의자 동기 공개 트리거 확정 (`data.ts` → `motiveRevealIds`)
+## Latest update
+
+- [x] 관리자 단서 개방 안전장치 강화
+  - `/admin` 전체 단서 개방 전 상태를 `team_evidence_items` 전역 DB 마커(`type='admin_open_all_snapshot'`)로 저장하도록 변경
+  - `이전 상태로 되돌리기`: 마지막 전체 개방으로 추가된 전역 공개 단서만 제거
+  - `단서 전체 초기화`: 모든 조의 `type='collected'` 단서 기록과 전역 공개 단서, 스냅샷 마커 삭제
+  - 실수 방지를 위해 전체 초기화는 입력칸에 `초기화`를 직접 입력해야 실행
+  - 수정 파일: `src/app/admin/page.tsx`, `docs/01_md/07_DATA_SCHEMA.md`, `docs/01_md/08_DEV_SPEC.md`, `progress.md`
