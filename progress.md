@@ -258,7 +258,18 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 ### 데이터 (이벤트 전 필수)
 - [ ] 중요 단서 비밀번호 확정 (`data.ts` → `LOCKED_EVIDENCE`)
 - [ ] 용의자 동기 공개 트리거 확정 (`data.ts` → `motiveRevealIds`)
+- [ ] **지문감식 결과보고서(E16) 본문 작성 — 현재 비어있음.** 나사장 노트북 `public/screen/laptop.html`의
+  `<article class="pdf-page">`가 제목만 있고 본문은 `내용 준비 중` 상태. 단서팀 확정본으로 채우기.
+  (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
+
+- [x] 나사장 노트북 디바이스 화면 구현 (`public/screen/laptop.html`, Vercel `/screen/laptop`)
+  - 잠금: 조 번호 드롭다운(1~6조) + 공통 암호 `980721`. 고른 조가 수집 대상. 암호 마스킹(•) + 눈 아이콘 토글
+  - 바탕화면에 `지문감식 결과보고서.pdf` 1개만(엑셀·죽은 파일 제거). 암호 없이 열람
+  - 열람 시 `supabase-js`(CDN)로 `team_evidence_items`에 실제 저장 → 선택한 조 증거함 실시간 반영
+  - 새 증거 **E16 지문감식 결과보고서** 추가(`data.ts`). ⚠️ **보고서 본문은 비워둠 — 단서팀 확정본 필요**(위 작업필요 참조)
+  - 정적 화면을 참가자 UI 미노출로 Vercel 서빙(`public/screen/`, `.html` 없이 접속 rewrite)
+  - 수정 파일: `public/screen/laptop.html`, `src/lib/data.ts`, `next.config.ts`, `docs/01_md/EDIT_GUIDE.md`
 
 - [x] 관리자 단서 개방 안전장치 강화
   - `/admin` 전체 단서 개방 전 상태를 `team_evidence_items` 전역 DB 마커(`type='admin_open_all_snapshot'`)로 저장하도록 변경

@@ -380,7 +380,9 @@ https://(배포주소)/screen/laptop.html
 
 - **공통 암호 변경:** `<script>` 안의 `const UNLOCK_PASSWORD = "980721";` 값을 수정.
 - **수집되는 증거 변경:** `const PDF_EVIDENCE_ID = "E16";` — PDF 열람 시 조 보관함에 저장되는 증거 ID(앱 `data.ts` 기준).
-- **보고서 내용 수정:** `winPdf` 안의 `<article class="pdf-page">` 내용을 편집(현재는 임시 자리표시).
+- **보고서 내용 작성(⚠️ 현재 비어있음):** `winPdf` 안의 `<article class="pdf-page">`는 제목만 있고 본문은
+  비워둔 상태(`내용 준비 중`). **단서팀 확정본으로 채워야 함.** `.pdf-doc-head`/`.pdf-meta`/`.pdf-section`/
+  `.pdf-table`/`.pdf-opinion`/`.pdf-sign` 스타일이 이미 준비돼 있어 그대로 마크업만 넣으면 됨.
 - **조 개수 변경:** 잠금화면의 `<select id="teamSelect">` 안 `<option>` 목록을 늘리거나 줄임
   (현재 1조~6조). 예: 8조까지면 `<option value="7">7조</option>` `<option value="8">8조</option>` 추가.
 - **화면 상단 데모 배너**(`class="demo-banner"`)에 암호가 노출돼 있음 — 실제 운영 시 이 배너 줄을 지우거나 가리세요.
