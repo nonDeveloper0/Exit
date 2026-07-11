@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
-import { GLOBAL_PAIR_ID } from "@/lib/data";
+import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE } from "@/lib/data";
+import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 
 const ADMIN_PASSWORD = "0000";
 
@@ -91,6 +92,8 @@ function AdminPanel() {
   const [myPairId, setMyPairId] = useState<string | null>(null);
   const [settingVoteRound, setSettingVoteRound] = useState(false);
   const [togglingEnding, setTogglingEnding] = useState(false);
+  const [incomingCallActive, setIncomingCallActive] = useState(false);
+  const [togglingIncomingCall, setTogglingIncomingCall] = useState(false);
   const [pairings, setPairings] = useState<Record<string, string>>({});
   const [pairA, setPairA] = useState("");
   const [pairB, setPairB] = useState("");
@@ -110,6 +113,48 @@ function AdminPanel() {
       .then(({ data }) => {
         if (data?.pairings) setPairings(data.pairings as Record<string, string>);
       });
+  }, []);
+
+  useEffect(() => {
+    supabase
+      .from("team_evidence_items")
+      .select("created_at")
+      .eq("pair_id", GLOBAL_PAIR_ID)
+      .eq("evidence_id", INCOMING_CALL_EVENT_ID)
+      .eq("type", INCOMING_CALL_EVENT_TYPE)
+      .maybeSingle()
+      .then(({ data }) => setIncomingCallActive(!!data));
+
+    const channel = supabase
+      .channel("admin_incoming_call")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "team_evidence_items",
+          filter: `pair_id=eq.${GLOBAL_PAIR_ID}`,
+        },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const oldRow = payload.old as { evidence_id?: string; type?: string };
+            if (oldRow.evidence_id === INCOMING_CALL_EVENT_ID && oldRow.type === INCOMING_CALL_EVENT_TYPE) {
+              setIncomingCallActive(false);
+            }
+            return;
+          }
+
+          const newRow = payload.new as { evidence_id?: string; type?: string };
+          if (newRow.evidence_id === INCOMING_CALL_EVENT_ID && newRow.type === INCOMING_CALL_EVENT_TYPE) {
+            setIncomingCallActive(true);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchTeams = useCallback(async () => {
@@ -184,6 +229,35 @@ function AdminPanel() {
       .update({ ending_open: !ending_open })
       .eq("id", "singleton");
     setTogglingEnding(false);
+  }
+
+  async function toggleIncomingCall() {
+    setTogglingIncomingCall(true);
+    if (incomingCallActive) {
+      await supabase
+        .from("team_evidence_items")
+        .delete()
+        .eq("pair_id", GLOBAL_PAIR_ID)
+        .eq("evidence_id", INCOMING_CALL_EVENT_ID)
+        .eq("type", INCOMING_CALL_EVENT_TYPE);
+      setIncomingCallActive(false);
+    } else {
+      const createdAt = new Date().toISOString();
+      clearIncomingCallHandled();
+      await supabase
+        .from("team_evidence_items")
+        .upsert(
+          {
+            pair_id: GLOBAL_PAIR_ID,
+            evidence_id: INCOMING_CALL_EVENT_ID,
+            type: INCOMING_CALL_EVENT_TYPE,
+            created_at: createdAt,
+          },
+          { onConflict: "pair_id,evidence_id,type" }
+        );
+      setIncomingCallActive(true);
+    }
+    setTogglingIncomingCall(false);
   }
 
   async function handleReset(pairId: string) {
@@ -272,6 +346,33 @@ function AdminPanel() {
             {ending_open && (
               <p className="text-xs text-amber-500/70 px-1">
                 엔딩이 공개 중입니다 — 모든 참가자 기기가 자동으로 엔딩 화면으로 이동합니다.
+              </p>
+            )}
+
+            {/* Incoming call */}
+            <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-zinc-200">수신전화 연출</p>
+                <p className={`text-xs font-mono ${incomingCallActive ? "text-red-400" : "text-zinc-500"}`}>
+                  {incomingCallActive ? "● 전화 거는 중" : "○ 대기 중"}
+                </p>
+              </div>
+              <button
+                onClick={toggleIncomingCall}
+                disabled={togglingIncomingCall}
+                className={`rounded px-5 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                  incomingCallActive
+                    ? "border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                    : "bg-red-500 text-white hover:bg-red-400"
+                }`}
+              >
+                {togglingIncomingCall ? "..." : incomingCallActive ? "전화 종료" : "전화 걸기"}
+              </button>
+            </div>
+
+            {incomingCallActive && (
+              <p className="text-xs text-red-300/70 px-1">
+                참가자 앱에 수신전화 화면이 표시됩니다. 받기를 누른 기기에서 오디오가 재생됩니다.
               </p>
             )}
           </>

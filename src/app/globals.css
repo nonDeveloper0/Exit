@@ -66,3 +66,30 @@ body {
 .animate-collect-pop {
   animation: collect-pop 0.5s ease-out;
 }
+
+@keyframes call-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.35); }
+  50% { box-shadow: 0 0 0 24px rgba(248, 113, 113, 0); }
+}
+
+.animate-call-pulse {
+  animation: call-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes call-answer {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-call-answer {
+  animation: call-answer 1.15s ease-in-out infinite;
+}
+
+@keyframes call-wave {
+  0%, 100% { height: 14px; opacity: 0.45; }
+  50% { height: 58px; opacity: 1; }
+}
+
+.animate-call-wave {
+  animation: call-wave 0.9s ease-in-out infinite;
+}

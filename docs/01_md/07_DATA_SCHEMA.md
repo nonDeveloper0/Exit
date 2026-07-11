@@ -57,7 +57,7 @@ export const LOCATIONS = {
 CREATE TABLE team_evidence_items (
   pair_id     TEXT NOT NULL,           -- 조 번호 (숫자 문자열, 예: "1", "2")
   evidence_id TEXT NOT NULL,           -- 증거 ID: "E01" ~, "_joined"(입장 마커), 또는 심문권은 용의자 ID("A"~"E")
-  type        TEXT NOT NULL,           -- "collected" | "joined" | "interrogation_used"
+  type        TEXT NOT NULL,           -- "collected" | "joined" | "interrogation_used" | "incoming_call"
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   PRIMARY KEY (pair_id, evidence_id, type)
 );
@@ -66,6 +66,7 @@ CREATE TABLE team_evidence_items (
 - `type='joined'`, `evidence_id='_joined'`: 입장 시 기록되는 마커. 현황 페이지에서 증거 0개인 조도 표시하기 위해 사용.
 - `type='interrogation_used'`, `evidence_id=용의자 ID`: 해당 용의자 심문권을 사용(소모)했다는 마커. 조 전체·짝 조가 공유하며 랭킹 집계에서는 제외됨.
 - `pair_id='__global'`: 공통 단서(`COMMON_EVIDENCE_IDS`) 저장소. 어느 조가 찾든 이 가상 조에 기록되고, 모든 조가 이 pair_id를 함께 구독해 전체 공개된다. 랭킹/관리자 조 목록에서는 제외됨.
+- `pair_id='__global'`, `evidence_id='_incoming_call'`, `type='incoming_call'`: 수신전화 연출 활성 마커. 이 행이 있으면 참가자 앱에 수신전화 UI가 표시되고, 삭제하면 종료된다.
 
 ## Supabase 테이블: `game_state`
 
@@ -74,7 +75,7 @@ CREATE TABLE team_evidence_items (
 ```sql
 CREATE TABLE game_state (
   id          TEXT PRIMARY KEY,         -- 항상 "singleton"
-  vote_round  INTEGER NOT NULL DEFAULT 0, -- 0=닫힘, 2=최종 투표 열림 (중간 투표 폐지, 1 미사용)
+  vote_round  INTEGER NOT NULL DEFAULT 0, -- 0=닫힘, 2=최종 투표 열림
   ending_open BOOLEAN NOT NULL DEFAULT false, -- 엔딩 공개 여부
   pairings    JSONB DEFAULT '{}',       -- 조 매핑 (양방향), 예: {"1":"3","3":"1"}
   updated_at  TIMESTAMPTZ DEFAULT NOW()
@@ -89,3 +90,4 @@ CREATE TABLE game_state (
 |----|-----------|
 | `exit2026_team` | 조 정보 JSON (예: `{"teamNumber":"1","leaderName":"홍길동"}`) |
 | `exit2026_vote_final` | 최종 투표에서 선택한 용의자 ID (예: `"C"`, 1회 제출) |
+| `exit2026_incoming_call_handled` | 처리한 수신전화 이벤트의 `created_at` 값. 같은 전화가 반복 표시되지 않도록 기기별 저장 |

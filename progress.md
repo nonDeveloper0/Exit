@@ -75,11 +75,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 버그 수정: PinGate 키패드 버튼 ref 수정, 채널 이름 인스턴스별 고유화
   - 신규 파일: `src/lib/useGameState.ts`, `src/components/GameStateRedirect.tsx`
   - 수정 파일: `src/app/layout.tsx`, `src/app/admin/page.tsx`, `src/app/vote/page.tsx`
-- [x] 투표 2라운드 분리 — 중간 투표 / 최종 투표 독립 제어
-  - Supabase `game_state`에 `vote_round integer` 컬럼 추가 (0=닫힘, 1=중간, 2=최종)
-  - 어드민: 기존 토글 → 중간 투표 열기 / 최종 투표 열기 / 닫기 3버튼
-  - 각 라운드 제출 결과 localStorage에 독립 저장 (`exit2026_vote_r1`, `exit2026_vote_r2`)
-  - 수정 파일: `src/lib/store.ts`, `src/lib/useGameState.ts`, `src/app/admin/page.tsx`, `src/app/vote/page.tsx`
 - [x] 잠금 증거 비밀번호 해제 시 자동 수집
   - 기존: 비밀번호 해제 후 '수집' 버튼 별도 클릭 필요
   - 변경: 비밀번호 정답 입력 즉시 자동 수집, 잠금 증거에 '수집' 버튼 미표시
@@ -135,11 +130,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 용의자 카드 펼침 뷰의 "역할" 줄 삭제 (role은 데이터로만 유지, 카드 미표시)
   - 투표 화면도 일관성 위해 큰 라벨 role → name (선택 목록 + 제출 완료 화면)
   - 수정 파일: `src/lib/data.ts`, `src/app/suspects/page.tsx`, `src/app/vote/page.tsx`, 문서 3종
-- [x] 중간투표 제거 — 최종투표 1회 제출만 유지
-  - 어드민: 3버튼(중간/최종/닫기) → 2버튼(최종 투표 열기 / 닫기)
-  - 앱 레벨 상태를 `vote_round`(0/1/2) → `voteOpen`(boolean)로 단순화. DB 컬럼 `vote_round`는 유지(마이그레이션 불필요), 열림=2·닫힘=0만 사용
-  - localStorage 투표 키 단일화: `exit2026_vote_r1`/`_r2` → `exit2026_vote_final` (구 키는 reset 시 정리)
-  - 투표 페이지: 라운드 분기(중간/최종) 전부 제거, "최종 추리" 단일 흐름 + "한 번만 제출" 안내
+- [x] 최종투표 1회 제출만 유지
+  - 어드민: 최종 투표 열기 / 닫기 2버튼
+  - 앱 레벨 상태를 `voteOpen`(boolean)로 단순화. DB 컬럼 `vote_round`는 유지(마이그레이션 불필요), 열림=2·닫힘=0만 사용
+  - localStorage 투표 키: `exit2026_vote_final`
+  - 투표 페이지: "최종 추리" 단일 흐름 + "한 번만 제출" 안내
   - 수정 파일: `src/lib/store.ts`, `src/lib/useGameState.ts`, `src/app/admin/page.tsx`, `src/app/vote/page.tsx`, 문서 4종
 - [x] 용의자 심문권 기능
   - `Suspect.interrogationTriggerId` 추가 — 지정 증거 수집 시 해당 용의자 심문권 획득 (현재 전부 undefined 휴면, QR 확정 후 지정)
@@ -155,6 +150,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 새 slug 9개 생성(†) — 인쇄 QR과 일치/교체 필요
   - 수정 파일: `src/lib/data.ts`, `docs/01_md/05_QR_MAP.md`, `progress.md`
 - [x] 조장 권한 분리 기획 폐기 — 조원/조장 구분 없이 모든 기기가 능동 기능(수집/투표/심문) 사용하는 기존 방식 유지. 기획 문서(`09_LEADER_ROLE_PLAN.md`) 삭제. (조장 이름 입력 기능은 그대로 유지)
+- [x] 수신전화 연출 구현
+  - `/admin`에서 전화 걸기/전화 종료 제어
+  - `team_evidence_items` 전역 마커(`__global` + `_incoming_call` + `incoming_call`)로 활성 상태 저장 — DB 스키마 변경 없음
+  - 참가자 화면 전역 오버레이: 수신전화 UI → `받기` 탭 시 `public/audio/incoming-call.mp3` 재생
+  - `/admin`, `/ending`, 랜딩에서는 전화 오버레이 미표시
+  - 처리한 전화는 기기별 localStorage에 기록, 관리자가 다시 전화 걸면 새 이벤트로 재표시
+  - 신규 파일: `src/components/IncomingCallOverlay.tsx`, `src/lib/useIncomingCall.ts`, `public/audio/incoming-call.mp3`
+  - 수정 파일: `src/app/admin/page.tsx`, `src/app/layout.tsx`, `src/app/globals.css`, `src/lib/data.ts`, 문서 3종
 
 ## 구조 확정 사항
 
@@ -191,14 +194,44 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 
 ## 작업중
 
-- [ ] 없음
+- [ ] 단서 기획 (오프라인 헌팅 중심) — 방향 확정, 실제 단서 채우는 중
+- [ ] 디제틱 기기 UI 기획 — 방향 확정(`docs/01_md/11_DEVICE_UI_PLAN.md`), 수신전화 연출만 구현 완료
 
+
+---
+
+## 기획 방향 확정 (2026-07-11)
+
+오프라인 물리 단서 중심으로 전환. 상세 기준: `docs/01_md/10_DESIGN_UPDATE.md`.
+
+- **웹 역할**: 단서 수집(공유 보관함) + 보조 설명 + 방송/진행 제어. **판정·소거 없음** (추리는 참여자 몫)
+- **등록 방식**: QR 스캔 + 코드 입력 **병행** — 둘 다 같은 수집 액션
+- **용의자 화면**: 중립 라벨(관련 단서 ①②③), 카테고리 라벨 UI 비노출
+- **단서 기획 뼈대**: 용의자별 동기/스토리라인/알리바이 3단계 (내부용)
+- **조 구도**: 혼합 — 조별 기본 + 짝 조 공유(`pairings`=독극물 레시피) + 전체 공개(`COMMON_EVIDENCE`=방송)
+- **재활용**: `pairings`, `COMMON_EVIDENCE`, 심문권 그대로. 아직 코드 구현 전 = 기획 문서만 반영
+
+### 디제틱 기기 UI 기획 확정 (2026-07-11, 세션 한도로 중단된 논의 정리)
+
+상세: `docs/01_md/11_DEVICE_UI_PLAN.md`. 목업: `docs/02_mockups/device-{laptop,ipad}-demo.html`.
+
+- **전 기기 동시재생 폐기** (모바일 자동재생 차단·백그라운드 정지·iOS 진동/푸시 제약) → 물리 스피커가 주 채널
+- **속보 시스템**: admin 발행 → DB+Realtime. 잠긴 기기는 다시 열 때 안 본 속보 자동 표시 + 홈 아카이브 ("동시 도달" 대신 "놓치지 않음")
+- **수신전화 연출 확정**: 앱 여는 기기마다 수신전화 UI → "받기" 탭(제스처)으로 오디오 재생 합법화
+- **디제틱 기기**: 폰/실물 기기 웹페이지가 "기기 화면인 척". `/device/[id]`로 기존 `/qr` 확장, 해제=수집 통일
+- **나사장 노트북 = 실물 1대 + 2단 잠금**: ① 조별 비번(Exit 앱에서 문제 풀면 조별 발급, 신분증 역할) ② 비밀장부.xlsx 엑셀 비번(공통, 감사패). 협박메시지는 오프라인 단서로 이동. 세션 위생(N조 배지 + 90초 자동 재잠금)
+- **출입관리 아이패드**: 사원번호는 공통이라 신분 불가 → **방문 조 체크인 단계(A안)** 로 조 구분
 
 ---
 
 ## 작업필요
 
+### 단서 기획 (방향 확정 후 후속)
+- [ ] 나사장 알리바이 단서 (없음 → 신규)
+- [ ] 채소장 알리바이 단서 (없음 → 신규)
+- [ ] 이대리 동기 단서 (약함 → 보강)
+- [ ] 나팀장(진범=모세) 동기/알리바이 — 반전 연결 정리
+
 ### 데이터 (이벤트 전 필수)
 - [ ] 중요 단서 비밀번호 확정 (`data.ts` → `LOCKED_EVIDENCE`)
 - [ ] 용의자 동기 공개 트리거 확정 (`data.ts` → `motiveRevealIds`)
-

@@ -40,6 +40,11 @@ export const COMMON_EVIDENCE_IDS: string[] = ["E10"];
 // 공통 단서를 저장하는 가상의 조 ID (실제 조 번호와 겹치지 않아야 함)
 export const GLOBAL_PAIR_ID = "__global";
 
+// 수신전화 연출 이벤트. team_evidence_items에 이 행이 있으면 전 참가자에게 전화 UI가 표시된다.
+export const INCOMING_CALL_EVENT_ID = "_incoming_call";
+export const INCOMING_CALL_EVENT_TYPE = "incoming_call";
+export const INCOMING_CALL_AUDIO_URL = "/audio/incoming-call.mp3";
+
 // 장소 이름 — 수정 시 여기서만 변경
 export const LOCATIONS = {
   L1: "자재 물류창고", // 사건 현장

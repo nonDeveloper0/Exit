@@ -15,7 +15,7 @@ DB / Realtime: Supabase
 |------|------|------|
 | pair_id | TEXT | 조 번호 (숫자 문자열, 예: "1", "2") — Primary Key의 일부 |
 | evidence_id | TEXT | 증거 ID ("E01" 등) — Primary Key의 일부 |
-| type | TEXT | "collected" 또는 "joined" — Primary Key의 일부 |
+| type | TEXT | "collected", "joined", "interrogation_used", "incoming_call" — Primary Key의 일부 |
 | created_at | TIMESTAMPTZ | 수집 시각 |
 
 **테이블: `game_state`**
@@ -23,7 +23,7 @@ DB / Realtime: Supabase
 | 컬럼 | 타입 | 설명 |
 |------|------|------|
 | id | TEXT | Primary Key, 항상 "singleton" |
-| vote_round | INTEGER | 최종 투표 상태 (0=닫힘, 2=최종 투표 열림, 기본 0. 중간 투표 폐지로 1은 미사용) |
+| vote_round | INTEGER | 최종 투표 상태 (0=닫힘, 2=최종 투표 열림, 기본 0) |
 | ending_open | BOOLEAN | 엔딩 공개 여부 (기본 false) |
 | pairings | JSONB | 조 매핑 (양방향, 예: `{"1":"3","3":"1"}`, 기본 `{}`) |
 | updated_at | TIMESTAMPTZ | 마지막 변경 시각 |
@@ -31,6 +31,10 @@ DB / Realtime: Supabase
 - 단일 행 (`id = 'singleton'`) 으로 관리
 - Realtime 활성화됨 (`supabase_realtime` publication)
 - RLS 비활성화 (인증 없는 이벤트용 앱)
+- 수신전화 연출은 별도 테이블 없이 `team_evidence_items`의 전역 마커를 사용:
+  - 활성: `pair_id='__global'`, `evidence_id='_incoming_call'`, `type='incoming_call'`
+  - 관리자 `전화 걸기` 시 `created_at`을 갱신해 새 이벤트로 처리
+  - 관리자 `전화 종료` 시 해당 행 삭제
 
 **환경변수 (`.env.local`)**
 ```
@@ -53,11 +57,10 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
 ```
 
 ## 투표 흐름
-
 ```
 / 랜딩에서 조 번호(숫자) + 조장 이름 입력 → localStorage 저장
     ↓
-관리자가 라운드 열기 (중간=1 / 최종=2)
+관리자가 최종 투표 열기
     ↓
 /vote 접속 (팀 정보 자동 표시, 닫힘이면 잠김 UI)
     ↓
@@ -65,10 +68,29 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
     ↓
 제출 → Google Form 전송 (entry: 197462467, 1747885092, 795452093)
     ↓
-라운드별 최대 2회 제출 가능, 라운드별 선택은 localStorage에 독립 저장
+최종 투표는 1회만 제출 가능하며, 제출한 선택은 localStorage에 저장
     ↓
 운영자가 Google Sheets에서 조별 최신 행 확인
 ```
+
+## 수신전화 연출 흐름
+
+```
+/admin → 수신전화 연출 "전화 걸기"
+    ↓
+team_evidence_items에 전역 전화 이벤트 upsert
+    ↓
+참가자 앱이 Realtime 또는 초기 조회로 이벤트 감지
+    ↓
+수신전화 전체화면 UI 표시
+    ↓
+"받기" 탭 → public/audio/incoming-call.mp3 재생
+    ↓
+처리한 이벤트 created_at을 localStorage에 저장해 같은 전화 반복 표시 방지
+```
+
+- `/admin`, `/ending`, `/` 랜딩에서는 수신전화 오버레이를 표시하지 않음
+- 모바일 브라우저 자동재생 제한 때문에 오디오는 반드시 `받기` 탭 이후 재생
 
 ## 페이지 구성
 
@@ -80,7 +102,7 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
 | `/evidence` | 수집한 증거 보관함 |
 | `/suspects` | 용의자 카드 (A, B, C, D, E — 5명) |
 | `/ranking` | 전체 조 실시간 수사 현황 랭킹 |
-| `/vote` | 최종 투표 (용의자 선택 → Google Form, 최대 2회) |
+| `/vote` | 최종 투표 (용의자 선택 → Google Form, 1회 제출) |
 | `/ending` | 엔딩 (반전 공개 — 모세 이야기) |
 | `/admin` | 관리자 패널 (PIN 0000) — 게임 진행 제어(투표/엔딩) + 조별 증거 초기화 |
 
@@ -91,5 +113,7 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
 | 증거 수집 | Supabase (조 단위 공유) |
 | 조 번호 / 조장 이름 | localStorage (기기별) |
 | 투표 내용 | localStorage `exit2026_vote_final` (기기별, 1회 제출) |
-| 게임 진행 상태 (투표 라운드/엔딩/조 매핑) | Supabase `game_state` (전체 공유, Realtime) |
+| 게임 진행 상태 (투표/엔딩/조 매핑) | Supabase `game_state` (전체 공유, Realtime) |
+| 수신전화 활성 상태 | Supabase `team_evidence_items` 전역 마커 |
+| 수신전화 처리 기록 | localStorage `exit2026_incoming_call_handled` |
 | 관리자 인증 | sessionStorage (탭 단위, PIN 0000) |
