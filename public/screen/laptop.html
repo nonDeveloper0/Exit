@@ -106,6 +106,17 @@
     font-weight: 600;
     word-break: keep-all;
   }
+  .team-select {
+    margin-top: 18px;
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid rgba(255,255,255,.32);
+    border-radius: 4px;
+    background: rgba(255,255,255,.92);
+    color: #111827;
+    font-size: 15px;
+  }
   .pw-row {
     margin-top: 12px;
     display: grid;
@@ -572,7 +583,7 @@
 
 <div class="demo-banner">
   <span>나사장 노트북 데모</span>
-  <span>잠금 정답(데모): <b>MOSES+조번호</b></span>
+  <span>공통 암호: <b>980721</b></span>
   <span>엑셀 암호: <b>1980</b></span>
 </div>
 
@@ -586,12 +597,23 @@
       <div class="avatar">👤</div>
       <div class="lock-name">나사장</div>
       <div class="lock-sub">녹산건설 · 대표이사</div>
+      <!-- 잠금 해제 퀴즈 (사용 안 함 — 조번호 선택 + 공통 암호 방식으로 대체)
       <div class="quiz-box">
         <div class="quiz-label">잠금 해제 퀴즈</div>
         <div class="quiz-question">문제 미확정: 현장 단서와 연결되는 퀴즈가 이 영역에 들어갑니다.</div>
       </div>
+      -->
+      <select class="team-select" id="teamSelect" aria-label="조 번호 선택">
+        <option value="" disabled selected>조 번호 선택</option>
+        <option value="1">1조</option>
+        <option value="2">2조</option>
+        <option value="3">3조</option>
+        <option value="4">4조</option>
+        <option value="5">5조</option>
+        <option value="6">6조</option>
+      </select>
       <div class="pw-row">
-        <input class="pw-input" id="pwInput" type="text" autocapitalize="characters" placeholder="암호" maxlength="12" />
+        <input class="pw-input" id="pwInput" type="text" inputmode="numeric" placeholder="암호" maxlength="6" />
         <button class="pw-btn" type="button" onclick="tryUnlock()" aria-label="로그인">›</button>
       </div>
       <div class="pw-error" id="pwError"></div>
@@ -734,7 +756,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const LOCK_PREFIX = "MOSES";
+  const UNLOCK_PASSWORD = "980721";
   const XLS_PASSWORD = "1980";
   let teamNo = null;
   let idleTimer = null;
@@ -749,22 +771,26 @@
   setInterval(updateClock, 15000);
 
   function tryUnlock() {
+    const select = document.getElementById("teamSelect");
     const input = document.getElementById("pwInput");
     const error = document.getElementById("pwError");
-    const val = input.value.trim().toUpperCase();
-    const m = val.match(/^MOSES(\d+)$/);
-    if (m) {
-      teamNo = parseInt(m[1], 10);
-      document.getElementById("sessionLabel").textContent = teamNo + "조 세션";
-      document.getElementById("lockScreen").classList.remove("active");
-      document.getElementById("desktop").classList.add("active");
-      error.textContent = "";
-      resetIdle();
-    } else {
+    if (!select.value) {
+      error.textContent = "조 번호를 선택하세요.";
+      shake(select);
+      return;
+    }
+    if (input.value.trim() !== UNLOCK_PASSWORD) {
       error.textContent = "비밀번호가 올바르지 않습니다.";
       input.value = "";
       shake(input.closest(".pw-row"));
+      return;
     }
+    teamNo = parseInt(select.value, 10);
+    document.getElementById("sessionLabel").textContent = teamNo + "조 세션";
+    document.getElementById("lockScreen").classList.remove("active");
+    document.getElementById("desktop").classList.add("active");
+    error.textContent = "";
+    resetIdle();
   }
   document.getElementById("pwInput").addEventListener("keydown", event => {
     if (event.key === "Enter") tryUnlock();
@@ -829,6 +855,7 @@
     document.getElementById("desktop").classList.remove("active");
     document.querySelectorAll(".file-icon.done").forEach(el => el.classList.remove("done"));
     document.getElementById("lockScreen").classList.add("active");
+    document.getElementById("teamSelect").value = "";
     document.getElementById("pwInput").value = "";
     document.getElementById("pwError").textContent = "";
     teamNo = null;

@@ -372,6 +372,21 @@ https://(배포주소)/screen/laptop.html
 
 **화면 내용 수정:** 위 HTML 파일을 직접 편집. 원본 목업은 `docs/02_mockups/`에 있음.
 
+### 나사장 노트북(`laptop.html`) 잠금화면 값 수정
+
+잠금 방식: **조 번호 드롭다운 선택 + 공통 암호 입력**. 고른 조 번호가 수집 대상 조가 됩니다.
+(예전의 "MOSES+조번호" 개별 암호 방식은 폐기.)
+
+- **공통 암호 변경:** `<script>` 안의 `const UNLOCK_PASSWORD = "980721";` 값을 수정.
+- **엑셀(비밀장부) 암호 변경:** 같은 위치 `const XLS_PASSWORD = "1980";` 값을 수정.
+- **조 개수 변경:** 잠금화면의 `<select id="teamSelect">` 안 `<option>` 목록을 늘리거나 줄임
+  (현재 1조~6조). 예: 8조까지면 `<option value="7">7조</option>` `<option value="8">8조</option>` 추가.
+- **화면 상단 데모 배너**(`class="demo-banner"`)에 암호가 노출돼 있음 — 실제 운영 시 이 배너 줄을 지우거나 가리세요.
+- 잠금 해제 퀴즈 영역은 HTML 주석(`<!-- ... -->`)으로 남겨둠 — 되살리려면 주석만 해제.
+
+> ⚠️ 아직 실제 Supabase 수집 연동은 안 돼 있음(토스트로 "N조 수집함 전송"만 표시). 조 증거함에
+> 실제 저장하려면 `13_PUZZLE_DESIGN.md` / `11_DEVICE_UI_PLAN.md`의 `/device` 연동 작업 필요.
+
 > ⚠️ 현재는 **정적 화면(연출용)**입니다. "노트북/아이패드에서 연 걸 조 증거함에 자동 수집"
 > (Supabase 연동)은 미구현 — `11_DEVICE_UI_PLAN.md` / `13_PUZZLE_DESIGN.md` 참고.
 
