@@ -81,6 +81,15 @@ LLM의 흔한 코딩 실수를 줄이기 위한 행동 지침입니다. 프로�
 - Framework: Next.js (TypeScript)
 - Hosting: Vercel
 
+### 파일 인코딩 규칙 (한글 깨짐 방지)
+
+여러 AI 도구(Codex, Claude 등)가 번갈아 작업하므로, 모든 텍스트 파일은 **UTF-8 (BOM 없음) + LF** 로 통일한다.
+
+- 파일 생성/수정은 Write/Edit 도구로 하고, 항상 UTF-8(BOM 없음)로 저장한다.
+- **PowerShell 리다이렉트로 한글 파일을 쓰지 마라.** `>`, `>>`, `Set-Content` 기본형은 파일을 UTF-16 / CP949(ANSI)로 재저장해 한글을 깨뜨린다. 셸로 파일을 써야 하면 `Out-File -Encoding utf8` 또는 `[IO.File]::WriteAllText($p,$t,[Text.UTF8Encoding]::new($false))`를 쓴다.
+- BOM(`EF BB BF`)을 붙이지 마라. 줄바꿈은 LF.
+- 규칙은 `.gitattributes`, `.editorconfig`에 고정돼 있다.
+
 ### 주요 기능
 
 | 기능 | 설명 |
