@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
-import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE } from "@/lib/data";
+import { EVIDENCE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 
 const ADMIN_PASSWORD = "0000";
@@ -94,6 +94,7 @@ function AdminPanel() {
   const [togglingEnding, setTogglingEnding] = useState(false);
   const [incomingCallActive, setIncomingCallActive] = useState(false);
   const [togglingIncomingCall, setTogglingIncomingCall] = useState(false);
+  const [openingAllEvidence, setOpeningAllEvidence] = useState(false);
   const [pairings, setPairings] = useState<Record<string, string>>({});
   const [pairA, setPairA] = useState("");
   const [pairB, setPairB] = useState("");
@@ -260,6 +261,21 @@ function AdminPanel() {
     setTogglingIncomingCall(false);
   }
 
+  async function openAllEvidence() {
+    setOpeningAllEvidence(true);
+    const createdAt = new Date().toISOString();
+    await supabase.from("team_evidence_items").upsert(
+      EVIDENCE.map((e) => ({
+        pair_id: GLOBAL_PAIR_ID,
+        evidence_id: e.id,
+        type: "collected",
+        created_at: createdAt,
+      })),
+      { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
+    );
+    setOpeningAllEvidence(false);
+  }
+
   async function handleReset(pairId: string) {
     setLoadingId(pairId);
     await supabase
@@ -375,6 +391,22 @@ function AdminPanel() {
                 참가자 앱에 수신전화 화면이 표시됩니다. 받기를 누른 기기에서 오디오가 재생됩니다.
               </p>
             )}
+            {/* Evidence unlock */}
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-zinc-200">모든 단서 개방</p>
+                <p className="text-xs text-zinc-500">
+                  전체 참가자에게 증거함의 모든 단서를 즉시 공개합니다.
+                </p>
+              </div>
+              <button
+                onClick={openAllEvidence}
+                disabled={openingAllEvidence}
+                className="w-full rounded bg-emerald-500 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              >
+                {openingAllEvidence ? "개방 중..." : "모든 단서 개방"}
+              </button>
+            </div>
           </>
         )}
       </div>
