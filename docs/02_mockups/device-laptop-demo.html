@@ -3,181 +3,750 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>나사장의 노트북 — 데모</title>
+<title>나사장 노트북 데모</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; }
-  body { font-family: "Segoe UI", "Malgun Gothic", -apple-system, sans-serif; background: #0a0a0f; color: #e5e7eb; overflow: hidden; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+    background: #111827;
+    color: #111827;
+    overflow: hidden;
+  }
+  button, input { font: inherit; }
+  button { cursor: pointer; }
 
-  .demo-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: #b45309; color: #fff; font-size: 11px; text-align: center; padding: 5px 8px; line-height: 1.5; }
-  .demo-banner b { color: #fde68a; }
+  .demo-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #202020;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+    color: #f5f5f5;
+    font-size: 12px;
+  }
+  .demo-banner b { color: #9cdcfe; font-weight: 600; }
 
-  .screen { position: absolute; inset: 0; padding-top: 34px; display: none; flex-direction: column; }
-  .screen.active { display: flex; }
+  .screen {
+    position: absolute;
+    inset: 28px 0 0;
+    display: none;
+  }
+  .screen.active { display: block; }
 
-  /* 잠금화면 (조별 비번 = 앱에서 발급, 신분증 역할) */
-  #lockScreen { background: radial-gradient(ellipse at 30% 20%, rgba(30,58,138,.55), transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(88,28,135,.35), transparent 55%), #0b1020; align-items: center; justify-content: center; }
-  .lock-inner { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%; padding: 24px; }
-  .avatar { width: 88px; height: 88px; border-radius: 50%; background: linear-gradient(135deg,#334155,#1e293b); border: 2px solid rgba(255,255,255,.25); display: flex; align-items: center; justify-content: center; font-size: 40px; }
-  .lock-name { font-size: 20px; font-weight: 600; }
-  .lock-sub { font-size: 12px; color: #94a3b8; margin-top: -8px; }
-  .lock-hint { font-size: 11px; color: #64748b; margin-top: 2px; text-align: center; }
-  .pw-row { display: flex; gap: 8px; margin-top: 10px; width: 100%; max-width: 300px; }
-  .pw-input { flex: 1; padding: 12px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; font-size: 16px; outline: none; }
-  .pw-input::placeholder { color: #64748b; }
-  .pw-btn { padding: 12px 16px; border-radius: 6px; border: none; background: #2563eb; color: #fff; font-size: 15px; font-weight: 600; }
-  .pw-btn:active { background: #1d4ed8; }
-  .pw-error { font-size: 12px; color: #f87171; height: 16px; }
-  .shake { animation: shake .4s; }
-  @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
+  #lockScreen {
+    background:
+      radial-gradient(circle at 18% 12%, rgba(255,255,255,.18), transparent 24%),
+      radial-gradient(circle at 85% 15%, rgba(54,148,255,.46), transparent 30%),
+      linear-gradient(135deg, #0e4674 0%, #0b6cae 45%, #0d5a7b 72%, #1e4d66 100%);
+  }
+  .lock-shade {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 72px 24px 56px;
+    background: linear-gradient(to bottom, rgba(0,0,0,.1), rgba(0,0,0,.45));
+  }
+  .lock-time {
+    position: absolute;
+    top: clamp(28px, 7vh, 62px);
+    left: clamp(24px, 5vw, 44px);
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,.32);
+  }
+  .clock { font-size: clamp(48px, 10vw, 82px); line-height: .95; font-weight: 300; letter-spacing: 0; }
+  .date { margin-top: 12px; font-size: 18px; font-weight: 400; }
+  .login-panel {
+    width: min(420px, calc(100% - 32px));
+    margin: 0 auto;
+    color: #fff;
+    text-align: center;
+  }
+  .avatar {
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,.22);
+    border: 1px solid rgba(255,255,255,.55);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 18px 50px rgba(0,0,0,.25);
+    font-size: 40px;
+  }
+  .lock-name { font-size: 22px; font-weight: 600; }
+  .lock-sub { margin-top: 4px; font-size: 13px; color: rgba(255,255,255,.82); }
+  .quiz-box {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255,255,255,.32);
+    border-radius: 6px;
+    background: rgba(0,0,0,.22);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  }
+  .quiz-label {
+    font-size: 12px;
+    color: rgba(255,255,255,.72);
+  }
+  .quiz-question {
+    margin-top: 6px;
+    color: #fff;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 600;
+    word-break: keep-all;
+  }
+  .pw-row {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 1fr 44px;
+    gap: 4px;
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0,0,0,.23);
+  }
+  .pw-input {
+    min-width: 0;
+    height: 42px;
+    padding: 0 12px;
+    border: 0;
+    outline: 0;
+    background: rgba(255,255,255,.92);
+    color: #111827;
+    font-size: 15px;
+  }
+  .pw-btn {
+    border: 0;
+    background: #0078d4;
+    color: #fff;
+    font-size: 21px;
+  }
+  .pw-btn:active { background: #005a9e; }
+  .pw-error { height: 18px; margin-top: 8px; color: #ffd6d6; font-size: 12px; }
+  .shake { animation: shake .35s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 50%{transform:translateX(8px)} 75%{transform:translateX(-4px)} }
 
-  /* 바탕화면 */
-  #desktop { background: radial-gradient(ellipse at 70% 10%, rgba(14,116,144,.35), transparent 55%), linear-gradient(160deg,#0f172a 0%,#1e2a4a 60%,#0f172a 100%); }
-  .session-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: rgba(6,95,70,.35); border-bottom: 1px solid rgba(16,185,129,.35); font-size: 12px; }
-  .session-bar .who { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #6ee7b7; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; }
-  .logout-btn { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #e5e7eb; font-size: 11px; padding: 5px 10px; border-radius: 5px; }
+  #desktop {
+    background:
+      radial-gradient(circle at 16% 18%, rgba(255,255,255,.18), transparent 22%),
+      linear-gradient(135deg, #186a9d 0%, #0d5d86 42%, #174761 72%, #253045 100%);
+  }
+  .desktop-area {
+    position: absolute;
+    inset: 0 0 46px;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 86px);
+    grid-auto-rows: 92px;
+    align-content: start;
+    gap: 8px 10px;
+  }
+  .file-icon {
+    width: 86px;
+    height: 92px;
+    padding: 7px 5px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    gap: 6px;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,.75);
+    background: transparent;
+    position: relative;
+  }
+  .file-icon:hover, .file-icon:focus-visible {
+    background: rgba(255,255,255,.16);
+    border-color: rgba(255,255,255,.34);
+    outline: 0;
+  }
+  .file-icon.done::after {
+    content: "✓";
+    position: absolute;
+    top: 4px;
+    right: 9px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #107c10;
+    color: #fff;
+    font-size: 12px;
+    text-shadow: none;
+    border: 1px solid rgba(255,255,255,.7);
+  }
+  .icon-art {
+    width: 46px;
+    height: 52px;
+    border-radius: 3px;
+    display: grid;
+    place-items: center;
+    position: relative;
+    box-shadow: 0 8px 16px rgba(0,0,0,.22);
+    text-shadow: none;
+  }
+  .icon-art.excel { background: linear-gradient(135deg, #21a366, #107c41); }
+  .icon-art.doc { background: linear-gradient(135deg, #60a5fa, #1d4ed8); }
+  .icon-art.folder { background: linear-gradient(180deg, #f8d775 0 28%, #e7b94c 28%); }
+  .icon-art::before { color: #fff; font-size: 24px; font-weight: 700; }
+  .icon-art.excel::before { content: "X"; }
+  .icon-art.doc::before { content: "W"; }
+  .icon-art.folder::before { content: ""; }
+  .lockbadge {
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(0,0,0,.62);
+    color: #fff;
+    font-size: 11px;
+    text-shadow: none;
+  }
+  .label {
+    max-width: 78px;
+    font-size: 12px;
+    line-height: 1.25;
+    text-align: center;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+  .muted { opacity: .62; }
 
-  .desktop-area { flex: 1; padding: 22px 18px; display: flex; flex-direction: column; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
-  .file-icon { width: 90px; padding: 10px 4px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; border: 1px solid transparent; position: relative; }
-  .file-icon:active { background: rgba(59,130,246,.25); border-color: rgba(59,130,246,.5); }
-  .file-icon .glyph { font-size: 38px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
-  .file-icon .label { font-size: 11px; text-align: center; line-height: 1.3; text-shadow: 0 1px 3px rgba(0,0,0,.8); word-break: keep-all; }
-  .file-icon .lockbadge { position: absolute; top: 4px; right: 12px; font-size: 14px; }
-  .file-icon.done .glyph { opacity: .5; }
-  .file-icon.done::after { content: "✓"; position: absolute; top: 6px; right: 12px; color: #34d399; font-weight: 700; font-size: 15px; }
+  .taskbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 46px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    background: rgba(243,246,250,.86);
+    border-top: 1px solid rgba(255,255,255,.6);
+    backdrop-filter: blur(24px);
+    color: #1f2937;
+    box-shadow: 0 -1px 0 rgba(0,0,0,.08);
+  }
+  .task-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .task-app, .start-btn {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #1f2937;
+  }
+  .task-app:hover, .start-btn:hover { background: rgba(0,0,0,.06); }
+  .start-logo {
+    width: 18px;
+    height: 18px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 2px;
+  }
+  .start-logo span { background: #0078d4; }
+  .task-search {
+    width: min(220px, 30vw);
+    height: 32px;
+    border: 1px solid #d1d5db;
+    border-radius: 16px;
+    background: #fff;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  .tray {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-right: 12px;
+    font-size: 12px;
+  }
+  .session-pill {
+    justify-self: start;
+    margin-left: 12px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(0,0,0,.08);
+    font-size: 12px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #107c10; }
+  .logout-btn {
+    border: 0;
+    background: transparent;
+    color: #005a9e;
+    font-size: 12px;
+  }
 
-  .taskbar { height: 44px; background: rgba(10,14,25,.85); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-top: 1px solid rgba(255,255,255,.08); }
-  .task-start { font-size: 20px; }
-  .task-clock { font-size: 11px; color: #cbd5e1; text-align: right; line-height: 1.4; }
-
-  .window-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,.55); display: none; align-items: center; justify-content: center; padding: 14px; padding-top: 44px; }
+  .window-overlay {
+    position: fixed;
+    inset: 28px 0 46px;
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    pointer-events: none;
+  }
   .window-overlay.open { display: flex; }
-  .window { width: 100%; max-width: 420px; max-height: 80vh; background: #f8fafc; color: #0f172a; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
-  .win-titlebar { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; font-size: 13px; font-weight: 600; color: #fff; }
-  .win-titlebar.xls { background: #15803d; }
-  .win-close { width: 26px; height: 26px; border: none; border-radius: 5px; background: rgba(255,255,255,.15); color: #fff; font-size: 14px; }
-  .win-close:active { background: #dc2626; }
-  .win-body { overflow-y: auto; padding: 16px; font-size: 14px; line-height: 1.7; }
+  .window {
+    width: min(1120px, 100%);
+    height: min(720px, 100%);
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.26);
+    border-radius: 7px;
+    box-shadow: 0 22px 70px rgba(0,0,0,.42);
+    pointer-events: auto;
+  }
+  .win-titlebar {
+    height: 34px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    background: #f7f7f7;
+    border-bottom: 1px solid #dadada;
+    color: #202020;
+    font-size: 12px;
+  }
+  .win-title-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 10px;
+  }
+  .tiny-excel {
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 2px;
+    background: #107c41;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .title-text { justify-self: center; color: #2b2b2b; }
+  .win-controls { display: flex; height: 34px; }
+  .win-control {
+    width: 46px;
+    height: 34px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #202020;
+    font-size: 14px;
+  }
+  .win-control:hover { background: #e5e5e5; }
+  .win-control.close:hover { background: #c42b1c; color: #fff; }
+  .excel-ribbon {
+    background: #f3f2f1;
+    border-bottom: 1px solid #d1d1d1;
+  }
+  .tabs {
+    height: 34px;
+    display: flex;
+    align-items: end;
+    gap: 4px;
+    padding: 0 12px;
+  }
+  .tab {
+    height: 30px;
+    padding: 7px 12px 0;
+    font-size: 12px;
+    color: #333;
+  }
+  .tab.active {
+    background: #fff;
+    border-top: 3px solid #217346;
+    padding-top: 4px;
+    font-weight: 600;
+  }
+  .ribbon-row {
+    height: 58px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: #fff;
+    border-top: 1px solid #e5e5e5;
+  }
+  .tool-group {
+    min-width: 70px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-right: 1px solid #e5e5e5;
+    padding-right: 12px;
+    color: #444;
+    font-size: 11px;
+  }
+  .formula-bar {
+    height: 32px;
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    align-items: center;
+    border-bottom: 1px solid #d6d6d6;
+    background: #fafafa;
+    font-size: 12px;
+  }
+  .name-box { padding-left: 12px; color: #555; }
+  .formula { height: 23px; margin-right: 10px; padding: 3px 8px; border: 1px solid #d1d5db; background: #fff; color: #333; }
+  .excel-body { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #fff; }
+  .sheet-wrap { flex: 1; min-height: 0; overflow: auto; }
+  .sheet {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 12px;
+  }
+  .sheet th, .sheet td {
+    height: 28px;
+    border: 1px solid #d9e2d9;
+    padding: 4px 7px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sheet .col-head, .sheet .row-head {
+    background: #f3f3f3;
+    color: #4b5563;
+    font-weight: 400;
+    text-align: center;
+  }
+  .sheet .row-head { width: 42px; }
+  .sheet .header { background: #e2f0d9; color: #1f4e2f; font-weight: 700; text-align: center; }
+  .sheet .money { text-align: right; font-variant-numeric: tabular-nums; }
+  .sheet .danger { color: #b00000; font-weight: 700; background: #fff1f1; }
+  .sheet .note { color: #744210; background: #fffbeb; }
+  .sheet .total td:not(.row-head) { background: #d9ead3; font-weight: 700; }
+  .sheet .selected { outline: 2px solid #217346; outline-offset: -2px; background: #fff; }
+  .sheet-tabs {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 10px;
+    border-top: 1px solid #d6d6d6;
+    background: #f7f7f7;
+  }
+  .sheet-tab {
+    height: 27px;
+    padding: 6px 14px 0;
+    background: #fff;
+    border: 1px solid #d0d0d0;
+    border-bottom-color: #217346;
+    color: #333;
+    font-size: 12px;
+  }
+  .sheet-tab.active { border-bottom: 3px solid #217346; font-weight: 700; }
 
-  .xls-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .xls-table th { background: #dcfce7; border: 1px solid #bbf7d0; padding: 6px 8px; font-weight: 600; color: #166534; white-space: nowrap; }
-  .xls-table td { border: 1px solid #e2e8f0; padding: 6px 8px; white-space: nowrap; }
-  .xls-table tr:nth-child(even) td { background: #f1f5f9; }
-  .xls-red { color: #dc2626; font-weight: 600; }
-
-  .pw-modal { position: fixed; inset: 0; z-index: 550; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; padding: 20px; }
+  .pw-modal {
+    position: fixed;
+    inset: 28px 0 46px;
+    z-index: 560;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.32);
+    padding: 16px;
+  }
   .pw-modal.open { display: flex; }
-  .pw-card { background: #f1f5f9; color: #0f172a; border-radius: 10px; width: 100%; max-width: 320px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
-  .pw-card .head { background: #15803d; color: #fff; padding: 12px 14px; font-size: 13px; font-weight: 600; }
-  .pw-card .body { padding: 18px 16px; }
-  .pw-card p { font-size: 13px; color: #475569; margin-bottom: 12px; }
-  .pw-card input { width: 100%; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; outline: none; }
-  .pw-card input:focus { border-color: #15803d; }
-  .pw-card .row { display: flex; gap: 8px; margin-top: 12px; }
-  .pw-card .row button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; }
-  .pw-card .cancel { background: #e2e8f0; color: #334155; }
-  .pw-card .ok { background: #15803d; color: #fff; }
-  .pw-card .err { color: #dc2626; font-size: 12px; height: 16px; margin-top: 6px; }
+  .dialog {
+    width: min(360px, 100%);
+    overflow: hidden;
+    border: 1px solid #bdbdbd;
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: 0 18px 60px rgba(0,0,0,.32);
+  }
+  .dialog-title {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 12px;
+    border-bottom: 1px solid #e5e5e5;
+    background: #f7f7f7;
+    font-size: 12px;
+  }
+  .dialog-body { padding: 18px; }
+  .dialog-copy { color: #3b3b3b; font-size: 13px; line-height: 1.55; }
+  .dialog-input {
+    width: 100%;
+    height: 34px;
+    margin-top: 12px;
+    padding: 0 9px;
+    border: 1px solid #8a8a8a;
+    outline: 0;
+  }
+  .dialog-input:focus { border-color: #0067c0; box-shadow: 0 0 0 1px #0067c0; }
+  .dialog-error { height: 17px; margin-top: 6px; color: #c42b1c; font-size: 12px; }
+  .dialog-actions { display: flex; justify-content: end; gap: 8px; margin-top: 10px; }
+  .dialog-button {
+    min-width: 78px;
+    height: 32px;
+    border: 1px solid #8a8a8a;
+    border-radius: 3px;
+    background: #f5f5f5;
+    color: #111827;
+    font-size: 13px;
+  }
+  .dialog-button.primary { border-color: #005a9e; background: #0078d4; color: #fff; }
 
-  .toast { position: fixed; left: 50%; bottom: 58px; transform: translateX(-50%) translateY(20px); background: #065f46; color: #d1fae5; padding: 11px 20px; border-radius: 999px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: all .3s; z-index: 600; white-space: nowrap; text-align: center; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 60px;
+    z-index: 700;
+    transform: translateX(-50%) translateY(16px);
+    opacity: 0;
+    pointer-events: none;
+    min-width: min(360px, calc(100% - 32px));
+    padding: 12px 16px;
+    border-radius: 6px;
+    background: #202020;
+    color: #fff;
+    box-shadow: 0 12px 36px rgba(0,0,0,.32);
+    font-size: 13px;
+    transition: .2s ease;
+    text-align: center;
+  }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast small { display: block; font-weight: 400; color: #6ee7b7; font-size: 11px; margin-top: 2px; }
+  .toast small { display: block; margin-top: 3px; color: #c7e0f4; font-size: 11px; }
 
-  .fade-in { animation: fadeIn .5s ease; }
-  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @media (max-width: 720px) {
+    .demo-banner { height: 34px; padding: 0 8px; font-size: 11px; text-align: center; }
+    .screen { inset-top: 34px; }
+    .task-search { display: none; }
+    .window-overlay, .pw-modal { inset-top: 34px; padding: 8px; }
+    .window { height: 100%; min-height: 0; border-radius: 4px; }
+    .ribbon-row { display: none; }
+    .title-text { justify-self: start; }
+    .tray { gap: 7px; padding-right: 8px; }
+    .session-pill { margin-left: 8px; padding: 0 8px; }
+    .lock-shade { padding: 88px 16px 40px; }
+    .lock-time { top: 24px; left: 24px; }
+    .date { font-size: 14px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="demo-banner">
-  💻 데모 · 잠금 비번 = <b>앱이 조별 발급</b> (데모: MOSES+조번호, 예 MOSES3) · 엑셀 비번(공통) = <b>1980</b>
+  <span>나사장 노트북 데모</span>
+  <span>잠금 정답(데모): <b>MOSES+조번호</b></span>
+  <span>엑셀 암호: <b>1980</b></span>
 </div>
 
-<!-- 잠금화면 -->
 <div class="screen active" id="lockScreen">
-  <div class="lock-inner">
-    <div class="avatar">👤</div>
-    <div class="lock-name">나사장</div>
-    <div class="lock-sub">EGYPT CITY 건설 · 대표이사</div>
-    <div class="lock-hint">Exit 앱에서 문제를 풀면 나오는<br/>우리 조 전용 비밀번호를 입력하세요</div>
-    <div class="pw-row">
-      <input class="pw-input" id="pwInput" type="text" autocapitalize="characters" placeholder="비밀번호" maxlength="12" />
-      <button class="pw-btn" onclick="tryUnlock()">→</button>
+  <div class="lock-shade">
+    <div class="lock-time">
+      <div class="clock" id="lockClock">22:47</div>
+      <div class="date">녹산건설 공사현장 사건 조사일</div>
     </div>
-    <div class="pw-error" id="pwError"></div>
+    <div class="login-panel">
+      <div class="avatar">👤</div>
+      <div class="lock-name">나사장</div>
+      <div class="lock-sub">녹산건설 · 대표이사</div>
+      <div class="quiz-box">
+        <div class="quiz-label">잠금 해제 퀴즈</div>
+        <div class="quiz-question">문제 미확정: 현장 단서와 연결되는 퀴즈가 이 영역에 들어갑니다.</div>
+      </div>
+      <div class="pw-row">
+        <input class="pw-input" id="pwInput" type="text" autocapitalize="characters" placeholder="암호" maxlength="12" />
+        <button class="pw-btn" type="button" onclick="tryUnlock()" aria-label="로그인">›</button>
+      </div>
+      <div class="pw-error" id="pwError"></div>
+    </div>
   </div>
 </div>
 
-<!-- 바탕화면 -->
 <div class="screen" id="desktop">
-  <div class="session-bar">
-    <div class="who"><span class="dot"></span><span id="sessionLabel">3조 세션</span></div>
-    <button class="logout-btn" onclick="logout()">닫기 (잠금)</button>
-  </div>
-  <div class="desktop-area">
-    <div class="file-icon" id="fileXls" onclick="openXls()">
-      <div class="lockbadge">🔒</div>
-      <div class="glyph">📊</div>
-      <div class="label">비밀장부.xlsx</div>
+  <main class="desktop-area" aria-label="Windows 바탕 화면">
+    <button class="file-icon" id="fileXls" type="button" onclick="openXls()">
+      <span class="lockbadge">🔒</span>
+      <span class="icon-art excel"></span>
+      <span class="label">비밀장부_5년치.xlsx</span>
+    </button>
+    <button class="file-icon muted" type="button" onclick="deadFile()">
+      <span class="icon-art doc"></span>
+      <span class="label">인사평가.docx</span>
+    </button>
+    <button class="file-icon muted" type="button" onclick="deadFile()">
+      <span class="icon-art folder"></span>
+      <span class="label">계약서 백업</span>
+    </button>
+  </main>
+
+  <footer class="taskbar">
+    <div class="session-pill"><span class="dot"></span><span id="sessionLabel">세션 없음</span><button class="logout-btn" type="button" onclick="logout()">잠금</button></div>
+    <div class="task-center">
+      <button class="start-btn" type="button" aria-label="시작"><span class="start-logo"><span></span><span></span><span></span><span></span></span></button>
+      <div class="task-search">검색</div>
+      <button class="task-app" type="button" onclick="openXls()" title="Excel">X</button>
     </div>
-    <div class="file-icon" style="opacity:.4" onclick="deadFile()">
-      <div class="glyph">📁</div>
-      <div class="label">인사자료</div>
-    </div>
-    <div class="file-icon" style="opacity:.4">
-      <div class="glyph">🗑️</div>
-      <div class="label">휴지통</div>
-    </div>
-  </div>
-  <div class="taskbar">
-    <div class="task-start">⊞</div>
-    <div class="task-clock">22:47<br/>사건 당일</div>
-  </div>
+    <div class="tray"><span>Wi-Fi</span><span>🔊</span><span id="taskClock">22:47</span></div>
+  </footer>
 </div>
 
-<!-- 엑셀 비번 모달 -->
 <div class="pw-modal" id="xlsPwModal">
-  <div class="pw-card">
-    <div class="head">🔒 비밀장부.xlsx — 암호 필요</div>
-    <div class="body">
-      <p>이 통합 문서는 암호로 보호되어 있습니다.</p>
-      <input id="xlsPwInput" type="text" inputmode="numeric" placeholder="암호 입력" maxlength="8" />
-      <div class="err" id="xlsPwErr"></div>
-      <div class="row">
-        <button class="cancel" onclick="closeXlsPw()">취소</button>
-        <button class="ok" onclick="tryXls()">열기</button>
+  <div class="dialog">
+    <div class="dialog-title">
+      <span>비밀장부_5년치.xlsx</span>
+      <button class="win-control close" type="button" onclick="closeXlsPw()" aria-label="닫기">×</button>
+    </div>
+    <div class="dialog-body">
+      <p class="dialog-copy">이 통합 문서는 암호로 보호되어 있습니다. 감사패에서 확인한 숫자 암호를 입력하세요.</p>
+      <input class="dialog-input" id="xlsPwInput" type="text" inputmode="numeric" placeholder="암호" maxlength="8" />
+      <div class="dialog-error" id="xlsPwErr"></div>
+      <div class="dialog-actions">
+        <button class="dialog-button" type="button" onclick="closeXlsPw()">취소</button>
+        <button class="dialog-button primary" type="button" onclick="tryXls()">확인</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- 창: 비밀장부.xlsx -->
 <div class="window-overlay" id="winXls">
-  <div class="window">
-    <div class="win-titlebar xls"><span>📊 비밀장부.xlsx — Excel</span><button class="win-close" onclick="closeWindow('winXls')">✕</button></div>
-    <div class="win-body">
-      <table class="xls-table">
-        <tr><th>날짜</th><th>항목</th><th>금액</th><th>비고</th></tr>
-        <tr><td>03/14</td><td>자재 대금 (정상)</td><td>42,000,000</td><td>세금계산서 O</td></tr>
-        <tr><td>03/14</td><td>자재 대금 (별도)</td><td class="xls-red">18,000,000</td><td class="xls-red">현금 · 기록 없음</td></tr>
-        <tr><td>04/02</td><td>안전관리비</td><td>7,500,000</td><td>세금계산서 O</td></tr>
-        <tr><td>04/02</td><td>안전관리비 (별도)</td><td class="xls-red">7,500,000</td><td class="xls-red">채소장 인출</td></tr>
-        <tr><td>05/21</td><td>후원금 (재단)</td><td>30,000,000</td><td>언론 보도용</td></tr>
-        <tr><td>05/21</td><td>회수</td><td class="xls-red">-27,000,000</td><td class="xls-red">차명계좌 환입</td></tr>
-      </table>
-      <p style="margin-top:12px; font-size:12px; color:#64748b;">※ 실제 내용은 단서팀 자료로 교체</p>
+  <section class="window" aria-label="Excel 창">
+    <div class="win-titlebar">
+      <div class="win-title-left"><span class="tiny-excel">X</span><span>자동 저장 꺼짐</span></div>
+      <div class="title-text">비밀장부_5년치.xlsx - Excel</div>
+      <div class="win-controls">
+        <button class="win-control" type="button" aria-label="최소화">−</button>
+        <button class="win-control" type="button" aria-label="최대화">□</button>
+        <button class="win-control close" type="button" onclick="closeWindow('winXls')" aria-label="닫기">×</button>
+      </div>
     </div>
-  </div>
+    <div class="excel-ribbon">
+      <div class="tabs">
+        <div class="tab active">홈</div>
+        <div class="tab">삽입</div>
+        <div class="tab">페이지 레이아웃</div>
+        <div class="tab">수식</div>
+        <div class="tab">데이터</div>
+        <div class="tab">검토</div>
+      </div>
+      <div class="ribbon-row">
+        <div class="tool-group">붙여넣기</div>
+        <div class="tool-group">글꼴<br />맑은 고딕</div>
+        <div class="tool-group">맞춤</div>
+        <div class="tool-group">표시 형식<br />₩ #,##0</div>
+        <div class="tool-group">정렬 및 필터</div>
+      </div>
+    </div>
+    <div class="formula-bar">
+      <div class="name-box">H50</div>
+      <div class="formula">=SUM(H2:H50)  // 5년 차액 합계 135,405,000</div>
+    </div>
+    <div class="excel-body">
+      <div class="sheet-wrap">
+        <table class="sheet">
+          <colgroup>
+            <col style="width:42px" />
+            <col style="width:92px" />
+            <col style="width:72px" />
+            <col style="width:140px" />
+            <col style="width:150px" />
+            <col style="width:150px" />
+            <col style="width:110px" />
+            <col style="width:110px" />
+            <col style="width:110px" />
+            <col style="width:72px" />
+            <col style="width:160px" />
+          </colgroup>
+          <tr>
+            <th class="col-head"></th><th class="col-head">A</th><th class="col-head">B</th><th class="col-head">C</th><th class="col-head">D</th><th class="col-head">E</th><th class="col-head">F</th><th class="col-head">G</th><th class="col-head">H</th><th class="col-head">I</th><th class="col-head">J</th>
+          </tr>
+          <tr>
+            <th class="row-head">1</th><td class="header">날짜</td><td class="header">연도</td><td class="header">항목</td><td class="header">장부상 처리</td><td class="header">실제 처리</td><td class="header">장부상 금액</td><td class="header">실제 금액</td><td class="header">차액</td><td class="header">처리자</td><td class="header">비고</td>
+          </tr>
+          <tr><th class="row-head">2</th><td>2022-02-14</td><td>2022년</td><td>H빔 잔여분</td><td>폐기 처리</td><td>외부 반출</td><td class="money">6,800,000</td><td class="money">2,400,000</td><td class="money danger">4,400,000</td><td>박</td><td>H운송 야간 출고</td></tr>
+          <tr><th class="row-head">3</th><td>2023-05-03</td><td>2023년</td><td>임시 가설재</td><td>신규 구매</td><td>기존 자재 재사용</td><td class="money">5,100,000</td><td class="money">700,000</td><td class="money danger">4,400,000</td><td>박</td><td>현장 확인 금지</td></tr>
+          <tr><th class="row-head">4</th><td>2024-01-12</td><td>2024년</td><td>H빔 보강재</td><td>현장 투입</td><td>8본 외부 반출</td><td class="money">9,600,000</td><td class="money">4,000,000</td><td class="money danger">5,600,000</td><td>박</td><td>야간 출고</td></tr>
+          <tr><th class="row-head">5</th><td>2025-02-15</td><td>2025년</td><td>철근 잔여분</td><td>폐기 처리</td><td>외부 반출</td><td class="money">8,400,000</td><td class="money">3,600,000</td><td class="money danger">4,800,000</td><td>박</td><td>B철강 회수</td></tr>
+          <tr><th class="row-head">6</th><td>2025-12-23</td><td>2025년</td><td>연말 정산 조정</td><td>장부 정리</td><td>차액 이월</td><td class="money">6,200,000</td><td class="money">1,000,000</td><td class="money danger">5,200,000</td><td>박</td><td>N 확인</td></tr>
+          <tr><th class="row-head">7</th><td>2026-02-18</td><td>2026년</td><td>철근 잔여분</td><td>폐기 처리</td><td>외부 반출</td><td class="money">9,300,000</td><td class="money">4,200,000</td><td class="money danger">5,100,000</td><td>박</td><td>야간 출고</td></tr>
+          <tr><th class="row-head">8</th><td>2026-06-18</td><td>2026년</td><td>협력사 입막음</td><td>납품수량 무마</td><td>현금 지급</td><td class="money">3,000,000</td><td class="money">1,000,000</td><td class="money danger">2,000,000</td><td>박</td><td>K자재</td></tr>
+          <tr><th class="row-head">9</th><td>2026-06-18</td><td>2026년</td><td>현장 사고 처리</td><td>외부 보고 차단</td><td>내부 처리</td><td class="money">1,700,000</td><td class="money">500,000</td><td class="money danger">1,200,000</td><td>박</td><td>김사원 건</td></tr>
+          <tr><th class="row-head">10</th><td>2026-06-24</td><td>2026년</td><td class="selected">B-4 자료 최종 정리</td><td>장부 원본 확인</td><td>별도 보관</td><td class="money">3,500,000</td><td class="money">500,000</td><td class="money danger">3,000,000</td><td>박</td><td class="note">사장 답변 대기</td></tr>
+          <tr class="total"><th class="row-head">11</th><td>2022년</td><td colspan="5">차액 합계</td><td></td><td class="money danger">21,060,000</td><td></td><td></td></tr>
+          <tr class="total"><th class="row-head">12</th><td>2023년</td><td colspan="5">차액 합계</td><td></td><td class="money danger">25,740,000</td><td></td><td></td></tr>
+          <tr class="total"><th class="row-head">13</th><td>2024년</td><td colspan="5">차액 합계</td><td></td><td class="money danger">25,735,000</td><td></td><td></td></tr>
+          <tr class="total"><th class="row-head">14</th><td>2025년</td><td colspan="5">차액 합계</td><td></td><td class="money danger">36,600,000</td><td></td><td></td></tr>
+          <tr class="total"><th class="row-head">15</th><td>2026년</td><td colspan="5">차액 합계</td><td></td><td class="money danger">26,270,000</td><td></td><td></td></tr>
+          <tr class="total"><th class="row-head">16</th><td>총계</td><td colspan="5">5년 차액 합계</td><td></td><td class="money danger">135,405,000</td><td></td><td></td></tr>
+          <tr><th class="row-head">17</th><td>별도</td><td colspan="5">현금 정산 합계</td><td></td><td class="money danger">24,200,000</td><td>박실장</td><td class="note">사장 보고 전</td></tr>
+        </table>
+      </div>
+      <div class="sheet-tabs">
+        <div class="sheet-tab active">전체내역</div>
+        <div class="sheet-tab">연도별합계</div>
+        <div class="sheet-tab">별도현금정산</div>
+        <div class="sheet-tab">2022년</div>
+        <div class="sheet-tab">2023년</div>
+        <div class="sheet-tab">2024년</div>
+        <div class="sheet-tab">2025년</div>
+        <div class="sheet-tab">2026년</div>
+      </div>
+    </div>
+  </section>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  const LOCK_PREFIX = "MOSES";   // 앱이 조별로 발급하는 비번의 데모 표현 (MOSES + 조번호)
-  const XLS_PASSWORD = "1980";   // 감사패에서 찾는 공통 엑셀 암호
+  const LOCK_PREFIX = "MOSES";
+  const XLS_PASSWORD = "1980";
   let teamNo = null;
   let idleTimer = null;
+
+  function updateClock() {
+    const now = new Date();
+    const time = now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
+    document.getElementById("lockClock").textContent = time;
+    document.getElementById("taskClock").textContent = time;
+  }
+  updateClock();
+  setInterval(updateClock, 15000);
 
   function tryUnlock() {
     const input = document.getElementById("pwInput");
@@ -188,24 +757,30 @@
       teamNo = parseInt(m[1], 10);
       document.getElementById("sessionLabel").textContent = teamNo + "조 세션";
       document.getElementById("lockScreen").classList.remove("active");
-      document.getElementById("desktop").classList.add("active", "fade-in");
+      document.getElementById("desktop").classList.add("active");
+      error.textContent = "";
       resetIdle();
     } else {
-      error.textContent = "비밀번호가 올바르지 않습니다";
+      error.textContent = "비밀번호가 올바르지 않습니다.";
       input.value = "";
       shake(input.closest(".pw-row"));
     }
   }
-  document.getElementById("pwInput").addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
+  document.getElementById("pwInput").addEventListener("keydown", event => {
+    if (event.key === "Enter") tryUnlock();
+  });
 
   function openXls() {
     resetIdle();
+    if (!teamNo) return;
     if (document.getElementById("fileXls").classList.contains("done")) {
-      document.getElementById("winXls").classList.add("open"); return;
+      document.getElementById("winXls").classList.add("open");
+      return;
     }
     document.getElementById("xlsPwModal").classList.add("open");
-    document.getElementById("xlsPwInput").focus();
+    setTimeout(() => document.getElementById("xlsPwInput").focus(), 30);
   }
+
   function tryXls() {
     const input = document.getElementById("xlsPwInput");
     const err = document.getElementById("xlsPwErr");
@@ -214,38 +789,62 @@
       document.getElementById("winXls").classList.add("open");
       collect("비밀장부", "fileXls");
     } else {
-      err.textContent = "암호가 일치하지 않습니다";
+      err.textContent = "암호가 일치하지 않습니다.";
       input.value = "";
-      shake(input.closest(".pw-card"));
+      shake(input.closest(".dialog"));
     }
   }
-  document.getElementById("xlsPwInput").addEventListener("keydown", e => { if (e.key === "Enter") tryXls(); });
-  function closeXlsPw() { document.getElementById("xlsPwModal").classList.remove("open"); document.getElementById("xlsPwErr").textContent = ""; document.getElementById("xlsPwInput").value = ""; }
-  function deadFile() { resetIdle(); alert("접근 권한이 없습니다."); }
+  document.getElementById("xlsPwInput").addEventListener("keydown", event => {
+    if (event.key === "Enter") tryXls();
+  });
 
-  function closeWindow(id) { resetIdle(); document.getElementById(id).classList.remove("open"); }
+  function closeXlsPw() {
+    document.getElementById("xlsPwModal").classList.remove("open");
+    document.getElementById("xlsPwErr").textContent = "";
+    document.getElementById("xlsPwInput").value = "";
+  }
+
+  function deadFile() {
+    resetIdle();
+    alert("접근 권한이 없습니다.");
+  }
+
+  function closeWindow(id) {
+    resetIdle();
+    document.getElementById(id).classList.remove("open");
+  }
 
   function collect(name, iconId) {
     const icon = document.getElementById(iconId);
     if (icon.classList.contains("done")) return;
     icon.classList.add("done");
-    const t = document.getElementById("toast");
-    t.innerHTML = "✓ " + name + " 수집됨<small>" + teamNo + "조 수집함으로 전송됨</small>";
-    t.classList.add("show");
-    setTimeout(() => t.classList.remove("show"), 2400);
+    const toast = document.getElementById("toast");
+    toast.innerHTML = name + " 수집 완료<small>" + teamNo + "조 수집함으로 전송됨</small>";
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2400);
   }
 
   function logout() {
-    ["winXls","xlsPwModal"].forEach(id => document.getElementById(id).classList.remove("open"));
+    ["winXls", "xlsPwModal"].forEach(id => document.getElementById(id).classList.remove("open"));
     document.getElementById("desktop").classList.remove("active");
     document.querySelectorAll(".file-icon.done").forEach(el => el.classList.remove("done"));
     document.getElementById("lockScreen").classList.add("active");
     document.getElementById("pwInput").value = "";
     document.getElementById("pwError").textContent = "";
-    teamNo = null; clearTimeout(idleTimer);
+    teamNo = null;
+    clearTimeout(idleTimer);
   }
-  function resetIdle() { clearTimeout(idleTimer); idleTimer = setTimeout(logout, 90000); }
-  function shake(el) { el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+
+  function resetIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(logout, 90000);
+  }
+
+  function shake(el) {
+    el.classList.remove("shake");
+    void el.offsetWidth;
+    el.classList.add("shake");
+  }
 </script>
 </body>
 </html>
