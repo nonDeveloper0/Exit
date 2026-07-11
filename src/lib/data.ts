@@ -146,6 +146,11 @@ export const EVIDENCE: Evidence[] = [
     title: "부검표",
     description: "박실장의 사망 관련 검시 메모. 외상과 독성 반응이 함께 기록되어 사망 경위를 다시 따져볼 필요가 있다.",
   },
+  {
+    id: "E16",
+    title: "지문감식 결과보고서",
+    description: "물류창고 현장 흉기와 주변에서 채취한 지문 감식 결과. 피해자 외 미상의 지문이 검출됐고, 사내 등록 지문과 대조에서 일치 항목이 확인됐다. (나사장 노트북에서 열람)",
+  },
 ];
 
 export const SUSPECTS: Suspect[] = [

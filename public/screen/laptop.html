@@ -221,27 +221,9 @@
     box-shadow: 0 8px 16px rgba(0,0,0,.22);
     text-shadow: none;
   }
-  .icon-art.excel { background: linear-gradient(135deg, #21a366, #107c41); }
-  .icon-art.doc { background: linear-gradient(135deg, #60a5fa, #1d4ed8); }
-  .icon-art.folder { background: linear-gradient(180deg, #f8d775 0 28%, #e7b94c 28%); }
-  .icon-art::before { color: #fff; font-size: 24px; font-weight: 700; }
-  .icon-art.excel::before { content: "X"; }
-  .icon-art.doc::before { content: "W"; }
-  .icon-art.folder::before { content: ""; }
-  .lockbadge {
-    position: absolute;
-    top: 8px;
-    right: 14px;
-    width: 18px;
-    height: 18px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: rgba(0,0,0,.62);
-    color: #fff;
-    font-size: 11px;
-    text-shadow: none;
-  }
+  .icon-art.pdf { background: linear-gradient(135deg, #f87171, #dc2626); }
+  .icon-art::before { color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .5px; }
+  .icon-art.pdf::before { content: "PDF"; }
   .label {
     max-width: 78px;
     font-size: 12px;
@@ -250,7 +232,6 @@
     word-break: keep-all;
     overflow-wrap: anywhere;
   }
-  .muted { opacity: .62; }
 
   .taskbar {
     position: absolute;
@@ -374,15 +355,15 @@
     gap: 8px;
     padding-left: 10px;
   }
-  .tiny-excel {
-    width: 18px;
+  .tiny-pdf {
+    width: 24px;
     height: 18px;
     display: grid;
     place-items: center;
     border-radius: 2px;
-    background: #107c41;
+    background: #dc2626;
     color: #fff;
-    font-size: 12px;
+    font-size: 9px;
     font-weight: 700;
   }
   .title-text { justify-self: center; color: #2b2b2b; }
@@ -398,161 +379,46 @@
   }
   .win-control:hover { background: #e5e5e5; }
   .win-control.close:hover { background: #c42b1c; color: #fff; }
-  .excel-ribbon {
-    background: #f3f2f1;
-    border-bottom: 1px solid #d1d1d1;
-  }
-  .tabs {
-    height: 34px;
+  .pdf-body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    background: #525659;
+    padding: 22px 16px;
     display: flex;
-    align-items: end;
-    gap: 4px;
-    padding: 0 12px;
-  }
-  .tab {
-    height: 30px;
-    padding: 7px 12px 0;
-    font-size: 12px;
-    color: #333;
-  }
-  .tab.active {
-    background: #fff;
-    border-top: 3px solid #217346;
-    padding-top: 4px;
-    font-weight: 600;
-  }
-  .ribbon-row {
-    height: 58px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
-    background: #fff;
-    border-top: 1px solid #e5e5e5;
-  }
-  .tool-group {
-    min-width: 70px;
-    height: 42px;
-    display: grid;
-    place-items: center;
-    border-right: 1px solid #e5e5e5;
-    padding-right: 12px;
-    color: #444;
-    font-size: 11px;
-  }
-  .formula-bar {
-    height: 32px;
-    display: grid;
-    grid-template-columns: 72px 1fr;
-    align-items: center;
-    border-bottom: 1px solid #d6d6d6;
-    background: #fafafa;
-    font-size: 12px;
-  }
-  .name-box { padding-left: 12px; color: #555; }
-  .formula { height: 23px; margin-right: 10px; padding: 3px 8px; border: 1px solid #d1d5db; background: #fff; color: #333; }
-  .excel-body { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #fff; }
-  .sheet-wrap { flex: 1; min-height: 0; overflow: auto; }
-  .sheet {
-    width: 100%;
-    min-width: 980px;
-    border-collapse: collapse;
-    table-layout: fixed;
-    font-size: 12px;
-  }
-  .sheet th, .sheet td {
-    height: 28px;
-    border: 1px solid #d9e2d9;
-    padding: 4px 7px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .sheet .col-head, .sheet .row-head {
-    background: #f3f3f3;
-    color: #4b5563;
-    font-weight: 400;
-    text-align: center;
-  }
-  .sheet .row-head { width: 42px; }
-  .sheet .header { background: #e2f0d9; color: #1f4e2f; font-weight: 700; text-align: center; }
-  .sheet .money { text-align: right; font-variant-numeric: tabular-nums; }
-  .sheet .danger { color: #b00000; font-weight: 700; background: #fff1f1; }
-  .sheet .note { color: #744210; background: #fffbeb; }
-  .sheet .total td:not(.row-head) { background: #d9ead3; font-weight: 700; }
-  .sheet .selected { outline: 2px solid #217346; outline-offset: -2px; background: #fff; }
-  .sheet-tabs {
-    height: 36px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 0 10px;
-    border-top: 1px solid #d6d6d6;
-    background: #f7f7f7;
-  }
-  .sheet-tab {
-    height: 27px;
-    padding: 6px 14px 0;
-    background: #fff;
-    border: 1px solid #d0d0d0;
-    border-bottom-color: #217346;
-    color: #333;
-    font-size: 12px;
-  }
-  .sheet-tab.active { border-bottom: 3px solid #217346; font-weight: 700; }
-
-  .pw-modal {
-    position: fixed;
-    inset: 28px 0 46px;
-    z-index: 560;
-    display: none;
-    align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,.32);
-    padding: 16px;
   }
-  .pw-modal.open { display: flex; }
-  .dialog {
-    width: min(360px, 100%);
-    overflow: hidden;
-    border: 1px solid #bdbdbd;
-    border-radius: 7px;
+  .pdf-page {
+    width: min(720px, 100%);
+    align-self: flex-start;
     background: #fff;
-    box-shadow: 0 18px 60px rgba(0,0,0,.32);
-  }
-  .dialog-title {
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-left: 12px;
-    border-bottom: 1px solid #e5e5e5;
-    background: #f7f7f7;
-    font-size: 12px;
-  }
-  .dialog-body { padding: 18px; }
-  .dialog-copy { color: #3b3b3b; font-size: 13px; line-height: 1.55; }
-  .dialog-input {
-    width: 100%;
-    height: 34px;
-    margin-top: 12px;
-    padding: 0 9px;
-    border: 1px solid #8a8a8a;
-    outline: 0;
-  }
-  .dialog-input:focus { border-color: #0067c0; box-shadow: 0 0 0 1px #0067c0; }
-  .dialog-error { height: 17px; margin-top: 6px; color: #c42b1c; font-size: 12px; }
-  .dialog-actions { display: flex; justify-content: end; gap: 8px; margin-top: 10px; }
-  .dialog-button {
-    min-width: 78px;
-    height: 32px;
-    border: 1px solid #8a8a8a;
-    border-radius: 3px;
-    background: #f5f5f5;
-    color: #111827;
+    color: #1a1a1a;
+    padding: 40px 44px 48px;
+    box-shadow: 0 6px 22px rgba(0,0,0,.45);
     font-size: 13px;
+    line-height: 1.6;
   }
-  .dialog-button.primary { border-color: #005a9e; background: #0078d4; color: #fff; }
+  .pdf-doc-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #111827;
+  }
+  .pdf-org { font-size: 12px; color: #4b5563; line-height: 1.4; }
+  .pdf-badge { font-size: 11px; color: #b00000; border: 1px solid #b00000; border-radius: 3px; padding: 2px 6px; white-space: nowrap; }
+  .pdf-title { margin: 22px 0 6px; font-size: 22px; font-weight: 800; text-align: center; letter-spacing: 2px; }
+  .pdf-sub { margin-bottom: 20px; font-size: 12px; color: #6b7280; text-align: center; }
+  .pdf-meta { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 12px; }
+  .pdf-meta th, .pdf-meta td { border: 1px solid #cbd5e1; padding: 6px 9px; text-align: left; }
+  .pdf-meta th { background: #f1f5f9; width: 84px; color: #334155; font-weight: 600; white-space: nowrap; }
+  .pdf-section { margin: 20px 0 8px; font-size: 13px; font-weight: 700; color: #111827; border-left: 3px solid #b00000; padding-left: 8px; }
+  .pdf-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .pdf-table th, .pdf-table td { border: 1px solid #cbd5e1; padding: 6px 9px; text-align: left; vertical-align: top; }
+  .pdf-table th { background: #f1f5f9; color: #334155; font-weight: 600; }
+  .pdf-table .hit { color: #b00000; font-weight: 700; }
+  .pdf-opinion { margin-top: 10px; padding: 12px 14px; background: #fff7f7; border: 1px solid #f0c9c9; border-radius: 4px; font-size: 12px; color: #7f1d1d; }
+  .pdf-sign { margin-top: 26px; text-align: right; font-size: 12px; color: #374151; }
 
   .toast {
     position: fixed;
@@ -579,9 +445,8 @@
     .demo-banner { height: 34px; padding: 0 8px; font-size: 11px; text-align: center; }
     .screen { inset-top: 34px; }
     .task-search { display: none; }
-    .window-overlay, .pw-modal { inset-top: 34px; padding: 8px; }
+    .window-overlay { inset-top: 34px; padding: 8px; }
     .window { height: 100%; min-height: 0; border-radius: 4px; }
-    .ribbon-row { display: none; }
     .title-text { justify-self: start; }
     .tray { gap: 7px; padding-right: 8px; }
     .session-pill { margin-left: 8px; padding: 0 8px; }
@@ -596,7 +461,6 @@
 <div class="demo-banner">
   <span>나사장 노트북 데모</span>
   <span>공통 암호: <b>980721</b></span>
-  <span>엑셀 암호: <b>1980</b></span>
 </div>
 
 <div class="screen active" id="lockScreen">
@@ -639,18 +503,9 @@
 
 <div class="screen" id="desktop">
   <main class="desktop-area" aria-label="Windows 바탕 화면">
-    <button class="file-icon" id="fileXls" type="button" onclick="openXls()">
-      <span class="lockbadge">🔒</span>
-      <span class="icon-art excel"></span>
-      <span class="label">비밀장부_5년치.xlsx</span>
-    </button>
-    <button class="file-icon muted" type="button" onclick="deadFile()">
-      <span class="icon-art doc"></span>
-      <span class="label">인사평가.docx</span>
-    </button>
-    <button class="file-icon muted" type="button" onclick="deadFile()">
-      <span class="icon-art folder"></span>
-      <span class="label">계약서 백업</span>
+    <button class="file-icon" id="filePdf" type="button" onclick="openPdf()">
+      <span class="icon-art pdf"></span>
+      <span class="label">지문감식 결과보고서.pdf</span>
     </button>
   </main>
 
@@ -659,112 +514,58 @@
     <div class="task-center">
       <button class="start-btn" type="button" aria-label="시작"><span class="start-logo"><span></span><span></span><span></span><span></span></span></button>
       <div class="task-search">검색</div>
-      <button class="task-app" type="button" onclick="openXls()" title="Excel">X</button>
+      <button class="task-app" type="button" onclick="openPdf()" title="지문감식 결과보고서">PDF</button>
     </div>
     <div class="tray"><span>Wi-Fi</span><span>🔊</span><span id="taskClock">22:47</span></div>
   </footer>
 </div>
 
-<div class="pw-modal" id="xlsPwModal">
-  <div class="dialog">
-    <div class="dialog-title">
-      <span>비밀장부_5년치.xlsx</span>
-      <button class="win-control close" type="button" onclick="closeXlsPw()" aria-label="닫기">×</button>
-    </div>
-    <div class="dialog-body">
-      <p class="dialog-copy">이 통합 문서는 암호로 보호되어 있습니다. 감사패에서 확인한 숫자 암호를 입력하세요.</p>
-      <input class="dialog-input" id="xlsPwInput" type="text" inputmode="numeric" placeholder="암호" maxlength="8" />
-      <div class="dialog-error" id="xlsPwErr"></div>
-      <div class="dialog-actions">
-        <button class="dialog-button" type="button" onclick="closeXlsPw()">취소</button>
-        <button class="dialog-button primary" type="button" onclick="tryXls()">확인</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="window-overlay" id="winXls">
-  <section class="window" aria-label="Excel 창">
+<div class="window-overlay" id="winPdf">
+  <section class="window" aria-label="PDF 뷰어">
     <div class="win-titlebar">
-      <div class="win-title-left"><span class="tiny-excel">X</span><span>자동 저장 꺼짐</span></div>
-      <div class="title-text">비밀장부_5년치.xlsx - Excel</div>
+      <div class="win-title-left"><span class="tiny-pdf">PDF</span><span>지문감식 결과보고서.pdf</span></div>
+      <div class="title-text">지문감식 결과보고서.pdf</div>
       <div class="win-controls">
         <button class="win-control" type="button" aria-label="최소화">−</button>
         <button class="win-control" type="button" aria-label="최대화">□</button>
-        <button class="win-control close" type="button" onclick="closeWindow('winXls')" aria-label="닫기">×</button>
+        <button class="win-control close" type="button" onclick="closeWindow('winPdf')" aria-label="닫기">×</button>
       </div>
     </div>
-    <div class="excel-ribbon">
-      <div class="tabs">
-        <div class="tab active">홈</div>
-        <div class="tab">삽입</div>
-        <div class="tab">페이지 레이아웃</div>
-        <div class="tab">수식</div>
-        <div class="tab">데이터</div>
-        <div class="tab">검토</div>
-      </div>
-      <div class="ribbon-row">
-        <div class="tool-group">붙여넣기</div>
-        <div class="tool-group">글꼴<br />맑은 고딕</div>
-        <div class="tool-group">맞춤</div>
-        <div class="tool-group">표시 형식<br />₩ #,##0</div>
-        <div class="tool-group">정렬 및 필터</div>
-      </div>
-    </div>
-    <div class="formula-bar">
-      <div class="name-box">H50</div>
-      <div class="formula">=SUM(H2:H50)  // 5년 차액 합계 135,405,000</div>
-    </div>
-    <div class="excel-body">
-      <div class="sheet-wrap">
-        <table class="sheet">
-          <colgroup>
-            <col style="width:42px" />
-            <col style="width:92px" />
-            <col style="width:72px" />
-            <col style="width:140px" />
-            <col style="width:150px" />
-            <col style="width:150px" />
-            <col style="width:110px" />
-            <col style="width:110px" />
-            <col style="width:110px" />
-            <col style="width:72px" />
-            <col style="width:160px" />
-          </colgroup>
-          <tr>
-            <th class="col-head"></th><th class="col-head">A</th><th class="col-head">B</th><th class="col-head">C</th><th class="col-head">D</th><th class="col-head">E</th><th class="col-head">F</th><th class="col-head">G</th><th class="col-head">H</th><th class="col-head">I</th><th class="col-head">J</th>
-          </tr>
-          <tr>
-            <th class="row-head">1</th><td class="header">날짜</td><td class="header">연도</td><td class="header">항목</td><td class="header">장부상 처리</td><td class="header">실제 처리</td><td class="header">장부상 금액</td><td class="header">실제 금액</td><td class="header">차액</td><td class="header">처리자</td><td class="header">비고</td>
-          </tr>
-          <tr><th class="row-head">2</th><td>2022-02-14</td><td>2022년</td><td>H빔 잔여분</td><td>폐기 처리</td><td>외부 반출</td><td class="money">6,800,000</td><td class="money">2,400,000</td><td class="money danger">4,400,000</td><td>박</td><td>H운송 야간 출고</td></tr>
-          <tr><th class="row-head">3</th><td>2023-05-03</td><td>2023년</td><td>임시 가설재</td><td>신규 구매</td><td>기존 자재 재사용</td><td class="money">5,100,000</td><td class="money">700,000</td><td class="money danger">4,400,000</td><td>박</td><td>현장 확인 금지</td></tr>
-          <tr><th class="row-head">4</th><td>2024-01-12</td><td>2024년</td><td>H빔 보강재</td><td>현장 투입</td><td>8본 외부 반출</td><td class="money">9,600,000</td><td class="money">4,000,000</td><td class="money danger">5,600,000</td><td>박</td><td>야간 출고</td></tr>
-          <tr><th class="row-head">5</th><td>2025-02-15</td><td>2025년</td><td>철근 잔여분</td><td>폐기 처리</td><td>외부 반출</td><td class="money">8,400,000</td><td class="money">3,600,000</td><td class="money danger">4,800,000</td><td>박</td><td>B철강 회수</td></tr>
-          <tr><th class="row-head">6</th><td>2025-12-23</td><td>2025년</td><td>연말 정산 조정</td><td>장부 정리</td><td>차액 이월</td><td class="money">6,200,000</td><td class="money">1,000,000</td><td class="money danger">5,200,000</td><td>박</td><td>N 확인</td></tr>
-          <tr><th class="row-head">7</th><td>2026-02-18</td><td>2026년</td><td>철근 잔여분</td><td>폐기 처리</td><td>외부 반출</td><td class="money">9,300,000</td><td class="money">4,200,000</td><td class="money danger">5,100,000</td><td>박</td><td>야간 출고</td></tr>
-          <tr><th class="row-head">8</th><td>2026-06-18</td><td>2026년</td><td>협력사 입막음</td><td>납품수량 무마</td><td>현금 지급</td><td class="money">3,000,000</td><td class="money">1,000,000</td><td class="money danger">2,000,000</td><td>박</td><td>K자재</td></tr>
-          <tr><th class="row-head">9</th><td>2026-06-18</td><td>2026년</td><td>현장 사고 처리</td><td>외부 보고 차단</td><td>내부 처리</td><td class="money">1,700,000</td><td class="money">500,000</td><td class="money danger">1,200,000</td><td>박</td><td>김사원 건</td></tr>
-          <tr><th class="row-head">10</th><td>2026-06-24</td><td>2026년</td><td class="selected">B-4 자료 최종 정리</td><td>장부 원본 확인</td><td>별도 보관</td><td class="money">3,500,000</td><td class="money">500,000</td><td class="money danger">3,000,000</td><td>박</td><td class="note">사장 답변 대기</td></tr>
-          <tr class="total"><th class="row-head">11</th><td>2022년</td><td colspan="5">차액 합계</td><td></td><td class="money danger">21,060,000</td><td></td><td></td></tr>
-          <tr class="total"><th class="row-head">12</th><td>2023년</td><td colspan="5">차액 합계</td><td></td><td class="money danger">25,740,000</td><td></td><td></td></tr>
-          <tr class="total"><th class="row-head">13</th><td>2024년</td><td colspan="5">차액 합계</td><td></td><td class="money danger">25,735,000</td><td></td><td></td></tr>
-          <tr class="total"><th class="row-head">14</th><td>2025년</td><td colspan="5">차액 합계</td><td></td><td class="money danger">36,600,000</td><td></td><td></td></tr>
-          <tr class="total"><th class="row-head">15</th><td>2026년</td><td colspan="5">차액 합계</td><td></td><td class="money danger">26,270,000</td><td></td><td></td></tr>
-          <tr class="total"><th class="row-head">16</th><td>총계</td><td colspan="5">5년 차액 합계</td><td></td><td class="money danger">135,405,000</td><td></td><td></td></tr>
-          <tr><th class="row-head">17</th><td>별도</td><td colspan="5">현금 정산 합계</td><td></td><td class="money danger">24,200,000</td><td>박실장</td><td class="note">사장 보고 전</td></tr>
+    <div class="pdf-body">
+      <!-- ▼ 보고서 내용은 임시 자리표시입니다. 단서팀 확정 내용으로 교체하세요. -->
+      <article class="pdf-page">
+        <div class="pdf-doc-head">
+          <div class="pdf-org"><strong>한빛 법과학 감정원</strong><br />Forensic Science Center</div>
+          <div class="pdf-badge">대외비 · CONFIDENTIAL</div>
+        </div>
+        <h1 class="pdf-title">지문감식 결과보고서</h1>
+        <div class="pdf-sub">물류창고 사망사건 현장 감정 · 문서번호 FSC-2026-0619</div>
+
+        <table class="pdf-meta">
+          <tr><th>사건번호</th><td>2026-형-1187</td><th>감정일자</th><td>2026-06-25</td></tr>
+          <tr><th>의뢰기관</th><td>강력계 수사팀</td><th>감정대상</th><td>현장 채취 지문 5점</td></tr>
+          <tr><th>현장</th><td colspan="3">녹산건설 자재 물류창고 (피해자 발견 지점 및 주변)</td></tr>
         </table>
-      </div>
-      <div class="sheet-tabs">
-        <div class="sheet-tab active">전체내역</div>
-        <div class="sheet-tab">연도별합계</div>
-        <div class="sheet-tab">별도현금정산</div>
-        <div class="sheet-tab">2022년</div>
-        <div class="sheet-tab">2023년</div>
-        <div class="sheet-tab">2024년</div>
-        <div class="sheet-tab">2025년</div>
-        <div class="sheet-tab">2026년</div>
-      </div>
+
+        <div class="pdf-section">1. 채취 지문 대조 결과</div>
+        <table class="pdf-table">
+          <tr><th>번호</th><th>채취 위치</th><th>지문 상태</th><th>대조 결과</th></tr>
+          <tr><td>①</td><td>흉기(금속 파이프) 손잡이</td><td>양호</td><td class="hit">미상 지문 — 사내 등록지문과 일치 항목 확인</td></tr>
+          <tr><td>②</td><td>피해자 의복 및 소지품</td><td>중첩</td><td>피해자 본인 지문</td></tr>
+          <tr><td>③</td><td>창고 출입문 안쪽 손잡이</td><td>부분</td><td class="hit">미상 지문 Ⅱ — 대조 진행 중</td></tr>
+          <tr><td>④</td><td>선반 모서리</td><td>불량</td><td>감정 불가</td></tr>
+          <tr><td>⑤</td><td>바닥 적재물</td><td>부분</td><td>피해자 본인 지문</td></tr>
+        </table>
+
+        <div class="pdf-section">2. 감정 소견</div>
+        <div class="pdf-opinion">
+          흉기 손잡이(①)에서 피해자 외 <strong>미상 지문 1종</strong>이 검출되었으며, 사내 등록지문
+          대조에서 <strong>일치 항목</strong>이 확인됨. 출입문(③) 지문과의 동일인 여부는 추가 대조가 필요함.
+          현장 정리·조작 정황과 함께, 사내 출입기록 및 인사기록과의 교차 확인을 권고함.
+        </div>
+
+        <div class="pdf-sign">감정인 : 한빛 법과학 감정원 · 책임감정관 (인)</div>
+      </article>
     </div>
   </section>
 </div>
@@ -774,9 +575,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const UNLOCK_PASSWORD = "980721";
-  const XLS_PASSWORD = "1980";
-  // 비밀장부 열람 시 선택한 조 보관함에 저장될 증거 ID (앱 data.ts의 E03 비밀장부)
-  const XLS_EVIDENCE_ID = "E03";
+  // 지문감식 결과보고서 열람 시 선택한 조 보관함에 저장될 증거 ID (앱 data.ts의 E16)
+  const PDF_EVIDENCE_ID = "E16";
   // Supabase 연결 (anon 공개키 — 앱과 동일 값)
   const SUPABASE_URL = "https://egnkhewpeyzcwdtstdxa.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH";
@@ -830,43 +630,11 @@
     input.focus();
   }
 
-  function openXls() {
+  function openPdf() {
     resetIdle();
     if (!teamNo) return;
-    if (document.getElementById("fileXls").classList.contains("done")) {
-      document.getElementById("winXls").classList.add("open");
-      return;
-    }
-    document.getElementById("xlsPwModal").classList.add("open");
-    setTimeout(() => document.getElementById("xlsPwInput").focus(), 30);
-  }
-
-  function tryXls() {
-    const input = document.getElementById("xlsPwInput");
-    const err = document.getElementById("xlsPwErr");
-    if (input.value.trim() === XLS_PASSWORD) {
-      closeXlsPw();
-      document.getElementById("winXls").classList.add("open");
-      collect("비밀장부", "fileXls", XLS_EVIDENCE_ID);
-    } else {
-      err.textContent = "암호가 일치하지 않습니다.";
-      input.value = "";
-      shake(input.closest(".dialog"));
-    }
-  }
-  document.getElementById("xlsPwInput").addEventListener("keydown", event => {
-    if (event.key === "Enter") tryXls();
-  });
-
-  function closeXlsPw() {
-    document.getElementById("xlsPwModal").classList.remove("open");
-    document.getElementById("xlsPwErr").textContent = "";
-    document.getElementById("xlsPwInput").value = "";
-  }
-
-  function deadFile() {
-    resetIdle();
-    alert("접근 권한이 없습니다.");
+    document.getElementById("winPdf").classList.add("open");
+    collect("지문감식 결과보고서", "filePdf", PDF_EVIDENCE_ID);
   }
 
   function closeWindow(id) {
@@ -901,7 +669,7 @@
   }
 
   function logout() {
-    ["winXls", "xlsPwModal"].forEach(id => document.getElementById(id).classList.remove("open"));
+    document.getElementById("winPdf").classList.remove("open");
     document.getElementById("desktop").classList.remove("active");
     document.querySelectorAll(".file-icon.done").forEach(el => el.classList.remove("done"));
     document.getElementById("lockScreen").classList.add("active");
