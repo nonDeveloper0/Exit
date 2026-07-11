@@ -3,7 +3,7 @@
 ## Evidence
 ```ts
 {
-  id: string;          // "E01" ~ "E10"
+  id: string;          // "E01" ~ "E16" (+ 수신전화 "CALL01"). E16은 노트북 디바이스 수집(QR 없음)
   title: string;       // 증거 이름
   description: string; // 증거 내용
   imageUrl?: string;   // 증거 이미지 경로 (public/ 기준, 예: "/02_blood.png")
@@ -40,10 +40,10 @@
 ## LOCATIONS 상수
 ```ts
 export const LOCATIONS = {
-  L1: "살해 현장",
-  L2: "CCTV 관제실",
-  L3: "주차장",
-  L4: "창고",
+  L1: "자재 물류창고", // 사건 현장
+  L2: "나사장 집무실",
+  L3: "나팀장 사무실",
+  L4: "채소장 연구실",
 } as const;
 ```
 
