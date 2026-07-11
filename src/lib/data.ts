@@ -71,80 +71,80 @@ export const EVIDENCE: Evidence[] = [
   },
   {
     id: "E01",
-    title: "목격자 진술",
-    description: "당일 밤 현장 인근에서 '두 사람이 격렬히 다투는 것'을 목격했다는 진술.",
+    title: "감사패",
+    description: "나사장 집무실에 놓인 오래된 감사패. 뒷면에 비밀장부 파일을 여는 데 쓰일 만한 숫자 흔적이 남아 있다.",
     imageUrl: "/03_evidence.png",
   },
   {
     id: "E02",
-    title: "CCTV 일부 영상",
-    description: "살인 당일 오후 10시~11시 구간. 특정 구간 30분이 삭제된 것이 확인됨.",
+    title: "협박메시지",
+    description: "박실장이 나사장에게 보낸 메시지 일부. 내부 감사 전까지 돈과 서류를 정리하라는 압박이 담겨 있다.",
   },
   {
     id: "E03",
-    title: "통화기록",
-    description: "사건 당일 피해자와 C 사이의 3분간 통화 내역 확인됨. 내용 불명.",
+    title: "비밀장부",
+    description: "자재 대금과 실제 입출고 수량이 맞지 않는 장부. 박실장과 회사 윗선이 함께 숨긴 항목이 표시돼 있다.",
   },
   {
     id: "E04",
-    title: "문자내역",
-    description: "사건 전날 피해자가 A에게 보낸 문자. '다시는 반항하지 마라'는 내용 포함.",
+    title: "이동동선",
+    description: "사건 당일 저녁 나팀장의 사내 이동 기록. 김사원 퇴근 직후 물류창고 방향으로 이동한 흔적이 남아 있다.",
   },
   {
     id: "E05",
-    title: "혈흔 사진",
-    description: "현장 주변에서 발견된 혈흔. 피해자의 혈액형과 일치하며, 격렬한 저항의 흔적이 보인다.",
+    title: "삭제된 출입기록",
+    description: "물류창고 출입 로그 일부가 삭제된 파일. 삭제 시각과 계정 정보가 온전히 지워지지 않았다.",
     imageUrl: "/02_blood.png",
   },
   {
     id: "E06",
-    title: "인사기록",
-    description: "C의 입사 서류. 출생지, 이전 주소, 학력 항목이 공란으로 처리됨.",
+    title: "미완성 메모",
+    description: "나팀장 책상에서 발견된 찢긴 메모. '김사원', '더는 방치할 수 없음', '직접 확인'이라는 단어만 남아 있다.",
   },
   {
     id: "E07",
-    title: "징계문서",
-    description: "피해자가 노동자 A를 부당 징계한 문서. 폭행 은폐 정황이 드러남.",
+    title: "약봉투",
+    description: "이대리 이름으로 조제된 신경안정제 봉투. 사건 당일 저녁 약국 결제 시각이 함께 확인된다.",
   },
   {
     id: "E08",
-    title: "병원기록",
-    description: "지난 6개월간 현장 노동자 9명이 외상으로 치료받은 기록. 사유: '작업 중 사고'.",
+    title: "카톡 대화",
+    description: "이대리가 채소장에게 보낸 메시지. 박실장이 김사원을 폭행했고 자신은 더 이상 못 보겠다는 내용이 포함돼 있다.",
   },
   {
     id: "E09",
-    title: "현장출입기록",
-    description: "사건 당일 오후 9시 이후 출입자: A, B, C. 퇴장 기록 없음.",
+    title: "파쇄문서",
+    description: "복구된 파쇄 문서 조각. 물류팀 비리와 관련된 비밀유지각서 일부로 보이며 이대리 서명이 남아 있다.",
   },
   {
     id: "E10",
-    title: "비밀문서",
-    description: "C가 회장에게 보낸 서한 일부. '더 이상 두고 볼 수 없습니다'라는 문구만 해독 가능.",
+    title: "폭행녹음",
+    description: "김사원 휴대폰에 남아 있던 녹음 파일. 박실장의 폭언과 물리적 충돌음이 짧게 기록돼 있다.",
   },
   {
     id: "E11",
-    title: "이중 장부",
-    description: "현장 자재 대금이 이중으로 기록된 장부. B와 피해자 사이 수년간의 비자금 거래 정황이 드러난다.",
+    title: "택시영수증",
+    description: "김사원 지갑에서 발견된 택시 영수증. 퇴근 이후 회사 밖으로 이동한 시각과 목적지가 찍혀 있다.",
   },
   {
     id: "E12",
-    title: "내부고발 문건",
-    description: "피해자가 외부에 넘기려던 조직 비리 자료. E가 이 문건의 존재를 사전에 파악하고 있었던 정황이 확인됨.",
+    title: "형제사진",
+    description: "오래된 가족사진. 김사원과 나팀장이 형제로 보이는 정황이 있으나, 회사 기록에는 두 사람의 관계가 남아 있지 않다.",
   },
   {
     id: "E13",
-    title: "경호팀 무전 기록",
-    description: "사건 당일 밤, E가 경호팀에 '뒷정리'를 지시한 무전 기록. 지시 직후 해당 시간대 통신이 일괄 삭제됐다.",
+    title: "채소장 다이어리",
+    description: "채소장의 개인 다이어리. 김사원을 걱정하는 문장과 박실장에게 강한 분노를 느낀 흔적이 함께 적혀 있다.",
   },
   {
     id: "E14",
-    title: "해고 통보서",
-    description: "사건 이틀 전 피해자 명의로 D에게 전달된 일방적 해고 통보서. 사유란은 공란으로 처리됐다.",
+    title: "독극물 재고표",
+    description: "위험물 보관함 재고표. 사건 직후 특정 약품 수량이 맞지 않고, 수정된 흔적이 남아 있다.",
   },
   {
     id: "E15",
-    title: "임금 체불 내역",
-    description: "D의 지난 수개월치 임금이 미지급된 내역과 야간 근무일지. 사건 당일에도 정문 근무가 기록돼 있다.",
+    title: "부검표",
+    description: "박실장의 사망 관련 검시 메모. 외상과 독성 반응이 함께 기록되어 사망 경위를 다시 따져볼 필요가 있다.",
   },
 ];
 
@@ -153,90 +153,90 @@ export const SUSPECTS: Suspect[] = [
     id: "A",
     codename: "용의자 A",
     name: "나사장",
-    role: "노동자 대표",
-    motive: "반복적인 폭행과 착취에 대한 복수",
+    role: "녹산건설 대표",
+    motive: "협박 차단과 회사 보호",
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E07", "E08"])
-    relatedEvidenceIds: ["E04", "E07", "E08"],
+    relatedEvidenceIds: ["E01", "E02", "E03"],
     interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
-      "현장 노동자들의 리더. 피해자에게 수차례 부당한 폭행과 징계를 받아왔다. 사건 당일 현장에 있었음을 인정했다.",
+      "녹산건설 대표. 박실장의 자재 횡령과 장부 조작을 알고도 묵인해 왔다. 내부 감사가 다가오자 회사 이미지와 자신의 책임을 지키려 했다는 의심을 받는다.",
     motiveLevel: "높음",
   },
   {
     id: "B",
     codename: "용의자 B",
     name: "채소장",
-    role: "현장 소장",
-    motive: "비리 은폐",
+    role: "위험물관리사",
+    motive: "김사원 보호와 현장 조작 의혹",
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E02", "E06"])
-    relatedEvidenceIds: ["E01", "E09", "E11"],
+    relatedEvidenceIds: ["E13", "E14", "E15"],
     interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
-      "물류창고의 실질적 책임자. 피해자와 수년간 부당 거래를 해온 것으로 알려져 있다. 사건 관련 서류를 사전에 은폐한 정황이 있다.",
-    motiveLevel: "중간",
+      "위험물관리사. 김사원과 가까운 사이이며 독극물 취급 권한을 갖고 있다. 사건 이후 현장에 접근했고, 박실장의 사망 원인을 흐리게 만들 수 있는 위치에 있었다.",
+    motiveLevel: "높음",
   },
   {
     id: "C",
     codename: "용의자 C",
     name: "나팀장",
-    role: "회장 아들",
-    motive: "불명확 — 조사 중", // TODO: 동기 확정 후 교체
+    role: "전략기획실 팀장",
+    motive: "김사원 보호와 박실장 비리 응징", // TODO: 동기 확정 후 교체
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E10"])
-    relatedEvidenceIds: ["E03", "E06", "E10"],
+    relatedEvidenceIds: ["E04", "E05", "E06"],
     interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
-      "회장의 아들이라는 것 외에 신원 대부분이 비공개. 사건 당일 현장에 있었으며, 사건 직후 잠적. 연락 두절.",
-    motiveLevel: "불명",
+      "전략기획실 팀장. 정의감이 강하고 박실장의 비리를 오래 의심해 왔다. 김사원과의 관계를 회사에 숨기고 있었으며, 사건 당일 물류창고에 들어간 정황이 있다.",
+    motiveLevel: "중간",
   },
   {
     id: "D",
     codename: "용의자 D",
     name: "이대리",
-    role: "경비원",
-    motive: "해고 통보와 임금 체불에 대한 원한",
+    role: "물류팀 대리",
+    motive: "비리 공범 관계와 폭행 방조 부담",
     motiveRevealIds: [],
-    relatedEvidenceIds: ["E05", "E14", "E15"],
+    relatedEvidenceIds: ["E07", "E08", "E09"],
     interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
-      "물류창고 정문 담당 경비원. 사건 당일 야간 근무 중이었으며 현장 출입을 직접 통제하는 위치에 있었다. 피해자로부터 수개월간 임금을 받지 못했고, 사건 이틀 전 일방적인 해고를 통보받은 것으로 확인됐다.",
+      "물류팀 대리. 박실장의 장부 조작을 가까이서 도운 인물로, 사건 당일 김사원 폭행 장면을 보고도 창고를 떠났다. 이후 약국에 다녀온 기록이 있어 행적 확인이 필요하다.",
     motiveLevel: "중간",
   },
   {
     id: "E",
     codename: "용의자 E",
     name: "김사원",
-    role: "경호실장",
-    motive: "피해자의 내부 고발 차단 — 조직 비리 은폐",
+    role: "물류팀 사원",
+    motive: "지속적인 폭행 피해와 허위장부 지시 거부",
     motiveRevealIds: [],
-    relatedEvidenceIds: ["E02", "E12", "E13"],
+    relatedEvidenceIds: ["E10", "E11", "E12"],
     interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
     description:
-      "회장 직속 경호실장. 현장 CCTV 관리 권한을 보유하고 있으며, 삭제된 영상 구간의 접근 이력이 그의 계정에서 발견됐다. 사건 당일 행적에 대해 일관성 없는 진술을 반복하고 있다.",
+      "물류팀 사원. 박실장에게 지속적으로 폭행을 당했고, 사건 당일 허위장부 작업 지시를 거부했다. 퇴근 후 행적은 일부 확인되지만 나팀장과의 숨겨진 관계가 사건의 핵심 변수로 남아 있다.",
     motiveLevel: "높음",
   },
 ];
 
 // QR 총 15개 = 자재 물류창고 6개 + 나사장 집무실/나팀장 사무실/채소장 연구실 각 3개
-// 증거 1개당 QR 1개. 방(용의자) = 그 용의자의 관련 단서 3개, 자재 물류창고 = 나머지(D·E) 6개.
+// 증거 1개당 QR 1개. 방(용의자) = 그 용의자의 관련 단서 3개, 자재 물류창고 = 나머지(이대리·김사원) 6개.
 // ※ 아래 slug 중 c8v3k1~w3n5k7(9개)는 새로 생성한 값 — 실제 인쇄 QR과 일치시키거나 원하는 값으로 교체하세요.
 export const QR_CODES: QrCode[] = [
   // 자재 물류창고 (사건 현장) — 6개
-  { id: "x4k9m2", location: LOCATIONS.L1, evidenceIds: ["E02"] },
-  { id: "p7n3q8", location: LOCATIONS.L1, evidenceIds: ["E12"] },
-  { id: "c8v3k1", location: LOCATIONS.L1, evidenceIds: ["E13"] },
-  { id: "d2m9x4", location: LOCATIONS.L1, evidenceIds: ["E05"] },
-  { id: "f5r7t2", location: LOCATIONS.L1, evidenceIds: ["E14"] },
-  { id: "g1h6n8", location: LOCATIONS.L1, evidenceIds: ["E15"] },
+  { id: "x4k9m2", location: LOCATIONS.L1, evidenceIds: ["E07"] },
+  { id: "p7n3q8", location: LOCATIONS.L1, evidenceIds: ["E08"] },
+  { id: "c8v3k1", location: LOCATIONS.L1, evidenceIds: ["E09"] },
+  { id: "d2m9x4", location: LOCATIONS.L1, evidenceIds: ["E10"] },
+  { id: "f5r7t2", location: LOCATIONS.L1, evidenceIds: ["E11"] },
+  { id: "g1h6n8", location: LOCATIONS.L1, evidenceIds: ["E12"] },
   // 나사장 집무실 (용의자 A) — 3개
-  { id: "h6t4c3", location: LOCATIONS.L2, evidenceIds: ["E04"] },
-  { id: "j4w2b5", location: LOCATIONS.L2, evidenceIds: ["E07"] },
-  { id: "k9p3z6", location: LOCATIONS.L2, evidenceIds: ["E08"] },
+  { id: "h6t4c3", location: LOCATIONS.L2, evidenceIds: ["E01"] },
+  { id: "j4w2b5", location: LOCATIONS.L2, evidenceIds: ["E02"] },
+  { id: "k9p3z6", location: LOCATIONS.L2, evidenceIds: ["E03"] },
   // 나팀장 사무실 (용의자 C) — 3개
-  { id: "b2r5w1", location: LOCATIONS.L3, evidenceIds: ["E03"] },
-  { id: "q7s1d3", location: LOCATIONS.L3, evidenceIds: ["E06"] },
-  { id: "t6y8m2", location: LOCATIONS.L3, evidenceIds: ["E10"] },
+  { id: "b2r5w1", location: LOCATIONS.L3, evidenceIds: ["E04"] },
+  { id: "q7s1d3", location: LOCATIONS.L3, evidenceIds: ["E05"] },
+  { id: "t6y8m2", location: LOCATIONS.L3, evidenceIds: ["E06"] },
   // 채소장 연구실 (용의자 B) — 3개
-  { id: "m1d7k5", location: LOCATIONS.L4, evidenceIds: ["E01"] },
-  { id: "n4v8z3", location: LOCATIONS.L4, evidenceIds: ["E09"] },
-  { id: "w3n5k7", location: LOCATIONS.L4, evidenceIds: ["E11"] },
+  { id: "m1d7k5", location: LOCATIONS.L4, evidenceIds: ["E13"] },
+  { id: "n4v8z3", location: LOCATIONS.L4, evidenceIds: ["E14"] },
+  { id: "w3n5k7", location: LOCATIONS.L4, evidenceIds: ["E15"] },
 ];
