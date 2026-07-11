@@ -116,6 +116,7 @@ function AdminPanel() {
   const [rollingBackAllEvidence, setRollingBackAllEvidence] = useState(false);
   const [resettingAllEvidence, setResettingAllEvidence] = useState(false);
   const [openAllEvidenceSnapshot, setOpenAllEvidenceSnapshot] = useState<string[] | null>(null);
+  const [showResetEvidenceConfirm, setShowResetEvidenceConfirm] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState("");
   const [pairings, setPairings] = useState<Record<string, string>>({});
   const [pairA, setPairA] = useState("");
@@ -410,6 +411,7 @@ function AdminPanel() {
       .eq("pair_id", GLOBAL_PAIR_ID)
       .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE);
     setOpenAllEvidenceSnapshot(null);
+    setShowResetEvidenceConfirm(false);
     setResetConfirmText("");
     resetAll();
     await fetchTeams();
@@ -559,7 +561,22 @@ function AdminPanel() {
                 >
                   {rollingBackAllEvidence ? "되돌리는 중..." : "이전 상태로 되돌리기"}
                 </button>
-                <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    setShowResetEvidenceConfirm(true);
+                    setResetConfirmText("");
+                  }}
+                  disabled={openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
+                  className="rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  {resettingAllEvidence ? "초기화 중..." : "단서 전체 초기화"}
+                </button>
+              </div>
+              {showResetEvidenceConfirm && (
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 space-y-2">
+                  <p className="text-xs leading-relaxed text-red-200/80">
+                    모든 조의 수집 단서와 전역 공개 단서를 삭제합니다. 실행하려면 아래에 초기화를 입력하세요.
+                  </p>
                   <input
                     value={resetConfirmText}
                     onChange={(e) => setResetConfirmText(e.target.value)}
@@ -572,12 +589,22 @@ function AdminPanel() {
                     disabled={resetConfirmText.trim() !== "초기화" || openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
                     className="w-full rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
-                    {resettingAllEvidence ? "초기화 중..." : "단서 전체 초기화"}
+                    {resettingAllEvidence ? "초기화 중..." : "초기화 확정"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowResetEvidenceConfirm(false);
+                      setResetConfirmText("");
+                    }}
+                    disabled={resettingAllEvidence}
+                    className="w-full rounded border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-bold text-zinc-400 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  >
+                    취소
                   </button>
                 </div>
-              </div>
+              )}
               <p className="text-[11px] leading-relaxed text-zinc-600">
-                되돌리기는 마지막 전체 개방으로 추가된 전역 공개 단서만 제거합니다. 전체 초기화는 모든 조의 수집 단서와 전역 공개 단서를 삭제하며, 실행하려면 입력칸에 초기화를 입력해야 합니다.
+                되돌리기는 마지막 전체 개방으로 추가된 전역 공개 단서만 제거합니다. 전체 초기화는 모든 조의 수집 단서와 전역 공개 단서를 삭제합니다.
               </p>
             </div>
           </>
