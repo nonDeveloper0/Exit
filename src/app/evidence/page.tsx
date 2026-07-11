@@ -242,30 +242,37 @@ function EvidenceContent() {
                         className="w-full accent-emerald-400"
                         aria-label="통화녹음 재생 위치"
                       />
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           type="button"
                           onClick={() => handleAudioPlay(e.id, e.audioUrl!)}
                           disabled={activeAudioId === e.id && isPlaying}
-                          className="rounded border border-emerald-500/40 bg-emerald-500/15 px-3 py-2 text-xs font-bold text-emerald-200 disabled:opacity-40"
+                          className="flex h-10 w-11 items-center justify-center rounded border border-emerald-500/40 bg-emerald-500/15 text-emerald-200 transition-colors disabled:opacity-40"
+                          aria-label="통화녹음 재생"
+                          title="재생"
                         >
-                          재생
+                          <span className="ml-0.5 h-0 w-0 border-y-[7px] border-l-[11px] border-y-transparent border-l-current" />
                         </button>
                         <button
                           type="button"
                           onClick={handleAudioPause}
                           disabled={activeAudioId !== e.id || !isPlaying}
-                          className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-bold text-zinc-300 disabled:opacity-40"
+                          className="flex h-10 w-11 items-center justify-center gap-1 rounded border border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors disabled:opacity-40"
+                          aria-label="통화녹음 일시정지"
+                          title="일시정지"
                         >
-                          일시정지
+                          <span className="h-4 w-1.5 rounded-sm bg-current" />
+                          <span className="h-4 w-1.5 rounded-sm bg-current" />
                         </button>
                         <button
                           type="button"
                           onClick={handleAudioReset}
                           disabled={activeAudioId !== e.id}
-                          className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-bold text-zinc-300 disabled:opacity-40"
+                          className="flex h-10 w-11 items-center justify-center rounded border border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors disabled:opacity-40"
+                          aria-label="통화녹음 정지 후 처음으로"
+                          title="정지"
                         >
-                          리셋
+                          <span className="h-4 w-4 rounded-[2px] bg-current" />
                         </button>
                       </div>
                     </div>
