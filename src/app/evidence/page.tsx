@@ -10,7 +10,10 @@ function EvidenceContent() {
   const { collected } = useTeamEvidence();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const searchParams = useSearchParams();
@@ -44,21 +47,68 @@ function EvidenceContent() {
     return id.replace("E", "");
   }
 
-  function handleAudioReplay(id: string, audioUrl: string) {
-    if (playingId === id) {
-      audioRef.current?.pause();
-      audioRef.current = null;
-      setPlayingId(null);
-      return;
-    }
+  function formatTime(seconds: number) {
+    if (!Number.isFinite(seconds)) return "0:00";
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${minutes}:${remainingSeconds}`;
+  }
+
+  function loadAudio(id: string, audioUrl: string) {
+    if (audioRef.current && activeAudioId === id) return audioRef.current;
 
     audioRef.current?.pause();
     const audio = new Audio(audioUrl);
     audioRef.current = audio;
-    setPlayingId(id);
-    audio.onended = () => setPlayingId(null);
-    audio.onerror = () => setPlayingId(null);
-    void audio.play().catch(() => setPlayingId(null));
+    setActiveAudioId(id);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(false);
+
+    audio.onloadedmetadata = () => setDuration(audio.duration || 0);
+    audio.ontimeupdate = () => setCurrentTime(audio.currentTime || 0);
+    audio.onplay = () => setIsPlaying(true);
+    audio.onpause = () => setIsPlaying(false);
+    audio.onended = () => {
+      audio.currentTime = 0;
+      setCurrentTime(0);
+      setIsPlaying(false);
+    };
+    audio.onerror = () => {
+      setIsPlaying(false);
+      setActiveAudioId(null);
+      setCurrentTime(0);
+      setDuration(0);
+    };
+
+    return audio;
+  }
+
+  function handleAudioPlay(id: string, audioUrl: string) {
+    const audio = loadAudio(id, audioUrl);
+    void audio.play().catch(() => setIsPlaying(false));
+  }
+
+  function handleAudioPause() {
+    audioRef.current?.pause();
+  }
+
+  function handleAudioReset() {
+    if (!audioRef.current) return;
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    setCurrentTime(0);
+  }
+
+  function handleAudioSeek(value: string) {
+    const nextTime = Number(value);
+    if (!Number.isFinite(nextTime)) return;
+    if (audioRef.current) {
+      audioRef.current.currentTime = nextTime;
+    }
+    setCurrentTime(nextTime);
   }
 
   return (
@@ -171,17 +221,54 @@ function EvidenceContent() {
                     {e.description}
                   </p>
                   {e.audioUrl && (
-                    <button
-                      type="button"
-                      onClick={() => handleAudioReplay(e.id, e.audioUrl!)}
-                      className={`w-full rounded-lg border px-4 py-3 text-sm font-bold transition-colors ${
-                        playingId === e.id
-                          ? "border-red-500/30 bg-red-500/10 text-red-300"
-                          : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                      }`}
-                    >
-                      {playingId === e.id ? "통화녹음 정지" : "통화녹음 내역 다시 듣기"}
-                    </button>
+                    <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 space-y-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-mono font-bold text-emerald-300">
+                          통화녹음 내역
+                        </span>
+                        <span className="text-xs font-mono text-zinc-400">
+                          {formatTime(activeAudioId === e.id ? currentTime : 0)} /{" "}
+                          {formatTime(activeAudioId === e.id ? duration : 0)}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max={activeAudioId === e.id && duration > 0 ? duration : 1}
+                        step="0.1"
+                        value={activeAudioId === e.id ? Math.min(currentTime, duration || 1) : 0}
+                        onChange={(event) => handleAudioSeek(event.target.value)}
+                        disabled={activeAudioId !== e.id || duration <= 0}
+                        className="w-full accent-emerald-400"
+                        aria-label="통화녹음 재생 위치"
+                      />
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleAudioPlay(e.id, e.audioUrl!)}
+                          disabled={activeAudioId === e.id && isPlaying}
+                          className="rounded border border-emerald-500/40 bg-emerald-500/15 px-3 py-2 text-xs font-bold text-emerald-200 disabled:opacity-40"
+                        >
+                          재생
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleAudioPause}
+                          disabled={activeAudioId !== e.id || !isPlaying}
+                          className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-bold text-zinc-300 disabled:opacity-40"
+                        >
+                          일시정지
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleAudioReset}
+                          disabled={activeAudioId !== e.id}
+                          className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-bold text-zinc-300 disabled:opacity-40"
+                        >
+                          리셋
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
