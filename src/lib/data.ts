@@ -64,8 +64,8 @@ export interface QrCode {
 export const EVIDENCE: Evidence[] = [
   {
     id: INCOMING_CALL_EVIDENCE_ID,
-    title: "음성 메시지",
-    description: "발신번호 표시제한 전화에서 들려온 음성 메시지. 다시 들을 수 있도록 증거함에 저장됐다.",
+    title: "통화녹음 내역",
+    description: "발신번호 표시제한 전화에서 녹음된 통화 내역. 증거함에서 다시 들을 수 있다.",
     audioUrl: INCOMING_CALL_AUDIO_URL,
   },
   {

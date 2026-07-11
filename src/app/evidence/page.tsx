@@ -3,13 +3,15 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { EVIDENCE } from "@/lib/data";
+import { EVIDENCE, INCOMING_CALL_EVIDENCE_ID } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 function EvidenceContent() {
   const { collected } = useTeamEvidence();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const searchParams = useSearchParams();
   const focusId = searchParams.get("focus");
@@ -30,6 +32,34 @@ function EvidenceContent() {
   }, [focusId, collected]);
 
   const progress = EVIDENCE.length > 0 ? (collected.length / EVIDENCE.length) * 100 : 0;
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
+
+  function getDisplayId(id: string) {
+    if (id === INCOMING_CALL_EVIDENCE_ID) return "CALL";
+    return id.replace("E", "");
+  }
+
+  function handleAudioReplay(id: string, audioUrl: string) {
+    if (playingId === id) {
+      audioRef.current?.pause();
+      audioRef.current = null;
+      setPlayingId(null);
+      return;
+    }
+
+    audioRef.current?.pause();
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+    setPlayingId(id);
+    audio.onended = () => setPlayingId(null);
+    audio.onerror = () => setPlayingId(null);
+    void audio.play().catch(() => setPlayingId(null));
+  }
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
@@ -90,7 +120,7 @@ function EvidenceContent() {
                         : "bg-zinc-800 text-zinc-600"
                     }`}
                   >
-                    {e.id.replace("E", "")}
+                    {getDisplayId(e.id)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p
@@ -140,6 +170,19 @@ function EvidenceContent() {
                   <p className="text-xs text-zinc-400 font-mono leading-relaxed">
                     {e.description}
                   </p>
+                  {e.audioUrl && (
+                    <button
+                      type="button"
+                      onClick={() => handleAudioReplay(e.id, e.audioUrl!)}
+                      className={`w-full rounded-lg border px-4 py-3 text-sm font-bold transition-colors ${
+                        playingId === e.id
+                          ? "border-red-500/30 bg-red-500/10 text-red-300"
+                          : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                      }`}
+                    >
+                      {playingId === e.id ? "통화녹음 정지" : "통화녹음 내역 다시 듣기"}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
