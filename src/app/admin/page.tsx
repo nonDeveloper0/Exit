@@ -8,6 +8,7 @@ import { EVIDENCE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_T
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 
 const ADMIN_PASSWORD = "0000";
+const OPEN_ALL_EVIDENCE_SNAPSHOT_KEY = "exit2026_admin_open_all_evidence_snapshot";
 
 interface TeamRow {
   pairId: string;
@@ -95,6 +96,9 @@ function AdminPanel() {
   const [incomingCallActive, setIncomingCallActive] = useState(false);
   const [togglingIncomingCall, setTogglingIncomingCall] = useState(false);
   const [openingAllEvidence, setOpeningAllEvidence] = useState(false);
+  const [rollingBackAllEvidence, setRollingBackAllEvidence] = useState(false);
+  const [resettingAllEvidence, setResettingAllEvidence] = useState(false);
+  const [openAllEvidenceSnapshot, setOpenAllEvidenceSnapshot] = useState<string[] | null>(null);
   const [pairings, setPairings] = useState<Record<string, string>>({});
   const [pairA, setPairA] = useState("");
   const [pairB, setPairB] = useState("");
@@ -103,6 +107,15 @@ function AdminPanel() {
   useEffect(() => {
     const team = getTeamInfo();
     if (team) setMyPairId(team.teamNumber);
+
+    const savedSnapshot = localStorage.getItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY);
+    if (savedSnapshot) {
+      try {
+        setOpenAllEvidenceSnapshot(JSON.parse(savedSnapshot) as string[]);
+      } catch {
+        localStorage.removeItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -264,16 +277,64 @@ function AdminPanel() {
   async function openAllEvidence() {
     setOpeningAllEvidence(true);
     const createdAt = new Date().toISOString();
+    const evidenceIds = EVIDENCE.map((e) => e.id);
+    const { data: existingGlobalEvidence } = await supabase
+      .from("team_evidence_items")
+      .select("evidence_id")
+      .eq("pair_id", GLOBAL_PAIR_ID)
+      .eq("type", "collected")
+      .in("evidence_id", evidenceIds);
+    const snapshot = (existingGlobalEvidence ?? []).map((row) => row.evidence_id as string);
+    localStorage.setItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY, JSON.stringify(snapshot));
+    setOpenAllEvidenceSnapshot(snapshot);
     await supabase.from("team_evidence_items").upsert(
-      EVIDENCE.map((e) => ({
+      evidenceIds.map((evidenceId) => ({
         pair_id: GLOBAL_PAIR_ID,
-        evidence_id: e.id,
+        evidence_id: evidenceId,
         type: "collected",
         created_at: createdAt,
       })),
       { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
     );
     setOpeningAllEvidence(false);
+  }
+
+  async function rollbackOpenAllEvidence() {
+    if (!openAllEvidenceSnapshot) return;
+    const evidenceIds = EVIDENCE.map((e) => e.id);
+    const snapshot = new Set(openAllEvidenceSnapshot);
+    const idsToRemove = evidenceIds.filter((id) => !snapshot.has(id));
+    if (idsToRemove.length === 0) {
+      localStorage.removeItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY);
+      setOpenAllEvidenceSnapshot(null);
+      return;
+    }
+
+    setRollingBackAllEvidence(true);
+    await supabase
+      .from("team_evidence_items")
+      .delete()
+      .eq("pair_id", GLOBAL_PAIR_ID)
+      .eq("type", "collected")
+      .in("evidence_id", idsToRemove);
+    localStorage.removeItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY);
+    setOpenAllEvidenceSnapshot(null);
+    setRollingBackAllEvidence(false);
+  }
+
+  async function resetAllEvidenceItems() {
+    if (!window.confirm("모든 조와 전역 공개 단서 기록을 초기화할까요?")) return;
+    setResettingAllEvidence(true);
+    await supabase
+      .from("team_evidence_items")
+      .delete()
+      .eq("type", "collected")
+      .in("evidence_id", EVIDENCE.map((e) => e.id));
+    localStorage.removeItem(OPEN_ALL_EVIDENCE_SNAPSHOT_KEY);
+    setOpenAllEvidenceSnapshot(null);
+    resetAll();
+    await fetchTeams();
+    setResettingAllEvidence(false);
   }
 
   async function handleReset(pairId: string) {
@@ -398,14 +459,38 @@ function AdminPanel() {
                 <p className="text-xs text-zinc-500">
                   전체 참가자에게 증거함의 모든 단서를 즉시 공개합니다.
                 </p>
+                {openAllEvidenceSnapshot && (
+                  <p className="text-xs text-amber-400/80">
+                    직전 개방 전 상태가 저장되어 있습니다.
+                  </p>
+                )}
               </div>
               <button
                 onClick={openAllEvidence}
-                disabled={openingAllEvidence}
+                disabled={openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
                 className="w-full rounded bg-emerald-500 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 {openingAllEvidence ? "개방 중..." : "모든 단서 개방"}
               </button>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button
+                  onClick={rollbackOpenAllEvidence}
+                  disabled={!openAllEvidenceSnapshot || openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
+                  className="rounded border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 text-sm font-bold text-amber-300 hover:bg-amber-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  {rollingBackAllEvidence ? "되돌리는 중..." : "이전 상태로 되돌리기"}
+                </button>
+                <button
+                  onClick={resetAllEvidenceItems}
+                  disabled={openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
+                  className="rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  {resettingAllEvidence ? "초기화 중..." : "단서 전체 초기화"}
+                </button>
+              </div>
+              <p className="text-[11px] leading-relaxed text-zinc-600">
+                되돌리기는 마지막 전체 개방으로 추가된 전역 공개 단서만 제거합니다. 전체 초기화는 모든 조의 수집 단서와 전역 공개 단서를 삭제합니다.
+              </p>
             </div>
           </>
         )}
