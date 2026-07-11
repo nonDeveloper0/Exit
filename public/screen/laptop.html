@@ -120,7 +120,7 @@
   .pw-row {
     margin-top: 12px;
     display: grid;
-    grid-template-columns: 1fr 44px;
+    grid-template-columns: 1fr 44px 44px;
     gap: 4px;
     border-radius: 3px;
     overflow: hidden;
@@ -143,6 +143,18 @@
     font-size: 21px;
   }
   .pw-btn:active { background: #005a9e; }
+  .pw-eye {
+    border: 0;
+    background: rgba(255,255,255,.92);
+    color: #4b5563;
+    display: grid;
+    place-items: center;
+  }
+  .pw-eye:active { background: rgba(230,235,240,.95); }
+  .pw-eye svg { width: 18px; height: 18px; display: block; }
+  .pw-eye .icon-slash { display: none; }
+  .pw-eye.on .icon-open { display: none; }
+  .pw-eye.on .icon-slash { display: block; }
   .pw-error { height: 18px; margin-top: 8px; color: #ffd6d6; font-size: 12px; }
   .shake { animation: shake .35s; }
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 50%{transform:translateX(8px)} 75%{transform:translateX(-4px)} }
@@ -613,7 +625,11 @@
         <option value="6">6조</option>
       </select>
       <div class="pw-row">
-        <input class="pw-input" id="pwInput" type="text" inputmode="numeric" placeholder="암호" maxlength="6" />
+        <input class="pw-input" id="pwInput" type="password" inputmode="numeric" placeholder="암호" maxlength="6" />
+        <button class="pw-eye" id="pwEye" type="button" onclick="togglePw()" aria-label="암호 표시" aria-pressed="false">
+          <svg class="icon-open" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+          <svg class="icon-slash" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" /></svg>
+        </button>
         <button class="pw-btn" type="button" onclick="tryUnlock()" aria-label="로그인">›</button>
       </div>
       <div class="pw-error" id="pwError"></div>
@@ -755,9 +771,16 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const UNLOCK_PASSWORD = "980721";
   const XLS_PASSWORD = "1980";
+  // 비밀장부 열람 시 선택한 조 보관함에 저장될 증거 ID (앱 data.ts의 E03 비밀장부)
+  const XLS_EVIDENCE_ID = "E03";
+  // Supabase 연결 (anon 공개키 — 앱과 동일 값)
+  const SUPABASE_URL = "https://egnkhewpeyzcwdtstdxa.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   let teamNo = null;
   let idleTimer = null;
 
@@ -796,6 +819,17 @@
     if (event.key === "Enter") tryUnlock();
   });
 
+  function togglePw() {
+    const input = document.getElementById("pwInput");
+    const btn = document.getElementById("pwEye");
+    const reveal = input.type === "password";
+    input.type = reveal ? "text" : "password";
+    btn.classList.toggle("on", reveal);
+    btn.setAttribute("aria-pressed", reveal ? "true" : "false");
+    btn.setAttribute("aria-label", reveal ? "암호 숨기기" : "암호 표시");
+    input.focus();
+  }
+
   function openXls() {
     resetIdle();
     if (!teamNo) return;
@@ -813,7 +847,7 @@
     if (input.value.trim() === XLS_PASSWORD) {
       closeXlsPw();
       document.getElementById("winXls").classList.add("open");
-      collect("비밀장부", "fileXls");
+      collect("비밀장부", "fileXls", XLS_EVIDENCE_ID);
     } else {
       err.textContent = "암호가 일치하지 않습니다.";
       input.value = "";
@@ -840,14 +874,30 @@
     document.getElementById(id).classList.remove("open");
   }
 
-  function collect(name, iconId) {
+  function collect(name, iconId, evidenceId) {
     const icon = document.getElementById(iconId);
     if (icon.classList.contains("done")) return;
     icon.classList.add("done");
+    saveToTeam(evidenceId);
     const toast = document.getElementById("toast");
     toast.innerHTML = name + " 수집 완료<small>" + teamNo + "조 수집함으로 전송됨</small>";
     toast.classList.add("show");
     setTimeout(() => toast.classList.remove("show"), 2400);
+  }
+
+  async function saveToTeam(evidenceId) {
+    if (!teamNo || !evidenceId) return;
+    try {
+      const { error } = await sb
+        .from("team_evidence_items")
+        .upsert(
+          { pair_id: String(teamNo), evidence_id: evidenceId, type: "collected" },
+          { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
+        );
+      if (error) console.error("수집 저장 실패:", error.message);
+    } catch (e) {
+      console.error("수집 저장 오류:", e);
+    }
   }
 
   function logout() {
@@ -857,6 +907,9 @@
     document.getElementById("lockScreen").classList.add("active");
     document.getElementById("teamSelect").value = "";
     document.getElementById("pwInput").value = "";
+    document.getElementById("pwInput").type = "password";
+    document.getElementById("pwEye").classList.remove("on");
+    document.getElementById("pwEye").setAttribute("aria-pressed", "false");
     document.getElementById("pwError").textContent = "";
     teamNo = null;
     clearTimeout(idleTimer);

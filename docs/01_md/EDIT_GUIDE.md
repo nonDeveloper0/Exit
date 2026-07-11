@@ -379,16 +379,20 @@ https://(배포주소)/screen/laptop.html
 
 - **공통 암호 변경:** `<script>` 안의 `const UNLOCK_PASSWORD = "980721";` 값을 수정.
 - **엑셀(비밀장부) 암호 변경:** 같은 위치 `const XLS_PASSWORD = "1980";` 값을 수정.
+- **수집되는 증거 변경:** `const XLS_EVIDENCE_ID = "E03";` — 비밀장부 열람 시 조 보관함에 저장되는 증거 ID(앱 `data.ts` 기준).
 - **조 개수 변경:** 잠금화면의 `<select id="teamSelect">` 안 `<option>` 목록을 늘리거나 줄임
   (현재 1조~6조). 예: 8조까지면 `<option value="7">7조</option>` `<option value="8">8조</option>` 추가.
 - **화면 상단 데모 배너**(`class="demo-banner"`)에 암호가 노출돼 있음 — 실제 운영 시 이 배너 줄을 지우거나 가리세요.
 - 잠금 해제 퀴즈 영역은 HTML 주석(`<!-- ... -->`)으로 남겨둠 — 되살리려면 주석만 해제.
 
-> ⚠️ 아직 실제 Supabase 수집 연동은 안 돼 있음(토스트로 "N조 수집함 전송"만 표시). 조 증거함에
-> 실제 저장하려면 `13_PUZZLE_DESIGN.md` / `11_DEVICE_UI_PLAN.md`의 `/device` 연동 작업 필요.
+**실제 조 보관함 저장 (연동 완료):** 비밀장부 열람에 성공하면 `supabase-js`(CDN)로
+`team_evidence_items`에 `{ pair_id: 선택한 조, evidence_id: E03, type: "collected" }`를 저장합니다.
+선택한 조 참가자 폰의 증거함에 실시간 반영됩니다. 조 ID는 앱 등록과 동일한 `"1"`~`"6"` 형식이라
+드롭다운 값과 그대로 일치합니다. Supabase 주소/키(`SUPABASE_URL`, `SUPABASE_ANON_KEY`)는
+앱과 동일한 공개값이라 보통 건드릴 필요 없습니다.
 
-> ⚠️ 현재는 **정적 화면(연출용)**입니다. "노트북/아이패드에서 연 걸 조 증거함에 자동 수집"
-> (Supabase 연동)은 미구현 — `11_DEVICE_UI_PLAN.md` / `13_PUZZLE_DESIGN.md` 참고.
+> ⚠️ **아이패드 화면(`ipad.html`)은 아직 연출용 정적 화면**입니다(수집 연동 없음).
+> 노트북(`laptop.html`)만 위와 같이 실제 저장이 연동돼 있습니다.
 
 ---
 
