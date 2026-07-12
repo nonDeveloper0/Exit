@@ -14,3 +14,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - BOM(`EF BB BF`)을 파일 앞에 붙이지 마라. Next.js/Vercel 표준은 BOM 없는 UTF-8이다.
 - 줄바꿈은 LF. `.gitattributes`가 커밋 시 자동 정규화한다.
 - 규칙은 저장소의 `.gitattributes`, `.editorconfig`에 고정돼 있다 — 이를 우회하지 마라.
+
+# 작업 진행 기록
+
+- 세션을 시작하면 코드 작업 전에 `progress.md`를 먼저 읽고 현재 상태와 맥락을 파악한다.
+- 작업을 시작할 때 무엇을 할 것인지 `progress.md`에 기록한다.
+- 작업을 종료할 때 완료 내용과 변경 파일을 `progress.md`에 기록한다.
+- 위 기록은 사용자에게 별도 허가를 요청하지 않고 자동으로 업데이트한다. 사용자가 명시적으로 중단을 요청하지 않는 한 생략하지 않는다.

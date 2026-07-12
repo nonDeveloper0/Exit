@@ -1,5 +1,10 @@
 # EXIT 2026 — 진행 현황
 
+## 진행 기록 운영 규칙
+
+- 모든 작업은 시작 시 작업 예정 내용을, 종료 시 완료 내용과 변경 파일을 이 문서에 기록한다.
+- 이 업데이트는 별도 사용자 허가를 요청하지 않고 자동으로 수행한다.
+
 ## 다른 로컬에서 시작하는 법
 
 ```bash
@@ -268,6 +273,23 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   `<article class="pdf-page">`가 제목만 있고 본문은 `내용 준비 중` 상태. 단서팀 확정본으로 채우기.
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
+
+- [x] 제한 시간 타이머 (관리자 브로드캐스트 카운트다운 + 종료 경보) (2026-07-12)
+  - `/admin`에 **제한 시간 타이머** 섹션 추가: 분 입력 + 5/10/15/30 프리셋 → `타이머 시작` / `종료`
+  - 시작 시 **모든 참가자 기기 상단에 카운트다운 배너** 표시(1분 이하 빨간색), 0이 되면 각 기기에서 **경보음 약 4초**(Android 진동) + `시간 종료` 표시
+  - 동기화: 스키마 변경 없이 기존 전역 마커 재사용 — `team_evidence_items`(`pair_id=__global`, `type='timer'`) 1행의 `created_at`에 **종료 시각(ISO)** 저장. 모든 기기가 `remaining = endsAt - now`로 동일 계산. `종료`는 마커 삭제
+  - 구독은 기존 범용 훅 `useBroadcastEvent` 재사용. 경보는 이미 끝난 타이머로 뒤늦게 접속/새로고침한 기기에서 안 울리도록 "실행 중을 본 이벤트"에서만 1회 재생
+  - 경보음은 `ringtone.ts`에 Web Audio 합성 `playAlarm` 추가(앱 전역 `armAudioUnlock` 재사용)
+  - 신규 파일: `src/components/TimerOverlay.tsx` / 수정: `src/lib/data.ts`(TIMER 상수), `src/lib/ringtone.ts`(`playAlarm`/`stopAlarm`), `src/app/layout.tsx`, `src/app/admin/page.tsx`, `docs/01_md/EDIT_GUIDE.md`(13절)
+
+- [x] 나팀장 노트북 PDF 열기 UX 수정 (2026-07-12)
+  - laptop 화면에서 PDF 파일 단일 클릭은 선택만 하고, 더블클릭해야 PDF 창이 열리도록 변경
+  - 작업표시줄 PDF 버튼도 단일 클릭 우회가 되지 않도록 더블클릭 열기로 맞춤
+  - 수정 파일: `public/screen/laptop.html`, `progress.md`
+
+- [x] 진행 기록 자동 업데이트 규칙 명문화 (2026-07-12)
+  - 작업 시작·종료 시 `progress.md`를 사용자 별도 허가 없이 자동 업데이트하도록 `CLAUDE.md`, `AGENTS.md`, `progress.md`에 명시
+  - 수정 파일: `CLAUDE.md`, `AGENTS.md`, `progress.md`
 
 - [x] 수신전화 — 수신 전용 기기(공기계) 1대에만 오도록 변경 (B안, 2026-07-12)
   - 기존: admin `전화 걸기` → 전역 마커라 **모든 참가자 기기가 같이 울림**

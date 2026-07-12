@@ -172,7 +172,7 @@
     background: transparent;
     position: relative;
   }
-  .file-icon:hover, .file-icon:focus-visible {
+  .file-icon:hover, .file-icon:focus-visible, .file-icon.selected {
     background: rgba(255,255,255,.16);
     border-color: rgba(255,255,255,.34);
     outline: 0;
@@ -476,7 +476,7 @@
 
 <div class="screen" id="desktop">
   <main class="desktop-area" aria-label="Windows 바탕 화면">
-    <button class="file-icon" id="filePdf" type="button" onclick="openPdf()">
+    <button class="file-icon" id="filePdf" type="button" onclick="selectFile('filePdf')" ondblclick="openPdf()">
       <span class="icon-art pdf"></span>
       <span class="label">지문감식 결과보고서.pdf</span>
     </button>
@@ -487,7 +487,7 @@
     <div class="task-center">
       <button class="start-btn" type="button" aria-label="시작"><span class="start-logo"><span></span><span></span><span></span><span></span></span></button>
       <div class="task-search">검색</div>
-      <button class="task-app" type="button" onclick="openPdf()" title="지문감식 결과보고서">PDF</button>
+      <button class="task-app" type="button" ondblclick="openPdf()" title="지문감식 결과보고서">PDF</button>
     </div>
     <div class="tray"><span>Wi-Fi</span><span>🔊</span><span id="taskClock">22:47</span></div>
   </footer>
@@ -574,6 +574,12 @@
     btn.setAttribute("aria-pressed", reveal ? "true" : "false");
     btn.setAttribute("aria-label", reveal ? "암호 숨기기" : "암호 표시");
     input.focus();
+  }
+
+  function selectFile(iconId) {
+    resetIdle();
+    document.querySelectorAll(".file-icon.selected").forEach(el => el.classList.remove("selected"));
+    document.getElementById(iconId).classList.add("selected");
   }
 
   function openPdf() {

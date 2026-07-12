@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
-import { EVIDENCE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE } from "@/lib/data";
+import { EVIDENCE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, TIMER_EVENT_ID, TIMER_EVENT_TYPE } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
+import { useBroadcastEvent } from "@/lib/useBroadcastEvent";
 
 const ADMIN_PASSWORD = "0000";
 const OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE = "admin_open_all_snapshot";
@@ -125,6 +126,10 @@ function AdminPanel() {
   const [pairA, setPairA] = useState("");
   const [pairB, setPairB] = useState("");
   const [savingPair, setSavingPair] = useState(false);
+  const timerEvent = useBroadcastEvent(TIMER_EVENT_ID, TIMER_EVENT_TYPE);
+  const [timerMinutes, setTimerMinutes] = useState("15");
+  const [togglingTimer, setTogglingTimer] = useState(false);
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
     const team = getTeamInfo();
@@ -287,6 +292,45 @@ function AdminPanel() {
     delete newPairings[b];
     await supabase.from("game_state").update({ pairings: newPairings }).eq("id", "singleton");
     setPairings(newPairings);
+  }
+
+  // 타이머 진행 중에는 남은 시간을 매초 갱신
+  useEffect(() => {
+    if (!timerEvent.active) return;
+    const id = setInterval(() => setNowMs(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [timerEvent.active]);
+
+  const timerEndsAt = timerEvent.eventId ? Date.parse(timerEvent.eventId) : null;
+  const timerRemaining = timerEndsAt !== null ? Math.max(0, timerEndsAt - nowMs) : 0;
+  const timerRunning = timerEvent.active && timerEndsAt !== null;
+
+  async function startTimer() {
+    const minutes = parseInt(timerMinutes, 10);
+    if (!minutes || minutes <= 0) return;
+    setTogglingTimer(true);
+    const endsAt = new Date(Date.now() + minutes * 60_000).toISOString();
+    await supabase.from("team_evidence_items").upsert(
+      {
+        pair_id: GLOBAL_PAIR_ID,
+        evidence_id: TIMER_EVENT_ID,
+        type: TIMER_EVENT_TYPE,
+        created_at: endsAt,
+      },
+      { onConflict: "pair_id,evidence_id,type" }
+    );
+    setTogglingTimer(false);
+  }
+
+  async function stopTimer() {
+    setTogglingTimer(true);
+    await supabase
+      .from("team_evidence_items")
+      .delete()
+      .eq("pair_id", GLOBAL_PAIR_ID)
+      .eq("evidence_id", TIMER_EVENT_ID)
+      .eq("type", TIMER_EVENT_TYPE);
+    setTogglingTimer(false);
   }
 
   async function setVoteOpen(open: boolean) {
@@ -610,6 +654,67 @@ function AdminPanel() {
                 </div>
               </div>
             )}
+            {/* Countdown timer */}
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold text-zinc-200">제한 시간 타이머</p>
+                  <p className={`text-xs font-mono ${timerRunning ? "text-amber-400" : "text-zinc-500"}`}>
+                    {timerRunning
+                      ? timerRemaining > 0
+                        ? `● 남은 시간 ${String(Math.floor(Math.ceil(timerRemaining / 1000) / 60)).padStart(2, "0")}:${String(Math.ceil(timerRemaining / 1000) % 60).padStart(2, "0")}`
+                        : "● 시간 종료"
+                      : "○ 대기 중"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={timerMinutes}
+                  onChange={(e) => setTimerMinutes(e.target.value.replace(/\D/g, "").slice(0, 3))}
+                  disabled={togglingTimer}
+                  className="w-20 rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-center text-lg text-zinc-100 focus:border-amber-400 focus:outline-none disabled:opacity-40"
+                  aria-label="제한 시간(분)"
+                />
+                <span className="text-sm text-zinc-400">분</span>
+                <div className="flex flex-1 justify-end gap-1.5">
+                  {[5, 10, 15, 30].map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setTimerMinutes(String(m))}
+                      disabled={togglingTimer}
+                      className="rounded border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-700 disabled:opacity-40"
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={startTimer}
+                  disabled={togglingTimer || !parseInt(timerMinutes, 10)}
+                  className="flex-1 rounded bg-amber-400 px-3 py-2 text-sm font-bold text-zinc-900 hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  {togglingTimer ? "..." : timerRunning ? "타이머 재시작" : "타이머 시작"}
+                </button>
+                <button
+                  onClick={stopTimer}
+                  disabled={togglingTimer || !timerRunning}
+                  className="flex-1 rounded border border-zinc-600 bg-zinc-800 px-3 py-2 text-sm font-bold text-zinc-300 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  {togglingTimer ? "..." : "종료"}
+                </button>
+              </div>
+              <p className="text-[11px] leading-relaxed text-zinc-600">
+                시작하면 모든 참가자 기기 상단에 카운트다운이 표시되고, 0이 되면 경보음이 울립니다.
+              </p>
+            </div>
+
             {/* Evidence unlock */}
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
               <div className="space-y-0.5">
