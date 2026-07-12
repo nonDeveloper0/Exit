@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { EVIDENCE, LOCATIONS, QR_CODES } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
@@ -64,18 +65,24 @@ export default function MainPage() {
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="text-xs text-zinc-500">QR 코드를 스캔해 현장 곳곳의 증거를 수집하세요.</p>
+        <p className="text-xs text-zinc-500">QR 스캔 또는 정답 입력으로 현장 곳곳의 증거를 수집하세요.</p>
       </div>
 
       {/* Instructions */}
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 space-y-2">
         <h2 className="text-sm font-semibold text-amber-400">수사 방법</h2>
         <ol className="text-sm text-zinc-400 space-y-1.5 list-decimal list-inside">
-          <li>각 장소에 있는 QR 코드를 스캔한다</li>
-          <li>해당 구역의 증거를 수집한다</li>
+          <li>각 장소의 QR을 스캔하거나 현장 문제의 정답을 입력한다</li>
+          <li>해당 단서를 수집한다</li>
           <li>용의자 파일을 검토한다</li>
           <li>범인을 선택하고 최종 추리를 제출한다</li>
         </ol>
+        <Link
+          href="/solve"
+          className="inline-flex items-center justify-center rounded bg-amber-400 px-3 py-2 text-xs font-bold text-zinc-900 hover:bg-amber-300 active:scale-95 transition-all"
+        >
+          정답 입력
+        </Link>
       </div>
 
       {/* Location Evidence Status */}

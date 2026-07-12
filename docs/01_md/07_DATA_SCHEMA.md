@@ -37,6 +37,19 @@
 }
 ```
 
+## Puzzle
+```ts
+{
+  id: string;           // 문제 ID, 예: "P01"
+  question: string;     // 문제 문구. showInList=true면 /solve에 표시
+  answer: string;       // 정답. 비교 시 공백/대소문자 무시
+  reward:
+    | { type: "evidence"; evidenceId: string } // 단서 수집, 조 동기화
+    | { type: "hint"; text: string };          // 힌트 표시, 현재 기기만
+  showInList?: boolean;
+}
+```
+
 ## LOCATIONS 상수
 ```ts
 export const LOCATIONS = {

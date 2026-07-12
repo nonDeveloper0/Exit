@@ -239,11 +239,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 - **조 구도**: 혼합 — 조별 기본 + 짝 조 공유(`pairings`=독극물 레시피) + 전체 공개(`COMMON_EVIDENCE`=방송)
 - **재활용**: `pairings`, `COMMON_EVIDENCE`, 심문권 그대로. 아직 코드 구현 전 = 기획 문서만 반영
 
-### 퀴즈/코드 답 입력 방식 (2026-07-12, 보류 결정)
+### 퀴즈/코드 답 입력 방식 (2026-07-13, 1차 구현 완료)
 
-- **현 방식 유지**: 퀴즈(잠긴 증거)의 답 입력창은 **QR 페이지(`/qr/[slug]`)에만** 존재. 해당 증거에 연결된 QR로 들어가야 문제+비밀번호 입력창이 뜨고, 정답 입력 시 자동 수집됨 (`LOCKED_EVIDENCE` + `EVIDENCE_QUIZ`).
+- **QR 경유 유지**: 퀴즈(잠긴 증거)의 답 입력창은 기존처럼 **QR 페이지(`/qr/[slug]`)** 에도 존재. 해당 증거에 연결된 QR로 들어가면 문제+비밀번호 입력창이 뜨고, 정답 입력 시 자동 수집됨 (`LOCKED_EVIDENCE` + `EVIDENCE_QUIZ`).
+- **QR 없는 정답 입력 추가**: `/solve` 전역 정답 입력창에서 `PUZZLES.answer`와 일치하는 값을 입력하면 QR 없이도 보상 지급.
+- **단서 보상**: `reward.type="evidence"`는 `collect(evidenceId)`로 같은 조 Supabase 증거함에 실시간 반영.
+- **힌트 보상**: `reward.type="hint"`는 현재 기기에만 표시. 조 동기화는 아직 안 함.
 - **증거함(`/evidence`)은 읽기 전용**: 미수집 증거는 `???` + 버튼 비활성. 여기서는 퀴즈를 풀 수 없음 (참여자 혼동 지점 — 의도된 동작).
-- **보류**: QR 없이 증거함 등에서 코드/퀴즈 답만으로 수집하는 **별도 진입점(코드 입력 게이트 일반화)** 은 나중에 다시 결정. 현재는 QR 경유만.
 
 ### 디제틱 기기 UI 기획 확정 (2026-07-11, 세션 한도로 중단된 논의 정리)
 
@@ -273,6 +275,16 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   `<article class="pdf-page">`가 제목만 있고 본문은 `내용 준비 중` 상태. 단서팀 확정본으로 채우기.
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
+
+- [x] QR 없는 문제 풀이형 단서 수집 (`/solve`) (2026-07-13)
+  - `PUZZLES` 데이터 모델 추가: 정답 입력 → 단서 수집 또는 힌트 표시 보상
+  - `/solve` 전역 정답 입력 페이지 추가. QR을 찍지 않아도 `PUZZLES.answer`와 일치하면 단서 수집 가능
+  - 기존 잠금 단서 E01을 `PUZZLES`에 연결해 QR 페이지와 `/solve` 양쪽에서 풀 수 있게 구성
+  - 정답 비교는 앞뒤 공백, 중간 공백, 대소문자 무시
+  - 홈 수사 방법 안내와 하단 네비에 `정답` 진입 추가
+  - 문서 최신화: `13_PUZZLE_DESIGN`, `EDIT_GUIDE`, `DEV_SPEC`, `UI_SPEC`, `DATA_SCHEMA`, `ARCHITECTURE`
+  - 신규 파일: `src/app/solve/page.tsx`
+  - 수정 파일: `src/lib/data.ts`, `src/components/BottomNav.tsx`, `src/app/home/page.tsx`, `progress.md`
 
 - [x] 제한 시간 타이머 (관리자 브로드캐스트 카운트다운 + 종료 경보) (2026-07-12)
   - `/admin`에 **제한 시간 타이머** 섹션 추가: 분 입력 + 5/10/15/30 프리셋 → `타이머 시작` / `종료`

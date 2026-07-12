@@ -2,7 +2,7 @@
 
 ## Overview
 
-이벤트용 모바일 웹앱. 참가자 80명이 QR 코드를 스캔해 증거를 수집하고 범인을 투표하는 크라임씬 게임.
+이벤트용 모바일 웹앱. 참가자 80명이 QR 코드와 문제 정답 입력으로 증거를 수집하고 범인을 투표하는 크라임씬 게임.
 
 - Framework: Next.js 16 (App Router, TypeScript)
 - Styling: Tailwind CSS v4
@@ -18,12 +18,14 @@
 /                   → 랜딩 (조 번호 숫자 + 조장 이름 입력, 애니메이션 배경, 입장 시 joined 마커 기록)
 /home               → 수사본부 메인 (사건 개요, 증거 수집 진행률, QR 수집 현황)
 /evidence           → 증거함 (수집된 증거 목록, 조 공유 실시간 반영)
+/solve              → 정답 입력 (QR 없이 문제 정답으로 단서 수집)
 /suspects           → 용의자 파일 (A, B, C, D, E 카드)
 /vote               → 최종 추리 (용의자 선택 → Google Form, 1회 제출)
 /ranking            → 수사 현황 (전체 조 실시간 랭킹, 매핑된 조는 묶어서 표시)
 /ending             → 엔딩 (모세 반전 공개)
-/qr/[id]            → QR 증거 수집 페이지 (6자 opaque slug, 총 6개)
+/qr/[id]            → QR 증거 수집 페이지 (6자 opaque slug, 총 15개)
 /admin              → 관리자 패널 (PIN 인증 → 투표/엔딩 제어, 조 매핑, 조별/전체 초기화)
+/phone              → 수신전화 전용 공기계 대기 화면
 ```
 
 ---
@@ -38,6 +40,7 @@ src/
 │   ├── page.tsx                — 랜딩 페이지 (Client Component, 조/이름 입력 + joined 기록)
 │   ├── home/page.tsx           — 수사본부 메인 (Client Component)
 │   ├── evidence/page.tsx       — 증거함
+│   ├── solve/page.tsx          — 정답 입력 (PUZZLES 판정 + 단서 수집)
 │   ├── suspects/page.tsx       — 용의자 파일 (5인)
 │   ├── vote/page.tsx           — 최종 추리 (1회 제출)
 │   ├── ranking/page.tsx        — 수사 현황 랭킹
@@ -45,12 +48,15 @@ src/
 │   ├── qr/[id]/
 │   │   ├── page.tsx            — QR 라우트 핸들러 (Server, data fetch)
 │   │   └── QrPageClient.tsx    — QR 증거 수집 UI (Client Component, 잠금 해제/음성·영상 힌트)
-│   └── admin/page.tsx          — 관리자 패널 (PIN 게이트 + 게임 제어)
+│   ├── admin/page.tsx          — 관리자 패널 (PIN 게이트 + 게임 제어)
+│   └── phone/page.tsx          — 수신전화 전용 기기 화면
 ├── components/
-│   ├── BottomNav.tsx           — 하단 5탭 내비게이션 (/, /ending에서는 숨김)
-│   └── GameStateRedirect.tsx   — ending_open 활성화 시 전 참가자 기기 자동 /ending 이동
+│   ├── BottomNav.tsx           — 하단 내비게이션 (/, /ending, /phone에서는 숨김)
+│   ├── GameStateRedirect.tsx   — ending_open 활성화 시 전 참가자 기기 자동 /ending 이동
+│   ├── IncomingCallOverlay.tsx — 수신전화 오버레이
+│   └── TimerOverlay.tsx        — 관리자 브로드캐스트 타이머 오버레이
 └── lib/
-    ├── data.ts                 — 정적 데이터 (EVIDENCE, SUSPECTS, QR_CODES, LOCATIONS 등)
+    ├── data.ts                 — 정적 데이터 (EVIDENCE, SUSPECTS, QR_CODES, PUZZLES, LOCATIONS 등)
     ├── store.ts                — localStorage 헬퍼 (조 정보, 투표 기록)
     ├── supabase.ts             — Supabase 클라이언트
     ├── useTeamEvidence.ts      — 내 조 + 매핑된 파트너 조 증거 실시간 구독/수집
@@ -66,9 +72,10 @@ src/
 
 | 상수 | 타입 | 내용 |
 |------|------|------|
-| `EVIDENCE` | `Evidence[]` | 증거 10종 (id, title, description, imageUrl?, audioUrl?, videoUrl?) |
+| `EVIDENCE` | `Evidence[]` | 증거 데이터 (id, title, description, imageUrl?, audioUrl?, videoUrl?) |
 | `SUSPECTS` | `Suspect[]` | 용의자 5인 (A~E, motiveRevealIds로 동기 공개 트리거) |
-| `QR_CODES` | `QrCode[]` | QR 6개 (id: 6자 opaque slug → location + evidenceIds) |
+| `QR_CODES` | `QrCode[]` | QR 15개 (id: 6자 opaque slug → location + evidenceIds) |
+| `PUZZLES` | `Puzzle[]` | QR 없이 정답 입력으로 단서 또는 힌트를 지급하는 문제 |
 | `LOCATIONS` | `object` | 장소명 4개 (한 곳만 수정하면 전체 반영) |
 | `LOCKED_EVIDENCE` | `Record<string,string>` | 비밀번호 잠금 증거 { 증거ID: 비밀번호 } |
 | `EVIDENCE_QUIZ` | `Record<string,string>` | 잠금 증거 퀴즈 문제 |

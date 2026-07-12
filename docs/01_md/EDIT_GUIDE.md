@@ -158,6 +158,31 @@ export const QR_CODES: QrCode[] = [
 
 ---
 
+## 3-1. QR 없이 문제 정답으로 단서 수집
+
+**파일:** `src/lib/data.ts` → `PUZZLES` 배열
+
+`/solve` 페이지의 전역 정답 입력창에서 `PUZZLES.answer`와 일치하는 값을 입력하면 보상이 지급된다.
+
+```ts
+export const PUZZLES: Puzzle[] = [
+  {
+    id: "P01",
+    question: EVIDENCE_QUIZ.E01,
+    answer: LOCKED_EVIDENCE.E01,
+    reward: { type: "evidence", evidenceId: "E01" },
+    showInList: true,
+  },
+];
+```
+
+- `reward: { type: "evidence", evidenceId: "E01" }` → 해당 조 증거함에 수집된다.
+- `reward: { type: "hint", text: "..." }` → 입력한 기기에만 힌트가 표시된다. 조 동기화는 아직 안 됨.
+- 정답 비교는 앞뒤 공백, 중간 공백, 대소문자를 무시한다.
+- `showInList: true`면 `/solve` 하단의 공개 문제 목록에 문제 문구가 표시된다. 현장 인쇄물 문제라면 생략 가능.
+
+---
+
 ## 4. 용의자 정보 수정
 
 **파일:** `src/lib/data.ts`

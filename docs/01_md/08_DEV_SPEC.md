@@ -56,6 +56,23 @@ QR_CODES에서 slug 조회 → evidenceIds 확인
 수집 클릭 → Supabase upsert → 같은 조 기기에 Realtime 전파
 ```
 
+## 정답 입력 흐름
+
+```
+/solve 접속
+    ↓
+정답 입력
+    ↓
+PUZZLES에서 answer 매칭
+    ↓
+reward.type="evidence"면 collect(evidenceId) → Supabase upsert → 같은 조 기기에 Realtime 전파
+    ↓
+reward.type="hint"면 현재 기기에 힌트 표시
+```
+
+- 정답 비교는 앞뒤 공백, 중간 공백, 대소문자를 무시한다.
+- QR 잠금 단서도 `PUZZLES`에 등록하면 QR 없이 수집 가능하다.
+
 ## 투표 흐름
 ```
 / 랜딩에서 조 번호(숫자) + 조장 이름 입력 → localStorage 저장
@@ -99,6 +116,7 @@ team_evidence_items에 대상 조 번호를 담은 전화 이벤트 생성
 | `/` | 랜딩 (조 번호 숫자 입력 + 조장 이름 입력 → 입장하기) |
 | `/home` | 수사본부 (사건 개요, 진행률, QR 수집 현황) |
 | `/qr/[slug]` | QR 증거 수집 (slug: 6자 opaque, 1~2개 증거) |
+| `/solve` | 정답 입력 (QR 없이 문제 정답으로 단서 수집) |
 | `/evidence` | 수집한 증거 보관함 |
 | `/suspects` | 용의자 카드 (A, B, C, D, E — 5명) |
 | `/ranking` | 전체 조 실시간 수사 현황 랭킹 |
