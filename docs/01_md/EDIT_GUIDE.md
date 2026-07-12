@@ -267,6 +267,19 @@ export const PUZZLES: Puzzle[] = [
 
 ---
 
+## 5-3. 용의자 수사 노트 (참가자 메모)
+
+**파일:** `src/app/suspects/page.tsx`, `src/lib/store.ts`
+
+용의자 파일(`/suspects`)을 펼치면 맨 아래에 **수사 노트** 입력칸이 있다. 참가자가 용의자별로 메모를 남길 수 있다.
+
+- **저장 위치**: 이 기기의 `localStorage`(`exit2026_suspect_notes` 키, `{ 용의자ID: 메모 }` 형태). 입력 즉시 자동 저장된다.
+- **범위**: 개인 메모다. 조별 실시간 공유는 하지 않으며, 같은 조라도 다른 기기와는 공유되지 않는다.
+- **초기화**: 랜딩 재입장/`resetAll()` 시 함께 삭제된다. 관리자 단서 초기화(Supabase)에는 영향받지 않는다.
+- 별도 설정값은 없다. 문구/행 수를 바꾸려면 `suspects/page.tsx`의 `수사 노트` 블록을 수정한다.
+
+---
+
 ## 6. 중요 단서 비밀번호 잠금
 
 **파일:** `src/lib/data.ts` → `LOCKED_EVIDENCE` 객체

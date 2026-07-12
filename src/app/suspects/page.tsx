@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { SUSPECTS, EVIDENCE, type Suspect } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
-import { getTeamInfo } from "@/lib/store";
+import { getTeamInfo, getSuspectNotes, saveSuspectNote } from "@/lib/store";
 
 // 이미지가 없을 때 표시하는 기본 용의자 실루엣 (머그샷 흉상)
 function SuspectSilhouette({ className }: { className?: string }) {
@@ -37,10 +37,19 @@ export default function SuspectsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [teamNumber, setTeamNumber] = useState<string | null>(null);
   const [confirmUseId, setConfirmUseId] = useState<string | null>(null);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   useEffect(() => {
     setTeamNumber(getTeamInfo()?.teamNumber ?? null);
+    setNotes(getSuspectNotes());
   }, []);
+
+  function handleNoteChange(suspectId: string, value: string) {
+    setNotes((prev) => ({ ...prev, [suspectId]: value }));
+    saveSuspectNote(suspectId, value);
+    setSavedId(suspectId);
+  }
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
@@ -241,6 +250,23 @@ export default function SuspectsPage() {
                       )}
                     </div>
                   )}
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-500 font-mono text-xs">수사 노트</span>
+                      {savedId === s.id && (
+                        <span className="text-[10px] text-emerald-400/80">✓ 이 기기에 저장됨</span>
+                      )}
+                    </div>
+                    <textarea
+                      value={notes[s.id] ?? ""}
+                      onChange={(e) => handleNoteChange(s.id, e.target.value)}
+                      placeholder="이 용의자에 대한 메모를 남기세요…"
+                      rows={3}
+                      className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-sm text-zinc-200 placeholder:text-zinc-600 focus:border-amber-500/60 focus:outline-none"
+                    />
+                    <p className="text-[10px] text-zinc-600">메모는 이 기기에만 저장됩니다.</p>
+                  </div>
                 </div>
               )}
             </div>

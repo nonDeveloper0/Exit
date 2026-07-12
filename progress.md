@@ -276,6 +276,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 용의자별 수사 노트 (참가자 개인 메모) (2026-07-13)
+  - 용의자 파일(`/suspects`) 펼침 뷰 맨 아래에 **수사 노트** textarea 추가 — 용의자별로 메모 작성, 입력 즉시 자동 저장
+  - 저장은 이 기기 `localStorage`(`exit2026_suspect_notes`, `{용의자ID: 메모}`) — 개인 메모, 조 실시간 공유 안 함
+  - `resetAll()` 시 함께 삭제
+  - 신규 함수: `src/lib/store.ts`(`getSuspectNotes`/`saveSuspectNote`)
+  - 수정 파일: `src/lib/store.ts`, `src/app/suspects/page.tsx`, `docs/01_md/EDIT_GUIDE.md`(5-3절)
+
 - [x] QR 없는 문제 풀이형 단서 수집 (`/solve`) (2026-07-13)
   - `PUZZLES` 데이터 모델 추가: 정답 입력 → 단서 수집 또는 힌트 표시 보상
   - `/solve` 전역 정답 입력 페이지 추가. QR을 찍지 않아도 `PUZZLES.answer`와 일치하면 단서 수집 가능
