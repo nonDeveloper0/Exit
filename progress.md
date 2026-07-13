@@ -281,6 +281,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 채소장 폰(`phone2.html`) 홈 화면 UI 최신화 (2026-07-13)
+  - 문제: 홈 화면이 이모지 아이콘 + 밋밋한 그라데이션이라 실제 스마트폰처럼 안 느껴짐
+  - 배경: 다층 radial-gradient(빛 번짐 + 컬러 오브 3개) + 비네트로 요즘 폰 기본 배경화면 느낌의 깊이감 추가
+  - 상단: 다이나믹 아일랜드(알약 모양 노치) 추가, 상태바를 신호/와이파이 SVG 아이콘 + 배터리 퍼센트(%) 표기로 교체
+  - 앱 아이콘: 이모지(📞💬📷 등) → 전용 SVG 심볼(`<symbol id="ic-*">`)로 교체, squircle 모양 + 유리광택(하이라이트) + 그림자로 입체감 부여
+  - 하단: 제스처 내비게이션 홈 인디케이터(얇은 흰 알약바) 추가, 독(dock) 블러/그림자 강화
+  - 폰트: `Segoe UI` 우선순위 → `-apple-system/Roboto` 계열로 교체(모바일 OS 폰트 스택)
+  - 수정 파일: `public/screen/phone2.html`
+
 - [x] 디바이스 목업 3종 — 모바일 뒤로가기로 화면 이탈 방지 (2026-07-13)
   - 문제: `phone2.html`(채소장 폰) 등에서 모바일 브라우저 뒤로가기 버튼/스와이프를 누르면 화면을 벗어나 몰입이 깨짐
   - 조치: `history.pushState` + `popstate` 리스너로 히스토리를 계속 되채워 뒤로가기를 무력화(같은 화면에 그대로 남음)
