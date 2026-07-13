@@ -281,6 +281,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 채소장 휴대폰 디바이스 화면 목업 추가 (`public/screen/phone2.html`, Vercel `/screen/phone2`) (2026-07-13)
+  - 새 디제틱 기기: 조 선택(비밀번호 없음) → 홈 화면(전화·메시지·설정 앱) → 전화 앱(최근 통화 목록) / 메시지 앱(대화 목록 + 채팅 화면)
+  - 열람 전용 소품 — 증거 수집 연동 없음(노트북 `laptop.html`과 달리 Supabase 미연동)
+  - 통화목록·메시지 문구는 채소장 동기(김사원 보호 + 현장 조작 의혹) 기준 초안 — ⚠️ 단서팀 확정 필요
+  - 90초 무입력 시 자동 세션 초기화(다음 조 사용 대비), 설정 앱에서 수동 초기화도 가능
+  - 신규 파일: `public/screen/phone2.html` / 수정: `next.config.ts`, `docs/01_md/EDIT_GUIDE.md`(12절)
+
 - [x] 수신전화 수신 화면 UI — 밀어서 받기 폐기 → 아이콘 원형 버튼 2개로 변경 (2026-07-13)
   - 참고 이미지(One UI 스타일) 기준: 하단 좌측 초록 원형 버튼(받기)·우측 빨간 원형 버튼(거절), 텍스트 라벨 없이 아이콘만
   - 기존 "밀어서 받기" 슬라이더(드래그 제스처) 제거, 탭 한 번으로 받기/거절 가능한 단순 버튼으로 되돌림
