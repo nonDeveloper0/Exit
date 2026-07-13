@@ -415,3 +415,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 수신·거절·밀어서 받기·벨소리·진동·CALL01 수집 동작은 유지.
   - 검증: `npm run lint`(오류 0, 기존 경고 2건), `npm run build` 통과.
   - 수정 파일: `src/app/phone/page.tsx`, `src/components/IncomingCallOverlay.tsx`, `progress.md`.
+
+- [x] phone2 하단 독·버튼이 모바일 브라우저에서 잘려 안 보이는 문제 수정 (2026-07-13)
+  - 배포(`ns-exit.vercel.app`)는 최신 커밋과 동일함을 확인 — 배포 문제 아니었음(z-index 수정 커밋 `9d1f899`는 이미 반영돼 있었음)
+  - 실제 원인: `.screen`이 `position:absolute; inset:0`인데 `body`에 `position`이 지정 안 돼(static) 기준(containing block)이 실제 보이는 화면이 아니라 모바일 브라우저의 "큰 뷰포트"(주소창 숨김 기준 높이)로 잡힘 → 주소창이 떠 있는 실제 화면보다 콘텐츠가 더 길게 계산되고 `overflow:hidden`이라 스크롤도 안 돼 하단(독·시작화면 패널)이 화면 밖으로 밀려나 안 보였음
+  - `body`에 `position: relative`를 주고, `html, body` 높이를 실제 보장되는 최소 뷰포트 단위(`100svh`, `100vh` 폴백)로 명시해 `.screen`의 기준을 실제 보이는 영역으로 고정
+  - ⚠️ Chrome 확장 미연결로 실기기 렌더링은 직접 확인 필요. `laptop.html`/`ipad.html`도 동일한 `.screen{position:absolute;inset:0}` + body static 구조라 같은 증상 가능성 있음 — 보고되면 동일하게 고칠 것
+  - 수정 파일: `public/screen/phone2.html`, `progress.md`
