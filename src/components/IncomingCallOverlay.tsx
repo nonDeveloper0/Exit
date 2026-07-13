@@ -10,6 +10,10 @@ import { supabase } from "@/lib/supabase";
 
 type CallScreen = "incoming" | "calling" | "ended";
 
+const CALLER_NAME = "박미리";
+const CALLER_NUMBER = "010-9876-2345";
+const CALLER_INITIALS = "미리";
+
 export default function IncomingCallOverlay() {
   const { active, eventId, targetTeamId, loaded } = useIncomingCall();
   const pathname = usePathname();
@@ -45,11 +49,11 @@ export default function IncomingCallOverlay() {
     }
   }, [visible]);
 
-  const KNOB = 48; // 노브 지름(px) — 트랙 패딩(p-2=8px) 양쪽 제외
+  const KNOB = 56; // 노브 지름(px) — 트랙 패딩(p-1.5=6px) 양쪽 제외
   function getMaxX() {
     const track = trackRef.current;
     if (!track) return 0;
-    return track.clientWidth - KNOB - 16;
+    return track.clientWidth - KNOB - 12;
   }
 
   function onKnobDown(e: React.PointerEvent) {
@@ -159,29 +163,71 @@ export default function IncomingCallOverlay() {
   const ss = String(seconds % 60).padStart(2, "0");
 
   return (
-    <div className="fixed inset-0 z-[100] bg-zinc-950 text-zinc-100">
+    <div className="fixed inset-0 z-[100] overflow-hidden bg-[#071018] text-zinc-50">
       {screen === "incoming" ? (
-        <div className="flex min-h-full flex-col bg-[radial-gradient(circle_at_50%_18%,rgba(127,29,29,0.55),rgba(9,9,11,0.95)_48%,#020617_100%)]">
-          <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
-            <div className="mb-4 text-xs font-mono tracking-[0.32em] text-red-200/80">INCOMING CALL</div>
-            <div className="mb-8 flex h-28 w-28 items-center justify-center rounded-full border border-red-200/25 bg-red-950/50 shadow-[0_0_0_18px_rgba(239,68,68,0.08)] animate-call-pulse">
-              <span className="text-4xl font-mono text-red-100">TEL</span>
+        <div className="relative flex min-h-full flex-col bg-[radial-gradient(circle_at_50%_4%,rgba(35,180,178,0.34),transparent_32%),linear-gradient(160deg,#0b1b24_0%,#112331_44%,#090d17_100%)]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_18%_12%,rgba(84,222,211,0.22),transparent_34%),radial-gradient(circle_at_82%_10%,rgba(116,72,255,0.18),transparent_32%)]" />
+
+          <div className="relative flex items-center justify-between px-7 pt-5 text-sm font-semibold text-white/90">
+            <span>12:45</span>
+            <div className="flex items-center gap-1.5" aria-hidden="true">
+              <span className="h-2.5 w-3 rounded-[2px] border border-white/80" />
+              <span className="h-2.5 w-4 rounded-[3px] border border-white/80 after:block after:h-full after:w-2.5 after:rounded-[2px] after:bg-white/100" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-zinc-50">발신번호 표시제한</h1>
-            <p className="mt-2 text-sm text-zinc-400">피해자의 휴대폰</p>
-            <p className="mt-8 text-xs font-mono tracking-widest text-zinc-500">전화 수신 중</p>
           </div>
 
-          <div className="px-8 pb-14">
+          <div className="relative flex flex-1 flex-col items-center px-8 pt-12 text-center">
+            <div className="mb-10 flex items-center gap-2 text-lg font-medium text-white/90">
+              <span className="text-xl">☎</span>
+              <span>Incoming call</span>
+            </div>
+
+            <h1 className="max-w-full break-keep text-[42px] font-semibold leading-tight tracking-normal text-white drop-shadow-sm">
+              {CALLER_NAME}
+            </h1>
+            <p className="mt-2 text-lg font-medium tracking-normal text-white/80">{CALLER_NUMBER}</p>
+            <p className="mt-3 rounded-full bg-emerald-400/16 px-3 py-1 text-xs font-bold text-emerald-100 ring-1 ring-emerald-300/20">
+              저장된 연락처
+            </p>
+
+            <div className="mt-10 flex h-36 w-36 items-center justify-center rounded-full border border-white/45 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(213,239,245,0.9))] text-4xl font-bold text-[#1f4f65] shadow-[0_22px_70px_rgba(0,0,0,0.34),0_0_0_18px_rgba(255,255,255,0.06)] animate-call-pulse">
+              {CALLER_INITIALS}
+            </div>
+
+            <p className="mt-8 text-sm text-white/52">휴대전화 수신 중</p>
+          </div>
+
+          <div className="relative px-7 pb-12">
+            <div className="mb-5 flex items-center justify-between px-5">
+              <button
+                type="button"
+                onClick={decline}
+                className="flex flex-col items-center gap-2 text-sm font-medium text-white/72 active:scale-95"
+                aria-label="전화 거절"
+              >
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#ff4b55] text-2xl font-black text-white shadow-[0_12px_30px_rgba(255,75,85,0.34)]">
+                  ✕
+                </span>
+                거절
+              </button>
+
+              <div className="flex flex-col items-center gap-2 text-sm font-medium text-white/72" aria-hidden="true">
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/12 text-xl text-white/70 ring-1 ring-white/12">
+                  ⋯
+                </span>
+                메시지
+              </div>
+            </div>
+
             <div
               ref={trackRef}
-              className="relative flex h-16 items-center rounded-full border border-emerald-400/20 bg-zinc-900/80 p-2"
+              className="relative flex h-[68px] items-center rounded-full bg-black/25 p-1.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)] backdrop-blur-md"
             >
               <span
-                className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm font-medium text-emerald-200/70 animate-slide-hint"
+                className="pointer-events-none absolute inset-0 flex items-center justify-center pl-8 text-sm font-semibold text-emerald-100/82 animate-slide-hint"
                 style={{ opacity: dragX > 8 ? 0 : undefined }}
               >
-                밀어서 받기 →
+                밀어서 받기
               </span>
               <button
                 type="button"
@@ -190,40 +236,38 @@ export default function IncomingCallOverlay() {
                 onPointerUp={onKnobUp}
                 onPointerCancel={onKnobUp}
                 style={{ transform: `translateX(${dragX}px)` }}
-                className={`relative z-10 flex h-12 w-12 touch-none select-none items-center justify-center rounded-full bg-emerald-500 text-sm font-black tracking-wider text-white shadow-lg ${
+                className={`relative z-10 flex h-14 w-14 touch-none select-none items-center justify-center rounded-full bg-[#18c96f] text-2xl font-black text-white shadow-[0_12px_32px_rgba(24,201,111,0.45)] ${
                   dragging ? "" : "transition-transform duration-200"
                 }`}
                 aria-label="밀어서 전화 받기"
               >
-                받기
+                ✓
               </button>
             </div>
-            <button
-              type="button"
-              onClick={decline}
-              className="mt-6 w-full text-center text-sm text-zinc-500 active:text-zinc-300"
-              aria-label="전화 거절"
-            >
-              거절
-            </button>
           </div>
         </div>
       ) : (
-        <div className="flex min-h-full flex-col bg-[linear-gradient(180deg,#111827,#020617)]">
-          <div className="flex flex-col items-center gap-3 px-8 pt-14 text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 text-lg font-mono text-zinc-300">
-              TEL
+        <div className="relative flex min-h-full flex-col bg-[radial-gradient(circle_at_50%_0%,rgba(30,183,177,0.28),transparent_30%),linear-gradient(180deg,#0b1923_0%,#071018_100%)]">
+          <div className="relative flex items-center justify-between px-7 pt-5 text-sm font-semibold text-white/90">
+            <span>12:45</span>
+            <span className="text-xs text-emerald-200/80">통화 연결됨</span>
+          </div>
+
+          <div className="flex flex-col items-center px-8 pt-14 text-center">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full border border-white/36 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(213,239,245,0.9))] text-2xl font-bold text-[#1f4f65] shadow-[0_18px_54px_rgba(0,0,0,0.32)]">
+              {CALLER_INITIALS}
             </div>
-            <h1 className="text-xl font-bold text-zinc-100">발신번호 표시제한</h1>
-            <p className="text-sm font-mono text-emerald-400">{mm}:{ss}</p>
+            <h1 className="mt-6 text-3xl font-semibold tracking-normal text-white">{CALLER_NAME}</h1>
+            <p className="mt-1 text-base font-medium text-white/62">{CALLER_NUMBER}</p>
+            <p className="mt-4 text-lg font-mono text-emerald-300">{mm}:{ss}</p>
           </div>
 
           <div className="flex flex-1 items-center justify-center gap-1 px-10" aria-hidden="true">
-            {Array.from({ length: 13 }).map((_, i) => (
+            {Array.from({ length: 17 }).map((_, i) => (
               <span
                 key={i}
-                className="w-1.5 rounded-full bg-gradient-to-b from-sky-300 to-indigo-400 animate-call-wave"
-                style={{ animationDelay: `${i * 0.08}s` }}
+                className="w-1.5 rounded-full bg-gradient-to-b from-emerald-200 via-cyan-300 to-sky-400 animate-call-wave"
+                style={{ animationDelay: `${i * 0.055}s` }}
               />
             ))}
           </div>
@@ -237,15 +281,15 @@ export default function IncomingCallOverlay() {
             <button
               type="button"
               onClick={endCall}
-              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-600 text-xl font-bold text-white active:scale-95"
+              className="mx-auto flex h-[68px] w-[68px] items-center justify-center rounded-full bg-[#ff4b55] text-2xl font-black text-white shadow-[0_14px_34px_rgba(255,75,85,0.38)] active:scale-95"
               aria-label="통화 종료"
             >
-              X
+              ✕
             </button>
             <button
               type="button"
               onClick={close}
-              className="mt-5 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-zinc-300"
+              className="mt-5 w-full rounded-full border border-white/12 bg-white/10 px-4 py-3 text-sm font-bold text-white/76 backdrop-blur-sm active:bg-white/12"
             >
               통화 화면 닫기
             </button>

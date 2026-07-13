@@ -73,6 +73,23 @@
 
 ---
 
+## 1-3. 수신전화 화면 발신자 정보 수정
+
+**파일:** `src/components/IncomingCallOverlay.tsx`
+
+수신 화면과 통화 중 화면에 표시되는 이름/번호는 파일 상단 상수에서 수정한다.
+
+```ts
+const CALLER_NAME = "박미리";
+const CALLER_NUMBER = "010-9876-2345";
+const CALLER_INITIALS = "미리";
+```
+
+- `CALLER_NAME`: 크게 표시되는 발신자 이름
+- `CALLER_NUMBER`: 이름 아래에 표시되는 번호
+- `CALLER_INITIALS`: 원형 프로필 안에 표시되는 짧은 글자
+
+---
 ## 1-3. 수신전화 음성 메시지 증거 수정
 
 **파일:** `src/lib/data.ts` + `public/audio/` 폴더

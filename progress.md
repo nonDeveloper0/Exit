@@ -276,6 +276,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 수신전화 발신자 정보 + 최신 갤럭시 스타일 UI 개선 (2026-07-13)
+  - 수신전화 표시를 `발신번호 표시제한` → `박미리 / 010-9876-2345`로 변경
+  - 수신 화면: One UI 계열처럼 큰 발신자 이름, 번호, 원형 프로필, 하단 거절/밀어서 받기 UI로 재구성
+  - 통화 중 화면: 같은 발신자 정보, 통화 시간, 파형, 종료 버튼으로 정리
+  - 기존 수신 전용 기기 제한, 벨소리/진동, 밀어서 받기, `CALL01` 자동 수집 로직은 유지
+  - 수정 파일: `src/components/IncomingCallOverlay.tsx`, `docs/01_md/EDIT_GUIDE.md`
+  - 신규 문서: `docs/superpowers/specs/2026-07-13-incoming-call-galaxy-ui-design.md`, `docs/superpowers/plans/2026-07-13-incoming-call-galaxy-ui.md`
 - [x] 용의자별 수사 노트 (참가자 개인 메모) (2026-07-13)
   - 용의자 파일(`/suspects`) 펼침 뷰 맨 아래에 **수사 노트** textarea 추가 — 용의자별로 메모 작성, 입력 즉시 자동 저장
   - 저장은 이 기기 `localStorage`(`exit2026_suspect_notes`, `{용의자ID: 메모}`) — 개인 메모, 조 실시간 공유 안 함
