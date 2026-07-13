@@ -281,6 +281,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] phone2 목업 하단 잘림 재수정 — 인앱 브라우저 대응 (2026-07-13)
+  - 증상: `/screen/phone2` 홈 화면 하단 독(4개 아이콘)/시작 패널이 화면 밖으로 밀려 안 보이고 바닥이 검게 보임
+  - 원인: 직전 수정(`svh`)이 `svh` 미지원 브라우저(카카오톡·인스타 등 인앱 브라우저)에서 `100vh`(주소창 포함 큰 뷰포트)로 폴백돼 여전히 잘림. body 높이 > 실제 보이는 영역이라 `absolute` 자식(독/패널)이 밑으로 밀림
+  - 해결: JS로 `visualViewport.height`(폴백 `innerHeight`)를 `--app-h` 픽셀 값으로 고정, `resize`/`orientationchange`/`visualViewport resize`에 갱신. CSS는 `height: var(--app-h, 100svh)`로 JS 실행 전엔 svh 폴백. svh/dvh 지원 여부와 무관하게 모든 브라우저에서 보이는 영역에 정확히 맞춤
+  - 수정 파일: `public/screen/phone2.html`, `progress.md`
+
 - [x] 채소장 폰(`phone2.html`) 실기기 확인 후 레이아웃/시인성 수정 (2026-07-13)
   - 시작 화면: 조 번호 선택 패널이 시계에 너무 붙어 보이던 문제 — `margin-top:auto` 방식 대신 `justify-content:flex-end` + 고정 `gap(14vh)`로 교체해 항상 일정한 간격을 보장하고 화면 아래쪽에 균형있게 배치
   - 홈 화면: 독(dock) 아이콘이 **아예 안 보이던 실제 원인** — `.app-glyph::before`(유리광택 오버레이)가 z-index 미지정 상태라 아이콘 SVG보다 위에 그려지면서 아이콘을 완전히 가리고 있었음. 오버레이 `z-index:0`, 아이콘 SVG `z-index:1`로 명시해 확실히 위로 오도록 수정 — 근본 수정
