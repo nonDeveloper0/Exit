@@ -520,6 +520,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  // 뒤로가기(모바일 브라우저 스와이프/버튼)로 화면을 벗어나지 못하게 막음 — 히스토리를 계속 되채워서 popstate를 무력화
+  history.pushState(null, "", location.href);
+  window.addEventListener("popstate", () => history.pushState(null, "", location.href));
+
   const UNLOCK_PASSWORD = "980721";
   // 지문감식 결과보고서 열람 시 선택한 조 보관함에 저장될 증거 ID (앱 data.ts의 E16)
   const PDF_EVIDENCE_ID = "E16";

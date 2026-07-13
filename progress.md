@@ -281,6 +281,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 디바이스 목업 3종 — 모바일 뒤로가기로 화면 이탈 방지 (2026-07-13)
+  - 문제: `phone2.html`(채소장 폰) 등에서 모바일 브라우저 뒤로가기 버튼/스와이프를 누르면 화면을 벗어나 몰입이 깨짐
+  - 조치: `history.pushState` + `popstate` 리스너로 히스토리를 계속 되채워 뒤로가기를 무력화(같은 화면에 그대로 남음)
+  - `public/screen/phone2.html`, `laptop.html`, `ipad.html` 세 화면 모두 동일하게 적용
+  - 수정 파일: `public/screen/phone2.html`, `public/screen/laptop.html`, `public/screen/ipad.html`, `docs/01_md/EDIT_GUIDE.md`(12절)
+
 - [x] 채소장 휴대폰 디바이스 화면 목업 추가 (`public/screen/phone2.html`, Vercel `/screen/phone2`) (2026-07-13)
   - 새 디제틱 기기: 조 선택(비밀번호 없음) → 홈 화면(전화·메시지·설정 앱) → 전화 앱(최근 통화 목록) / 메시지 앱(대화 목록 + 채팅 화면)
   - 열람 전용 소품 — 증거 수집 연동 없음(노트북 `laptop.html`과 달리 Supabase 미연동)

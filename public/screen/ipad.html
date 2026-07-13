@@ -133,6 +133,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // 뒤로가기(모바일 브라우저 스와이프/버튼)로 화면을 벗어나지 못하게 막음 — 히스토리를 계속 되채워서 popstate를 무력화
+  history.pushState(null, "", location.href);
+  window.addEventListener("popstate", () => history.pushState(null, "", location.href));
+
   const SAWON_NO = "2201";  // 공통 사원번호 (사원증 = 스탭 보관)
   let teamNo = null;
   let teamBuf = "";
