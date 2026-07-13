@@ -9,6 +9,7 @@
 - [x] `docs/01_md/14_PHOTO_EVIDENCE_SPEC.md` 기준으로 증거함을 사진(폴라로이드) 업로드 보드로 전환하고, QR은 심문권 퀴즈 획득 플로우로 변경한다.
 - [x] 최신 사진 증거 명세에 맞춰 사진 제외/복원(status), 사진 장수 실시간 랭킹, 관리자 사진 점검 패널을 구현한다.
 - [x] `docs/01_md/15_ENDING_REVISION.md` 기준으로 엔딩 화면(`/ending`)의 범인 공개 + 모세 이야기 반전을 걷어내고 "EXIT SEASON 2 / TO BE CONTINUED..." 화면으로 교체한다(기존 코드는 주석 보존, 코드만 변경·문서 정리는 별도).
+- [x] `docs/01_md/16_ADMIN_CLEANUP.md` 기준으로 `/admin`의 "모든 단서 개방"(+되돌리기) 기능을 삭제하고, "단서 전체 초기화"/"조별 초기화"/"전체 조 초기화"를 사진(Storage 파일 포함) 삭제로 전환하며, "제한 시간 타이머" 기능(관리자 UI+참가자 오버레이+관련 상수·경보음)을 완전히 제거한다.
 
 
 ## 진행 기록 운영 규칙
@@ -220,6 +221,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 기존 엔딩 코드는 `src/app/ending/page.tsx` 내부 주석으로 보존. `ending_open` 기반 자동 이동 로직은 변경하지 않음.
   - 검증: `npm run lint` 통과(기존 `useGameState.ts` 경고 1건), Supabase env 주입 후 `npm run build` 통과.
   - 수정 파일: `src/app/ending/page.tsx`, `progress.md`
+- [x] 관리자 패널 정리: 사진 삭제 전환 + 타이머 제거 (2026-07-14)
+  - `/admin`에서 모든 단서 개방·되돌리기와 제한 시간 타이머를 제거.
+  - 사진 전체 삭제, 조별 초기화, 전체 조 초기화가 `photo_evidence` 행과 Storage `evidence-photos` 파일을 함께 삭제하도록 전환.
+  - 참가자 `TimerOverlay`, 타이머 상수, 타이머 경보음 함수를 제거하고 운영 가이드의 타이머 안내를 사진 초기화 안내로 교체.
+  - 검증: 타이머/단서 개방 식별자가 `src/`에 남지 않음을 확인. `npm run lint` 통과(기존 `useGameState.ts` 경고 1건), Supabase env 주입 후 `npm run build` 통과.
+  - 삭제 파일: `src/components/TimerOverlay.tsx`
+  - 수정 파일: `src/app/admin/page.tsx`, `src/app/layout.tsx`, `src/lib/data.ts`, `src/lib/ringtone.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
 
 ## 구조 확정 사항
 

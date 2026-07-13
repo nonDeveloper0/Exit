@@ -69,11 +69,6 @@ export const INCOMING_CALL_AUDIO_URL = "/audio/incoming-call.mp3";
 export const INCOMING_CALL_EVIDENCE_ID = "CALL01";
 export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_ID];
 
-// 제한 시간 타이머. 전역 마커 1행(pair_id=__global)의 created_at에 "종료 시각(ISO)"이 들어간다.
-// 모든 기기가 같은 종료 시각을 읽어 remaining = endsAt - now 로 동일하게 카운트다운한다.
-export const TIMER_EVENT_ID = "_timer";
-export const TIMER_EVENT_TYPE = "timer";
-
 // 장소 이름 — 수정 시 여기서만 변경
 export const LOCATIONS = {
   L1: "자재 물류창고", // 사건 현장

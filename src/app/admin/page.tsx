@@ -4,13 +4,10 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
-import { EVIDENCE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, photoTagLabel, TIMER_EVENT_ID, TIMER_EVENT_TYPE } from "@/lib/data";
+import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, photoTagLabel } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
-import { useBroadcastEvent } from "@/lib/useBroadcastEvent";
 
 const ADMIN_PASSWORD = "0000";
-const OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE = "admin_open_all_snapshot";
-const OPEN_ALL_EVIDENCE_SNAPSHOT_PREFIX = "_open_all_evidence_snapshot:";
 
 interface TeamRow {
   pairId: string;
@@ -25,22 +22,6 @@ interface AdminPhotoRow {
   suspect_tag: string | null;
   status: string | null;
   created_at: string;
-}
-
-function encodeOpenAllEvidenceSnapshot(evidenceIds: string[]) {
-  return `${OPEN_ALL_EVIDENCE_SNAPSHOT_PREFIX}${encodeURIComponent(JSON.stringify(evidenceIds))}`;
-}
-
-function decodeOpenAllEvidenceSnapshot(evidenceId: string) {
-  if (!evidenceId.startsWith(OPEN_ALL_EVIDENCE_SNAPSHOT_PREFIX)) return null;
-
-  try {
-    const encoded = evidenceId.slice(OPEN_ALL_EVIDENCE_SNAPSHOT_PREFIX.length);
-    const parsed = JSON.parse(decodeURIComponent(encoded));
-    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : null;
-  } catch {
-    return null;
-  }
 }
 
 function PinGate({ onSuccess }: { onSuccess: () => void }) {
@@ -131,69 +112,18 @@ function AdminPanel() {
   const [showIncomingCallConfirm, setShowIncomingCallConfirm] = useState(false);
   const [incomingCallTeamInput, setIncomingCallTeamInput] = useState("");
   const [togglingIncomingCall, setTogglingIncomingCall] = useState(false);
-  const [openingAllEvidence, setOpeningAllEvidence] = useState(false);
-  const [rollingBackAllEvidence, setRollingBackAllEvidence] = useState(false);
-  const [resettingAllEvidence, setResettingAllEvidence] = useState(false);
-  const [openAllEvidenceSnapshot, setOpenAllEvidenceSnapshot] = useState<string[] | null>(null);
-  const [showResetEvidenceConfirm, setShowResetEvidenceConfirm] = useState(false);
+  const [resettingAllPhotos, setResettingAllPhotos] = useState(false);
+  const [showResetPhotosConfirm, setShowResetPhotosConfirm] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState("");
   const [pairings, setPairings] = useState<Record<string, string>>({});
   const [pairA, setPairA] = useState("");
   const [pairB, setPairB] = useState("");
   const [savingPair, setSavingPair] = useState(false);
-  const timerEvent = useBroadcastEvent(TIMER_EVENT_ID, TIMER_EVENT_TYPE);
-  const [timerMinutes, setTimerMinutes] = useState("15");
-  const [togglingTimer, setTogglingTimer] = useState(false);
-  const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
     const team = getTeamInfo();
     if (team) setMyPairId(team.teamNumber);
   }, []);
-
-  const fetchOpenAllEvidenceSnapshot = useCallback(async () => {
-    const { data } = await supabase
-      .from("team_evidence_items")
-      .select("evidence_id")
-      .eq("pair_id", GLOBAL_PAIR_ID)
-      .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE)
-      .maybeSingle();
-
-    setOpenAllEvidenceSnapshot(data ? decodeOpenAllEvidenceSnapshot(data.evidence_id as string) : null);
-  }, []);
-
-  useEffect(() => {
-    fetchOpenAllEvidenceSnapshot();
-
-    const channel = supabase
-      .channel("admin_open_all_evidence_snapshot")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "team_evidence_items",
-          filter: `pair_id=eq.${GLOBAL_PAIR_ID}`,
-        },
-        (payload) => {
-          if (payload.eventType === "DELETE") {
-            const oldRow = payload.old as { type?: string };
-            if (oldRow.type === OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE) setOpenAllEvidenceSnapshot(null);
-            return;
-          }
-
-          const newRow = payload.new as { evidence_id?: string; type?: string };
-          if (newRow.type === OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE && newRow.evidence_id) {
-            setOpenAllEvidenceSnapshot(decodeOpenAllEvidenceSnapshot(newRow.evidence_id));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchOpenAllEvidenceSnapshot]);
 
   useEffect(() => {
     supabase
@@ -363,45 +293,6 @@ function AdminPanel() {
     setPairings(newPairings);
   }
 
-  // 타이머 진행 중에는 남은 시간을 매초 갱신
-  useEffect(() => {
-    if (!timerEvent.active) return;
-    const id = setInterval(() => setNowMs(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [timerEvent.active]);
-
-  const timerEndsAt = timerEvent.eventId ? Date.parse(timerEvent.eventId) : null;
-  const timerRemaining = timerEndsAt !== null ? Math.max(0, timerEndsAt - nowMs) : 0;
-  const timerRunning = timerEvent.active && timerEndsAt !== null;
-
-  async function startTimer() {
-    const minutes = parseInt(timerMinutes, 10);
-    if (!minutes || minutes <= 0) return;
-    setTogglingTimer(true);
-    const endsAt = new Date(Date.now() + minutes * 60_000).toISOString();
-    await supabase.from("team_evidence_items").upsert(
-      {
-        pair_id: GLOBAL_PAIR_ID,
-        evidence_id: TIMER_EVENT_ID,
-        type: TIMER_EVENT_TYPE,
-        created_at: endsAt,
-      },
-      { onConflict: "pair_id,evidence_id,type" }
-    );
-    setTogglingTimer(false);
-  }
-
-  async function stopTimer() {
-    setTogglingTimer(true);
-    await supabase
-      .from("team_evidence_items")
-      .delete()
-      .eq("pair_id", GLOBAL_PAIR_ID)
-      .eq("evidence_id", TIMER_EVENT_ID)
-      .eq("type", TIMER_EVENT_TYPE);
-    setTogglingTimer(false);
-  }
-
   async function setVoteOpen(open: boolean) {
     setSettingVoteRound(true);
     await supabase
@@ -457,94 +348,30 @@ function AdminPanel() {
     setTogglingIncomingCall(false);
   }
 
-  async function openAllEvidence() {
-    setOpeningAllEvidence(true);
-    const createdAt = new Date().toISOString();
-    const evidenceIds = EVIDENCE.map((e) => e.id);
-    const { data: existingGlobalEvidence } = await supabase
-      .from("team_evidence_items")
-      .select("evidence_id")
-      .eq("pair_id", GLOBAL_PAIR_ID)
-      .eq("type", "collected")
-      .in("evidence_id", evidenceIds);
-    const snapshot = (existingGlobalEvidence ?? []).map((row) => row.evidence_id as string);
-    await supabase
-      .from("team_evidence_items")
-      .delete()
-      .eq("pair_id", GLOBAL_PAIR_ID)
-      .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE);
-    await supabase.from("team_evidence_items").upsert(
-      {
-        pair_id: GLOBAL_PAIR_ID,
-        evidence_id: encodeOpenAllEvidenceSnapshot(snapshot),
-        type: OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE,
-        created_at: createdAt,
-      },
-      { onConflict: "pair_id,evidence_id,type" }
-    );
-    setOpenAllEvidenceSnapshot(snapshot);
-    await supabase.from("team_evidence_items").upsert(
-      evidenceIds.map((evidenceId) => ({
-        pair_id: GLOBAL_PAIR_ID,
-        evidence_id: evidenceId,
-        type: "collected",
-        created_at: createdAt,
-      })),
-      { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
-    );
-    setOpeningAllEvidence(false);
-  }
-
-  async function rollbackOpenAllEvidence() {
-    if (!openAllEvidenceSnapshot) return;
-    const evidenceIds = EVIDENCE.map((e) => e.id);
-    const snapshot = new Set(openAllEvidenceSnapshot);
-    const idsToRemove = evidenceIds.filter((id) => !snapshot.has(id));
-    if (idsToRemove.length === 0) {
-      await supabase
-        .from("team_evidence_items")
-        .delete()
-        .eq("pair_id", GLOBAL_PAIR_ID)
-        .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE);
-      setOpenAllEvidenceSnapshot(null);
-      return;
+  async function deleteTeamPhotos(pairId: string) {
+    const { data: files } = await supabase.storage.from(PHOTO_BUCKET).list(pairId, { limit: 1000 });
+    if (files && files.length > 0) {
+      await supabase.storage.from(PHOTO_BUCKET).remove(files.map((file) => `${pairId}/${file.name}`));
     }
-
-    setRollingBackAllEvidence(true);
-    await supabase
-      .from("team_evidence_items")
-      .delete()
-      .eq("pair_id", GLOBAL_PAIR_ID)
-      .eq("type", "collected")
-      .in("evidence_id", idsToRemove);
-    await supabase
-      .from("team_evidence_items")
-      .delete()
-      .eq("pair_id", GLOBAL_PAIR_ID)
-      .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE);
-    setOpenAllEvidenceSnapshot(null);
-    setRollingBackAllEvidence(false);
+    await supabase.from("photo_evidence").delete().eq("pair_id", pairId);
   }
 
-  async function resetAllEvidenceItems() {
+  async function deleteAllPhotos() {
+    const { data: folders } = await supabase.storage.from(PHOTO_BUCKET).list("", { limit: 1000 });
+    for (const folder of folders ?? []) {
+      await deleteTeamPhotos(folder.name);
+    }
+    await supabase.from("photo_evidence").delete().neq("pair_id", "");
+  }
+
+  async function resetAllPhotos() {
     if (resetConfirmText.trim() !== "초기화") return;
-    setResettingAllEvidence(true);
-    await supabase
-      .from("team_evidence_items")
-      .delete()
-      .eq("type", "collected")
-      .in("evidence_id", EVIDENCE.map((e) => e.id));
-    await supabase
-      .from("team_evidence_items")
-      .delete()
-      .eq("pair_id", GLOBAL_PAIR_ID)
-      .eq("type", OPEN_ALL_EVIDENCE_SNAPSHOT_TYPE);
-    setOpenAllEvidenceSnapshot(null);
-    setShowResetEvidenceConfirm(false);
+    setResettingAllPhotos(true);
+    await deleteAllPhotos();
+    setShowResetPhotosConfirm(false);
     setResetConfirmText("");
-    resetAll();
-    await fetchTeams();
-    setResettingAllEvidence(false);
+    await fetchPhotos();
+    setResettingAllPhotos(false);
   }
 
   async function handleReset(pairId: string) {
@@ -553,16 +380,20 @@ function AdminPanel() {
       .from("team_evidence_items")
       .delete()
       .eq("pair_id", pairId);
+    await deleteTeamPhotos(pairId);
     if (pairId === myPairId) resetAll();
     await fetchTeams();
+    await fetchPhotos();
     setLoadingId(null);
   }
 
   async function handleResetAll() {
     setLoadingId("ALL");
     await supabase.from("team_evidence_items").delete().neq("pair_id", "");
+    await deleteAllPhotos();
     resetAll();
     await fetchTeams();
+    await fetchPhotos();
     setLoadingId(null);
   }
 
@@ -728,140 +559,54 @@ function AdminPanel() {
                 </div>
               </div>
             )}
-            {/* Countdown timer */}
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <p className="text-sm font-bold text-zinc-200">제한 시간 타이머</p>
-                  <p className={`text-xs font-mono ${timerRunning ? "text-amber-400" : "text-zinc-500"}`}>
-                    {timerRunning
-                      ? timerRemaining > 0
-                        ? `● 남은 시간 ${String(Math.floor(Math.ceil(timerRemaining / 1000) / 60)).padStart(2, "0")}:${String(Math.ceil(timerRemaining / 1000) % 60).padStart(2, "0")}`
-                        : "● 시간 종료"
-                      : "○ 대기 중"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={timerMinutes}
-                  onChange={(e) => setTimerMinutes(e.target.value.replace(/\D/g, "").slice(0, 3))}
-                  disabled={togglingTimer}
-                  className="w-20 rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-center text-lg text-zinc-100 focus:border-amber-400 focus:outline-none disabled:opacity-40"
-                  aria-label="제한 시간(분)"
-                />
-                <span className="text-sm text-zinc-400">분</span>
-                <div className="flex flex-1 justify-end gap-1.5">
-                  {[5, 10, 15, 30].map((m) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setTimerMinutes(String(m))}
-                      disabled={togglingTimer}
-                      className="rounded border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-700 disabled:opacity-40"
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={startTimer}
-                  disabled={togglingTimer || !parseInt(timerMinutes, 10)}
-                  className="flex-1 rounded bg-amber-400 px-3 py-2 text-sm font-bold text-zinc-900 hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                  {togglingTimer ? "..." : timerRunning ? "타이머 재시작" : "타이머 시작"}
-                </button>
-                <button
-                  onClick={stopTimer}
-                  disabled={togglingTimer || !timerRunning}
-                  className="flex-1 rounded border border-zinc-600 bg-zinc-800 px-3 py-2 text-sm font-bold text-zinc-300 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                  {togglingTimer ? "..." : "종료"}
-                </button>
-              </div>
-              <p className="text-[11px] leading-relaxed text-zinc-600">
-                시작하면 모든 참가자 기기 상단에 카운트다운이 표시되고, 0이 되면 경보음이 울립니다.
-              </p>
-            </div>
-
-            {/* Evidence unlock */}
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
               <div className="space-y-0.5">
-                <p className="text-sm font-bold text-zinc-200">모든 단서 개방</p>
+                <p className="text-sm font-bold text-zinc-200">사진 전체 삭제</p>
                 <p className="text-xs text-zinc-500">
-                  전체 참가자에게 증거함의 모든 단서를 즉시 공개합니다.
+                  모든 조가 촬영한 사진 증거를 Storage 파일까지 완전히 삭제합니다. 되돌릴 수 없습니다.
                 </p>
-                {openAllEvidenceSnapshot && (
-                  <p className="text-xs text-amber-400/80">
-                    직전 개방 전 상태가 저장되어 있습니다.
-                  </p>
-                )}
               </div>
               <button
-                onClick={openAllEvidence}
-                disabled={openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
-                className="w-full rounded bg-emerald-500 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                onClick={() => {
+                  setShowResetPhotosConfirm(true);
+                  setResetConfirmText("");
+                }}
+                disabled={resettingAllPhotos}
+                className="w-full rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
-                {openingAllEvidence ? "개방 중..." : "모든 단서 개방"}
+                {resettingAllPhotos ? "삭제 중..." : "사진 전체 삭제"}
               </button>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <button
-                  onClick={rollbackOpenAllEvidence}
-                  disabled={!openAllEvidenceSnapshot || openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
-                  className="rounded border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 text-sm font-bold text-amber-300 hover:bg-amber-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                  {rollingBackAllEvidence ? "되돌리는 중..." : "이전 상태로 되돌리기"}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowResetEvidenceConfirm(true);
-                    setResetConfirmText("");
-                  }}
-                  disabled={openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
-                  className="rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                  {resettingAllEvidence ? "초기화 중..." : "단서 전체 초기화"}
-                </button>
-              </div>
-              {showResetEvidenceConfirm && (
+              {showResetPhotosConfirm && (
                 <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 space-y-2">
                   <p className="text-xs leading-relaxed text-red-200/80">
-                    모든 조의 수집 단서와 전역 공개 단서를 삭제합니다. 실행하려면 아래에 초기화를 입력하세요.
+                    모든 조의 사진(Storage 파일 포함)을 영구 삭제합니다. 실행하려면 아래에 초기화를 입력하세요.
                   </p>
                   <input
                     value={resetConfirmText}
                     onChange={(e) => setResetConfirmText(e.target.value)}
                     placeholder="초기화 입력"
-                    disabled={openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
+                    disabled={resettingAllPhotos}
                     className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-red-400 focus:outline-none disabled:opacity-40"
                   />
                   <button
-                    onClick={resetAllEvidenceItems}
-                    disabled={resetConfirmText.trim() !== "초기화" || openingAllEvidence || rollingBackAllEvidence || resettingAllEvidence}
+                    onClick={resetAllPhotos}
+                    disabled={resetConfirmText.trim() !== "초기화" || resettingAllPhotos}
                     className="w-full rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
-                    {resettingAllEvidence ? "초기화 중..." : "초기화 확정"}
+                    {resettingAllPhotos ? "삭제 중..." : "삭제 확정"}
                   </button>
                   <button
                     onClick={() => {
-                      setShowResetEvidenceConfirm(false);
+                      setShowResetPhotosConfirm(false);
                       setResetConfirmText("");
                     }}
-                    disabled={resettingAllEvidence}
+                    disabled={resettingAllPhotos}
                     className="w-full rounded border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-bold text-zinc-400 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
                     취소
                   </button>
                 </div>
               )}
-              <p className="text-[11px] leading-relaxed text-zinc-600">
-                되돌리기는 마지막 전체 개방으로 추가된 전역 공개 단서만 제거합니다. 전체 초기화는 모든 조의 수집 단서와 전역 공개 단서를 삭제합니다.
-              </p>
             </div>
           </>
         )}
@@ -1027,7 +772,7 @@ function AdminPanel() {
       <div className="space-y-3">
         <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">조별 초기화</h2>
         <p className="text-xs text-zinc-600">
-          Supabase 증거 수집 기록을 조별로 삭제합니다.
+          Supabase 증거 수집 기록과 촬영한 사진을 조별로 삭제합니다.
           내 기기 조와 일치하면 투표 기록도 함께 삭제됩니다.
         </p>
 

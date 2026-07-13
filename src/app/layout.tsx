@@ -5,7 +5,6 @@ import BottomNav from "@/components/BottomNav";
 import GameStateRedirect from "@/components/GameStateRedirect";
 import TeamEvidenceToast from "@/components/TeamEvidenceToast";
 import IncomingCallOverlay from "@/components/IncomingCallOverlay";
-import TimerOverlay from "@/components/TimerOverlay";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +39,6 @@ export default function RootLayout({
         <GameStateRedirect />
         <TeamEvidenceToast />
         <IncomingCallOverlay />
-        <TimerOverlay />
         <div className="max-w-md mx-auto min-h-full">{children}</div>
         <BottomNav />
       </body>
