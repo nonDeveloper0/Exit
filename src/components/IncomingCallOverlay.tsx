@@ -10,7 +10,7 @@ import { supabase } from "@/lib/supabase";
 
 type CallScreen = "incoming" | "calling" | "ended";
 
-const CALLER_NAME = "박미리";
+const CALLER_NAME = "박미리 탐정";
 const CALLER_NUMBER = "010-9876-2345";
 const CALLER_INITIALS = "미리";
 
@@ -163,12 +163,12 @@ export default function IncomingCallOverlay() {
   const ss = String(seconds % 60).padStart(2, "0");
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-hidden bg-[#071018] text-zinc-50">
+    <div className="fixed inset-0 z-[100] overflow-hidden bg-[#f7f9ff] text-[#202124]">
       {screen === "incoming" ? (
-        <div className="relative flex min-h-full flex-col bg-[radial-gradient(circle_at_50%_4%,rgba(35,180,178,0.34),transparent_32%),linear-gradient(160deg,#0b1b24_0%,#112331_44%,#090d17_100%)]">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_18%_12%,rgba(84,222,211,0.22),transparent_34%),radial-gradient(circle_at_82%_10%,rgba(116,72,255,0.18),transparent_32%)]" />
+        <div className="relative flex min-h-full flex-col bg-[radial-gradient(circle_at_22%_48%,rgba(139,198,255,0.62),transparent_40%),radial-gradient(circle_at_84%_78%,rgba(179,139,255,0.72),transparent_48%),linear-gradient(180deg,#fbfcff_0%,#eef5ff_35%,#9cc8ff_68%,#9b88e5_100%)]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-[linear-gradient(180deg,rgba(255,255,255,0.34),transparent)]" />
 
-          <div className="relative flex items-center justify-between px-7 pt-5 text-sm font-semibold text-white/90">
+          <div className="relative flex items-center justify-between px-7 pt-5 text-sm font-semibold text-[#202124]/75">
             <span>12:45</span>
             <div className="flex items-center gap-1.5" aria-hidden="true">
               <span className="h-2.5 w-3 rounded-[2px] border border-white/80" />
@@ -176,42 +176,42 @@ export default function IncomingCallOverlay() {
             </div>
           </div>
 
-          <div className="relative flex flex-1 flex-col items-center px-8 pt-12 text-center">
-            <div className="mb-10 flex items-center gap-2 text-lg font-medium text-white/90">
+          <div className="relative flex flex-1 flex-col items-center px-8 pt-[11vh] text-center">
+            <div className="mb-10 hidden items-center gap-2 text-lg font-medium text-white/90">
               <span className="text-xl">☎</span>
               <span>Incoming call</span>
             </div>
 
-            <h1 className="max-w-full break-keep text-[42px] font-semibold leading-tight tracking-normal text-white drop-shadow-sm">
+            <h1 className="max-w-full break-keep text-[39px] font-semibold leading-tight tracking-[-0.045em] text-[#202124]">
               {CALLER_NAME}
             </h1>
-            <p className="mt-2 text-lg font-medium tracking-normal text-white/80">{CALLER_NUMBER}</p>
-            <p className="mt-3 rounded-full bg-emerald-400/16 px-3 py-1 text-xs font-bold text-emerald-100 ring-1 ring-emerald-300/20">
+            <p className="mt-1.5 text-[15px] font-medium tracking-[0.02em] text-[#25262a]">{CALLER_NUMBER}</p>
+            <p className="mt-3 hidden rounded-full bg-emerald-400/16 px-3 py-1 text-xs font-bold text-emerald-100 ring-1 ring-emerald-300/20">
               저장된 연락처
             </p>
 
-            <div className="mt-10 flex h-36 w-36 items-center justify-center rounded-full border border-white/45 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(213,239,245,0.9))] text-4xl font-bold text-[#1f4f65] shadow-[0_22px_70px_rgba(0,0,0,0.34),0_0_0_18px_rgba(255,255,255,0.06)] animate-call-pulse">
+            <div className="mt-7 flex h-[132px] w-[132px] items-center justify-center rounded-full border border-[#8999a6]/35 bg-[radial-gradient(circle_at_42%_28%,#f8fafb_0%,#dfe5e8_57%,#bdc7ce_100%)] text-3xl font-semibold tracking-[-0.1em] text-[#58636c] shadow-[0_4px_14px_rgba(43,67,93,0.12)]">
               {CALLER_INITIALS}
             </div>
 
-            <p className="mt-8 text-sm text-white/52">휴대전화 수신 중</p>
+            <p className="mt-8 hidden text-sm text-white/52">휴대전화 수신 중</p>
           </div>
 
-          <div className="relative px-7 pb-12">
+          <div className="relative px-10 pb-[max(2.75rem,env(safe-area-inset-bottom))]">
             <div className="mb-5 flex items-center justify-between px-5">
               <button
                 type="button"
                 onClick={decline}
-                className="flex flex-col items-center gap-2 text-sm font-medium text-white/72 active:scale-95"
+                className="flex flex-col items-center gap-2.5 text-[13px] font-medium text-[#202124]/78 active:scale-95"
                 aria-label="전화 거절"
               >
-                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#ff4b55] text-2xl font-black text-white shadow-[0_12px_30px_rgba(255,75,85,0.34)]">
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#ef5247] text-2xl font-black text-white shadow-[0_3px_8px_rgba(182,53,50,0.28)]">
                   ✕
                 </span>
                 거절
               </button>
 
-              <div className="flex flex-col items-center gap-2 text-sm font-medium text-white/72" aria-hidden="true">
+              <div className="hidden flex-col items-center gap-2 text-sm font-medium text-white/72" aria-hidden="true">
                 <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/12 text-xl text-white/70 ring-1 ring-white/12">
                   ⋯
                 </span>
@@ -221,10 +221,10 @@ export default function IncomingCallOverlay() {
 
             <div
               ref={trackRef}
-              className="relative flex h-[68px] items-center rounded-full bg-black/25 p-1.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)] backdrop-blur-md"
+              className="relative flex h-[68px] items-center rounded-full bg-white/20 p-1.5 shadow-[inset_0_0_0_1px_rgba(60,72,94,0.10)] backdrop-blur-sm"
             >
               <span
-                className="pointer-events-none absolute inset-0 flex items-center justify-center pl-8 text-sm font-semibold text-emerald-100/82 animate-slide-hint"
+                className="pointer-events-none absolute inset-0 flex items-center justify-center pl-8 text-sm font-semibold text-[#385d74]/76 animate-slide-hint"
                 style={{ opacity: dragX > 8 ? 0 : undefined }}
               >
                 밀어서 받기
@@ -236,7 +236,7 @@ export default function IncomingCallOverlay() {
                 onPointerUp={onKnobUp}
                 onPointerCancel={onKnobUp}
                 style={{ transform: `translateX(${dragX}px)` }}
-                className={`relative z-10 flex h-14 w-14 touch-none select-none items-center justify-center rounded-full bg-[#18c96f] text-2xl font-black text-white shadow-[0_12px_32px_rgba(24,201,111,0.45)] ${
+                className={`relative z-10 flex h-14 w-14 touch-none select-none items-center justify-center rounded-full bg-[#16a77a] text-2xl font-black text-white shadow-[0_3px_8px_rgba(23,133,106,0.3)] ${
                   dragging ? "" : "transition-transform duration-200"
                 }`}
                 aria-label="밀어서 전화 받기"
@@ -247,8 +247,8 @@ export default function IncomingCallOverlay() {
           </div>
         </div>
       ) : (
-        <div className="relative flex min-h-full flex-col bg-[radial-gradient(circle_at_50%_0%,rgba(30,183,177,0.28),transparent_30%),linear-gradient(180deg,#0b1923_0%,#071018_100%)]">
-          <div className="relative flex items-center justify-between px-7 pt-5 text-sm font-semibold text-white/90">
+        <div className="relative flex min-h-full flex-col bg-[linear-gradient(180deg,#eef5ff_0%,#9cc8ff_58%,#9b88e5_100%)]">
+          <div className="relative flex items-center justify-between px-7 pt-5 text-sm font-semibold text-[#202124]/75">
             <span>12:45</span>
             <span className="text-xs text-emerald-200/80">통화 연결됨</span>
           </div>

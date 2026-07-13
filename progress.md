@@ -1,5 +1,10 @@
 # EXIT 2026 — 진행 현황
 
+## 작업 시작 (2026-07-13)
+
+- [x] `/phone` 대기 화면을 시계와 `나팀장 개인폰`만 표시하도록 단순화하고, 첨부 레퍼런스를 기준으로 수신전화 One UI 화면을 재구성한다.
+
+
 ## 진행 기록 운영 규칙
 
 - 모든 작업은 시작 시 작업 예정 내용을, 종료 시 완료 내용과 변경 파일을 이 문서에 기록한다.
@@ -341,3 +346,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - `단서 전체 초기화`: 모든 조의 `type='collected'` 단서 기록과 전역 공개 단서, 스냅샷 마커 삭제
   - 실수 방지를 위해 전체 초기화는 입력칸에 `초기화`를 직접 입력해야 실행
   - 수정 파일: `src/app/admin/page.tsx`, `docs/01_md/07_DATA_SCHEMA.md`, `docs/01_md/08_DEV_SPEC.md`, `progress.md`
+
+- [x] `/phone` 최소화 + 수신전화 밝은 One UI 레퍼런스 반영 (2026-07-13)
+  - `/phone`: 시계와 `나팀장 개인폰`만 표시. 수신대기·기기 안내·수신 해제 UI 제거(수신 전용 기기 자동 지정은 유지).
+  - 수신전화: 발신자 `박미리 탐정 / 010-9876-2345`, 밝은 흰색→하늘색→보라색 그라데이션 및 레퍼런스 기반 원형 프로필·버튼 색상으로 변경.
+  - 수신·거절·밀어서 받기·벨소리·진동·CALL01 수집 동작은 유지.
+  - 검증: `npm run lint`(오류 0, 기존 경고 2건), `npm run build` 통과.
+  - 수정 파일: `src/app/phone/page.tsx`, `src/components/IncomingCallOverlay.tsx`, `progress.md`.
