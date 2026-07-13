@@ -68,7 +68,9 @@
   /* 공통 배경 — 실기기 참고 이미지 기준 다크 배경화면 + 은은한 빛 번짐 + 비네트 (하단 아이콘이 묻히지 않게 너무 어둡지 않게 조정) */
   /* 비네트를 배경 레이어 맨 위에 얹어서(background는 항상 자식 콘텐츠보다 아래) z-index 없이 처리 */
   .wallpaper {
-    position: relative;
+    /* position을 지정하지 않는다 — 지정하면 .screen의 position:absolute; inset:0 을 덮어써서
+       홈/시작 화면이 flow로 무너지고(자식이 전부 absolute라 높이 0) 하단 독이 화면 밖으로 밀린다.
+       배경은 .screen의 absolute 박스에 그대로 그려지므로 position 없이도 문제없다. */
     background:
       radial-gradient(ellipse 120% 90% at 50% 50%, transparent 60%, rgba(0,0,0,.32) 100%),
       radial-gradient(ellipse 75% 50% at 50% 26%, rgba(125,150,255,.26), transparent 68%),

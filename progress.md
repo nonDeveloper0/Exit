@@ -281,6 +281,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] phone2 홈/시작 화면 붕괴 — 진짜 원인(.wallpaper position 충돌) 수정 (2026-07-13)
+  - 위 `svh`/`--app-h` 수정 후에도 홈 화면 하단 독이 여전히 안 보임 → 진짜 원인은 뷰포트 높이가 아니라 CSS `position` 충돌이었음
+  - `#home`/`#start`는 `class="screen wallpaper"`. `.screen{position:absolute;inset:0}`과 `.wallpaper{position:relative}`가 명시도가 같아 뒤에 온 `.wallpaper`가 이겨 `position:relative`가 적용됨. 그러면 화면이 body를 못 채우고, 자식(상태바·페이지닷·독)이 전부 `absolute`라 in-flow 콘텐츠가 없어 **화면 높이가 0으로 붕괴** → 독이 화면 밖으로 밀려 안 보이고 바닥은 body 검정만 노출
+  - 해결: `.wallpaper`에서 `position:relative` 제거(배경은 `.screen`의 absolute 박스에 그대로 그려짐). 재발 방지 주석 추가. `--app-h` 높이 수정은 앱 화면(전화/메시지)의 보이는 영역 정확도용으로 유지
+  - 검증: headless 렌더 측정 — 독 `16→484`, 4번째 아이콘 우측 `431`(<484)로 4개 모두 정상 배치. 아이콘은 고정 52px + 간격만 신축이라 뷰포트 ≥240px면 안 잘림(모든 폰 통과). 배경 그라데이션은 원인 아님(background는 자식보다 항상 아래)
+  - 수정 파일: `public/screen/phone2.html`, `progress.md`
+
 - [x] phone2 목업 하단 잘림 재수정 — 인앱 브라우저 대응 (2026-07-13)
   - 증상: `/screen/phone2` 홈 화면 하단 독(4개 아이콘)/시작 패널이 화면 밖으로 밀려 안 보이고 바닥이 검게 보임
   - 원인: 직전 수정(`svh`)이 `svh` 미지원 브라우저(카카오톡·인스타 등 인앱 브라우저)에서 `100vh`(주소창 포함 큰 뷰포트)로 폴백돼 여전히 잘림. body 높이 > 실제 보이는 영역이라 `absolute` 자식(독/패널)이 밑으로 밀림
