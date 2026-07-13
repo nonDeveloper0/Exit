@@ -470,6 +470,17 @@ https://(배포주소)/screen/phone2.html
 - **전화 앱**: `최근 기록` 탭에 통화 목록 하드코딩(`.call-row` 반복). `즐겨찾기`/`연락처` 탭은 빈 상태만 표시
 - **메시지 앱**: 대화 목록(`#threadList`) → 탭하면 해당 대화(`#chatKim`/`#chatUnknown`/`#chatLee`) 표시. 새 대화 추가 시 목록에 `.thread-row`(`onclick="openThread('id')"`) 하나, 채팅 내용에 `.chat-body`(`id="chat" + Id`) 하나를 세트로 추가하고 `THREAD_NAMES` 객체에 이름도 추가
 - ⚠️ **통화목록·메시지 문구는 초안입니다.** 채소장의 동기(김사원 보호 + 현장 조작 의혹)에 맞춰 작성한 임시 문구이며, 단서팀 확정본으로 교체해야 합니다.
+- **화면 상단 데모/목업 안내 바는 제거됨** (`.demo-banner` 삭제). 다시 필요하면 운영 화면이 아닌 별도 목업에서만 노출.
+- **시작 화면 배치:** 시계는 화면 살짝 위쪽(`#start .lock-clock { top: 16% }`), 조 선택 패널은 세로 중앙(`#start .start-panel { top: 50%; transform: translate(-50%,-50%) }`). 위치만 바꾸려면 이 `top` 값만 조정하면 된다.
+
+#### ⚠️ 레이아웃 함정 — 화면이 통째로 무너지거나 하단 독이 안 보일 때 (실수 방지 메모)
+
+`public/screen/*.html`의 각 화면(`.screen`)은 `position: absolute; inset: 0`으로 **부모(body)를 꽉 채워** 크기를 얻고, 그 위에서 하단 독·홈 인디케이터 등이 `bottom:` 기준으로 배치된다. 여기엔 두 가지 함정이 있었다(둘 다 실제로 밟았음).
+
+1. **`.screen`과 한 요소에 겹쳐 쓰는 다른 클래스에 `position`을 주지 마라.**
+   `#home`/`#start`는 `class="screen wallpaper"`처럼 클래스를 겹쳐 쓴다. `.wallpaper`(또는 다른 클래스)에 `position: relative` 등을 지정하면 `.screen`과 명시도가 같아 **CSS에서 나중에 나온 쪽이 이겨** `.screen`의 `position: absolute`를 덮어쓴다. 그러면 화면이 body를 못 채우고, 자식(상태바·독 등)이 전부 `absolute`라 in-flow 콘텐츠가 없어 **화면 높이가 0으로 붕괴** → 하단 독이 화면 밖으로 밀려 안 보이고 바닥엔 검정만 남는다. 배경 같은 스타일은 `position` 없이도 `.screen`의 absolute 박스에 그대로 그려지므로 굳이 `position`을 줄 이유가 없다.
+2. **증상이 "세로 잘림"처럼 보여도 원인이 뷰포트 높이가 아닐 수 있다.** 위 붕괴는 "하단이 잘렸다"처럼 보이지만 실제로는 높이 0 붕괴다. **먼저 화면이 body를 실제로 채우는지**(DevTools에서 `.screen`의 계산 높이 = 뷰포트 높이인지) 확인하라. 별개로 모바일 인앱 브라우저(카카오톡 등)는 `svh`/`dvh`를 모를 수 있어 `100svh`가 `100vh`(주소창 포함 큰 뷰포트)로 폴백된다 — 이 파일은 JS로 `visualViewport.height`를 `--app-h`에 고정해 대응한다(`height: var(--app-h, 100svh)`). 새 기기 화면도 이 패턴을 따르라.
+- **배경 그라데이션/색은 아이콘을 덮지 못한다.** CSS `background`는 항상 자식 콘텐츠보다 아래에 그려진다. 아이콘이 안 보이면 배경색이 아니라 위 배치 문제를 의심하라.
 
 ---
 

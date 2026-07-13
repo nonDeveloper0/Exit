@@ -281,6 +281,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] phone2 시작 화면 재배치 + 상단 목업 배너 제거 + 실수 문서화 (2026-07-13)
+  - 상단 목업 안내 바(`.demo-banner`) CSS·엘리먼트 삭제. `.screen`의 `padding-top: 26px` 주석을 "상단 상태바/노치 여백"으로 갱신(값 유지)
+  - 시작 화면: 시계·조 선택 드롭다운을 아래(`justify-content: flex-end`)에서 위로 이동. 시계는 `#start .lock-clock { top: 16% }`(살짝 위쪽), 조 선택 패널은 `#start .start-panel { top: 50%; transform: translate(-50%,-50%) }`(세로 중앙). `#start`는 `.screen`의 `inset:0`로 화면을 채우므로 자식 absolute 배치가 안전
+  - 재발 방지 문서화(사용자 요청): `docs/01_md/EDIT_GUIDE.md` phone2 절에 "⚠️ 레이아웃 함정" 메모 추가 — (1) `.screen`과 겹치는 클래스에 `position` 금지(높이 0 붕괴), (2) 세로 잘림처럼 보여도 원인이 뷰포트 높이가 아닐 수 있음 + svh 인앱 폴백, (3) 배경은 자식을 못 덮음
+  - 검증: headless 렌더로 시작 화면 확인(배너 없음, 시계 상단·패널 중앙)
+  - 수정 파일: `public/screen/phone2.html`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
 - [x] phone2 홈/시작 화면 붕괴 — 진짜 원인(.wallpaper position 충돌) 수정 (2026-07-13)
   - 위 `svh`/`--app-h` 수정 후에도 홈 화면 하단 독이 여전히 안 보임 → 진짜 원인은 뷰포트 높이가 아니라 CSS `position` 충돌이었음
   - `#home`/`#start`는 `class="screen wallpaper"`. `.screen{position:absolute;inset:0}`과 `.wallpaper{position:relative}`가 명시도가 같아 뒤에 온 `.wallpaper`가 이겨 `position:relative`가 적용됨. 그러면 화면이 body를 못 채우고, 자식(상태바·페이지닷·독)이 전부 `absolute`라 in-flow 콘텐츠가 없어 **화면 높이가 0으로 붕괴** → 독이 화면 밖으로 밀려 안 보이고 바닥은 body 검정만 노출

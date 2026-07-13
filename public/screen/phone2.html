@@ -43,23 +43,10 @@
     pointer-events: none;
   }
 
-  .demo-banner {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 999;
-    background: #6d28d9;
-    color: #fff;
-    font-size: 11px;
-    text-align: center;
-    padding: 5px 8px;
-    line-height: 1.5;
-  }
-  .demo-banner b { color: #ddd6fe; }
-
   .screen {
     position: absolute;
     inset: 0;
-    padding-top: 26px; /* 데모 배너 높이 */
+    padding-top: 26px; /* 상단 상태바/노치 여백 */
     display: none;
     flex-direction: column;
   }
@@ -98,11 +85,21 @@
   .statusbar .batt::before { content: ""; position: absolute; inset: 1.5px; width: 82%; background: currentColor; border-radius: 1px; }
 
   /* ---------- 시작(잠금) 화면 ---------- */
-  #start {
-    align-items: center;
-    justify-content: flex-end;
-    gap: 14vh;
-    padding: 74px 24px 64px;
+  /* 시계는 화면 살짝 위쪽, 조 선택 패널은 세로 중앙에 배치.
+     #start는 .screen(position:absolute; inset:0)으로 화면 전체를 채우므로
+     자식을 absolute로 놓아도 높이가 무너지지 않는다(inset:0가 크기를 보장). */
+  #start { padding: 0; }
+  #start .lock-clock {
+    position: absolute;
+    top: 16%;            /* 시계: 살짝 위쪽 */
+    left: 0; right: 0;
+  }
+  #start .start-panel {
+    position: absolute;
+    top: 50%;            /* 조 선택 드롭다운: 세로 중앙 */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(360px, calc(100% - 48px));
   }
   .lock-clock { text-align: center; }
   .lock-clock .time { font-size: clamp(52px, 14vw, 78px); font-weight: 300; letter-spacing: -.02em; }
@@ -355,8 +352,6 @@
 
 <div class="dynamic-island"></div>
 <div class="home-indicator"></div>
-
-<div class="demo-banner">📱 목업 · 채소장 개인 휴대폰 &mdash; <b>통화목록·메시지는 초안</b>, 단서팀 확정 필요 (열람용 소품, 수집 연동 없음)</div>
 
 <!-- 시작 화면: 조 번호 선택 (비밀번호 없음) -->
 <div class="screen active wallpaper" id="start">
