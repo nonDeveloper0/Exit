@@ -1,77 +1,25 @@
-# PUZZLE DESIGN — QR 없는 '문제 풀이형' 단서
+# PUZZLE DESIGN — 문제 풀이형 단서
 
-> "단서가 모두 QR은 아니다. 문제를 풀면 정답으로 단서를 얻는 형식"을 어떻게 구현할지 정리한 문서.
-> 2026-07-13 기준 1차 구현 완료: `/solve` 전역 정답 입력으로 QR 없이 단서를 수집할 수 있다.
+> 2026-07-13: `/solve` 전역 정답 입력 탭을 1차 구현했으나, "문제를 푸는 탭이 따로 있는 게 아니라
+> QR을 찍으면 문제가 뜨고 그 문제를 맞히면 단서를 수집하거나 심문권을 얻는" 방식으로 되돌리기로 결정.
+> `/solve` 페이지와 `PUZZLES`/`Puzzle` 데이터 모델은 제거했다.
 
-## 현재 구현
+## 확정된 방식
 
-- `LOCKED_EVIDENCE[id]` = 정답, `EVIDENCE_QUIZ[id]` = 문제 텍스트 (`src/lib/data.ts`)
-- `PUZZLES` = QR 없이 풀 수 있는 문제 데이터 (`src/lib/data.ts`)
-- `/solve`에서 정답 입력 → `findPuzzleByAnswer()` 판정 → `reward.type === "evidence"`면 `collect(evidenceId)`
-- 기존 QR 잠금 단서는 유지된다. 같은 정답/문제를 `PUZZLES`에 등록하면 QR 없이도 수집 가능하다.
+- 문제는 **QR을 찍어야만** 등장한다. QR 없는 별도 진입점은 없다.
+- 구현은 기존 QR 잠금 증거 메커니즘 그대로: `LOCKED_EVIDENCE[증거ID]` = 정답, `EVIDENCE_QUIZ[증거ID]` = 문제 문구 (`src/lib/data.ts`).
+- `/qr/[slug]` 페이지에서 잠긴 증거는 문제 문구 + 정답 입력창을 보여주고, 정답을 맞히면 자동으로 그 조 증거함에 수집된다.
+- **보상 두 가지**:
+  - **단서 수집** — 정답을 맞히면 해당 증거가 수집된다 (기본 동작).
+  - **심문권 획득** — 그 증거가 어느 용의자의 `interrogationTriggerId`(`SUSPECTS` 배열, EDIT_GUIDE 5-2절)로 지정돼 있으면, 수집과 동시에 그 용의자 심문권도 함께 얻는다. 별도 보상 타입이나 추가 로직은 필요 없다 — 잠금 증거를 심문권 트리거로 지정하기만 하면 된다.
 
-## 요구사항
+## 폐기한 것
 
-- QR 없이도 접근 가능한 '문제 풀이형' 단서가 필요.
-- 접근 방식: **전역 정답 입력창** 1차 구현 완료. `showInList: true` 문제는 `/solve`에 문제 문구도 표시.
-- 보상: **단서(증거) 수집** / **다음 QR·장소 힌트 공개** — 둘 다 가능해야 함.
-
-## 제안: 문제를 하나의 데이터로 통일
-
-접근 2 × 보상 2 = 4조합을 **하나의 `Puzzle` 데이터**로 정의하면, 4가지가 전부
-"같은 데이터를 다르게 소비"하는 것으로 정리됨 → 어느 쪽으로 가도 재작업 없음.
-
-```ts
-export interface Puzzle {
-  id: string;
-  question: string;            // 문제 텍스트 (앱 목록에 표시할 때 사용)
-  answer: string;              // 정답 (대소문자·공백 무시 비교)
-  reward:
-    | { type: "evidence"; evidenceId: string }  // → collect() 로 단서 수집 (조 동기화됨)
-    | { type: "hint"; text: string };           // → 다음 QR/장소 힌트 텍스트 공개
-  showInList?: boolean;        // true면 앱 내 '문제 목록' 페이지에 노출
-}
-
-export const PUZZLES: Puzzle[] = [
-  { id: "P01", question: "물류창고 벽의 숫자 3개를 더하면?", answer: "17",
-    reward: { type: "evidence", evidenceId: "E13" } },
-  { id: "P02", question: "박실장의 사물함 비밀번호는?", answer: "0412",
-    reward: { type: "hint", text: "채소장 연구실 안쪽 캐비닛을 확인하세요." }, showInList: true },
-];
-```
-
-정답 판정 로직 1개만 있으면 됨:
-
-```ts
-function solve(input: string): Puzzle | null {
-  const norm = (s: string) => s.trim().replace(/\s+/g, "").toLowerCase();
-  return PUZZLES.find((p) => norm(p.answer) === norm(input)) ?? null;
-}
-// 맞으면 reward.type 분기: "evidence" → collect(evidenceId), "hint" → 텍스트 표시
-```
-
-## 4가지 조합 커버 방식
-
-| | 전역 입력창 | 앱 내 문제 목록 |
-|---|---|---|
-| **보상=단서** | 정답 타이핑 → `collect()` → 조 동기화 | 문제별 입력 → `collect()` |
-| **보상=힌트** | 정답 타이핑 → 힌트 텍스트 표시 | 문제별 입력 → 힌트 표시 |
-
-- **전역 입력창**: `/solve`에서 `PUZZLES` 전체의 `answer` 매칭. 문제 텍스트는 안 써도 됨(문제는 현장 인쇄물에 있음).
-- **앱 내 목록**: `/solve`에서 `showInList: true`인 것만 `question`과 함께 렌더링.
-- 데이터는 하나, 소비하는 UI만 추가 → 지금 뭘 만들든 나중에 버릴 게 없음.
-
-## 구현 상태
-
-- [x] Phase 1: `PUZZLES` 데이터 + 전역 정답 입력창 `/solve`
-- [x] `showInList` 문제 목록 표시
-- [ ] 힌트 보상의 조 동기화
+- `/solve` 전역 정답 입력 페이지, 하단 네비 '정답' 탭
+- `PUZZLES`/`Puzzle` 데이터 모델, `findPuzzleByAnswer`/`normalizePuzzleAnswer` — `LOCKED_EVIDENCE` + `EVIDENCE_QUIZ`와 내용이 중복되어 정리
+- 힌트 전용 보상(`reward.type="hint"`) — 필요해지면 별도로 재설계
 
 ## 남은 결정 / 주의
 
-- [ ] **힌트 보상은 현재 설계상 조 동기화 안 됨** (`unlock`처럼 로컬). 한 명이 힌트를 봐도
-      같은 조 다른 폰엔 안 뜸. 증거 보상은 `collect()`라 동기화됨. 힌트도 조 전체에
-      띄우려면 Supabase 저장 추가 필요 — 필요 시 별도 논의.
-- [x] 기존 `LOCKED_EVIDENCE`/`EVIDENCE_QUIZ`(QR 게이트)와 병존. 필요한 항목만 `PUZZLES`에 같이 등록.
-- [ ] `11_DEVICE_UI_PLAN.md`의 "노트북 조별 비번 발급 퍼즐"과 이 시스템을 합칠지 검토
-      (조마다 다른 값을 발급하는 로직은 이 `Puzzle` 모델의 확장 필요).
+- 문제 문구와 정답은 `EVIDENCE_QUIZ`/`LOCKED_EVIDENCE`에 증거 ID별로 1:1 등록한다 (EDIT_GUIDE 6/6-1절).
+- 힌트 텍스트(정답 대신 다음 단서 위치 등을 알려주는 방식)가 필요해지면 그때 별도 데이터 모델을 논의한다.

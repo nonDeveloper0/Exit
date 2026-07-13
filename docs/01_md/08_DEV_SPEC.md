@@ -51,27 +51,16 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
     ↓
 QR_CODES에서 slug 조회 → evidenceIds 확인
     ↓
-증거 1~2개 공개 + 수집 버튼
+증거가 LOCKED_EVIDENCE에 없으면: 바로 공개 + 수집 버튼
+증거가 LOCKED_EVIDENCE에 있으면: EVIDENCE_QUIZ 문제 + 비밀번호 입력창 표시
     ↓
-수집 클릭 → Supabase upsert → 같은 조 기기에 Realtime 전파
+수집 버튼 클릭 또는 정답 입력 → Supabase upsert(collect) → 같은 조 기기에 Realtime 전파
+    ↓
+그 증거가 어느 용의자의 interrogationTriggerId면 심문권도 함께 획득됨
 ```
 
-## 정답 입력 흐름
-
-```
-/solve 접속
-    ↓
-정답 입력
-    ↓
-PUZZLES에서 answer 매칭
-    ↓
-reward.type="evidence"면 collect(evidenceId) → Supabase upsert → 같은 조 기기에 Realtime 전파
-    ↓
-reward.type="hint"면 현재 기기에 힌트 표시
-```
-
-- 정답 비교는 앞뒤 공백, 중간 공백, 대소문자를 무시한다.
-- QR 잠금 단서도 `PUZZLES`에 등록하면 QR 없이 수집 가능하다.
+- 문제(퀴즈)는 QR을 거쳐야만 등장한다 — 별도의 전역 정답 입력 페이지는 없다.
+- 정답(비밀번호) 비교는 앞뒤 공백을 무시한다.
 
 ## 투표 흐름
 ```
@@ -115,8 +104,7 @@ team_evidence_items에 대상 조 번호를 담은 전화 이벤트 생성
 |------|------|
 | `/` | 랜딩 (조 번호 숫자 입력 + 조장 이름 입력 → 입장하기) |
 | `/home` | 수사본부 (사건 개요, 진행률, QR 수집 현황) |
-| `/qr/[slug]` | QR 증거 수집 (slug: 6자 opaque, 1~2개 증거) |
-| `/solve` | 정답 입력 (QR 없이 문제 정답으로 단서 수집) |
+| `/qr/[slug]` | QR 증거 수집 (slug: 6자 opaque, 1~2개 증거, 잠긴 증거는 문제 풀이 필요) |
 | `/evidence` | 수집한 증거 보관함 |
 | `/suspects` | 용의자 카드 (A, B, C, D, E — 5명) |
 | `/ranking` | 전체 조 실시간 수사 현황 랭킹 |

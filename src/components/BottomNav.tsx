@@ -23,19 +23,6 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: "/solve",
-    label: "정답",
-    icon: (
-      <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-        <path
-          fillRule="evenodd"
-          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6.293-2.707a1 1 0 00-1.414 0L8 9.586l-.793-.793a1 1 0 00-1.414 1.414l1.5 1.5a1 1 0 001.414 0l3-3a1 1 0 000-1.414zM7 14a1 1 0 100 2h6a1 1 0 100-2H7z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
-  {
     href: "/suspects",
     label: "용의자",
     icon: (

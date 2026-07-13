@@ -281,6 +281,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] `/solve` 전역 정답 탭 폐기 → QR 경유 문제 풀이로 통합 (2026-07-13)
+  - 기존: `/solve`에서 QR 없이도 `PUZZLES.answer`를 입력해 단서를 수집할 수 있었음
+  - 변경: "문제는 QR을 찍어야 뜬다"로 되돌림. `/solve` 페이지, 하단 네비 '정답' 탭, 홈 화면 '정답 입력' 버튼 제거
+  - `PUZZLES`/`Puzzle`/`findPuzzleByAnswer`/`normalizePuzzleAnswer`는 기존 `LOCKED_EVIDENCE`+`EVIDENCE_QUIZ`와 중복이라 삭제. QR 페이지(`/qr/[slug]`)의 잠금 증거 퀴즈 플로우만 남김(변경 없음, 그대로 재사용)
+  - 잠긴 증거가 어느 용의자의 `interrogationTriggerId`면 정답을 맞히는 즉시 심문권도 함께 획득 — 기존 로직 그대로라 "문제를 맞히면 단서 or 심문권" 요구사항을 추가 코드 없이 충족
+  - 삭제 파일: `src/app/solve/page.tsx`
+  - 수정 파일: `src/lib/data.ts`, `src/components/BottomNav.tsx`, `src/app/home/page.tsx`, 문서 5종(`13_PUZZLE_DESIGN.md`, `EDIT_GUIDE.md`, `06_UI_SPEC.md`, `07_DATA_SCHEMA.md`, `08_DEV_SPEC.md`)
+
 - [x] 수신전화 발신자 정보 + 최신 갤럭시 스타일 UI 개선 (2026-07-13)
   - 수신전화 표시를 `발신번호 표시제한` → `박미리 / 010-9876-2345`로 변경
   - 수신 화면: One UI 계열처럼 큰 발신자 이름, 번호, 원형 프로필, 하단 거절/밀어서 받기 UI로 재구성

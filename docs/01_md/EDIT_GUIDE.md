@@ -175,31 +175,6 @@ export const QR_CODES: QrCode[] = [
 
 ---
 
-## 3-1. QR 없이 문제 정답으로 단서 수집
-
-**파일:** `src/lib/data.ts` → `PUZZLES` 배열
-
-`/solve` 페이지의 전역 정답 입력창에서 `PUZZLES.answer`와 일치하는 값을 입력하면 보상이 지급된다.
-
-```ts
-export const PUZZLES: Puzzle[] = [
-  {
-    id: "P01",
-    question: EVIDENCE_QUIZ.E01,
-    answer: LOCKED_EVIDENCE.E01,
-    reward: { type: "evidence", evidenceId: "E01" },
-    showInList: true,
-  },
-];
-```
-
-- `reward: { type: "evidence", evidenceId: "E01" }` → 해당 조 증거함에 수집된다.
-- `reward: { type: "hint", text: "..." }` → 입력한 기기에만 힌트가 표시된다. 조 동기화는 아직 안 됨.
-- 정답 비교는 앞뒤 공백, 중간 공백, 대소문자를 무시한다.
-- `showInList: true`면 `/solve` 하단의 공개 문제 목록에 문제 문구가 표시된다. 현장 인쇄물 문제라면 생략 가능.
-
----
-
 ## 4. 용의자 정보 수정
 
 **파일:** `src/lib/data.ts`
@@ -328,6 +303,8 @@ export const EVIDENCE_QUIZ: Record<string, string> = {
 - 해당 증거 ID의 퀴즈가 있으면 → 비밀번호 입력창 위에 퀴즈 문구 표시
 - 퀴즈가 없으면 → 기본 안내 문구("비밀번호를 입력하면 단서가 공개됩니다.") 표시
 - 퀴즈와 비밀번호는 별개 — 퀴즈 정답이 비밀번호가 되도록 직접 설계할 것
+- 별도의 "정답 입력" 탭은 없다 — 문제는 QR을 찍어야 나타나고, QR 화면 안에서 바로 정답을 맞힌다
+- 잠긴 증거가 어느 용의자의 `interrogationTriggerId`(5-2절)로 지정돼 있으면, 정답을 맞혀 그 증거를 수집하는 순간 심문권도 함께 획득된다 — 별도 로직 불필요, 트리거 대상 증거를 잠금 증거로 만들면 됨
 
 **예시 세팅:**
 ```ts

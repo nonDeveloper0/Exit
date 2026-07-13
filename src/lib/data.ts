@@ -67,26 +67,6 @@ export interface QrCode {
   evidenceIds: string[];
 }
 
-export interface Puzzle {
-  id: string;
-  question: string;
-  answer: string;
-  reward:
-    | { type: "evidence"; evidenceId: string }
-    | { type: "hint"; text: string };
-  showInList?: boolean;
-}
-
-export function normalizePuzzleAnswer(value: string): string {
-  return value.trim().replace(/\s+/g, "").toLowerCase();
-}
-
-export function findPuzzleByAnswer(input: string): Puzzle | null {
-  const normalized = normalizePuzzleAnswer(input);
-  if (!normalized) return null;
-  return PUZZLES.find((puzzle) => normalizePuzzleAnswer(puzzle.answer) === normalized) ?? null;
-}
-  
 export const EVIDENCE: Evidence[] = [
   {
     id: INCOMING_CALL_EVIDENCE_ID,
@@ -269,16 +249,4 @@ export const QR_CODES: QrCode[] = [
   { id: "m1d7k5", location: LOCATIONS.L4, evidenceIds: ["E13"] },
   { id: "n4v8z3", location: LOCATIONS.L4, evidenceIds: ["E14"] },
   { id: "w3n5k7", location: LOCATIONS.L4, evidenceIds: ["E15"] },
-];
-
-// QR 없이 정답 입력만으로 풀 수 있는 문제. showInList=true면 /solve에 문제 문구도 노출된다.
-// reward.type="evidence"는 해당 조 증거함에 수집되고, reward.type="hint"는 입력한 기기에만 표시된다.
-export const PUZZLES: Puzzle[] = [
-  {
-    id: "P01",
-    question: EVIDENCE_QUIZ.E01,
-    answer: LOCKED_EVIDENCE.E01,
-    reward: { type: "evidence", evidenceId: "E01" },
-    showInList: true,
-  },
 ];
