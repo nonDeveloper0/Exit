@@ -281,6 +281,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 수신전화 수신 화면 UI — 밀어서 받기 폐기 → 아이콘 원형 버튼 2개로 변경 (2026-07-13)
+  - 참고 이미지(One UI 스타일) 기준: 하단 좌측 초록 원형 버튼(받기)·우측 빨간 원형 버튼(거절), 텍스트 라벨 없이 아이콘만
+  - 기존 "밀어서 받기" 슬라이더(드래그 제스처) 제거, 탭 한 번으로 받기/거절 가능한 단순 버튼으로 되돌림
+  - 거절 아이콘은 받기와 같은 수화기 아이콘을 135도 회전해 통화종료 아이콘으로 표현
+  - 사용하지 않게 된 `.animate-slide-hint`/`@keyframes slide-hint` CSS 제거
+  - 수정 파일: `src/components/IncomingCallOverlay.tsx`, `src/app/globals.css`
+  - ⚠️ Chrome 확장 연결이 안 되어 있어 브라우저 실제 렌더링은 직접 확인 필요
+
 - [x] `/solve` 전역 정답 탭 폐기 → QR 경유 문제 풀이로 통합 (2026-07-13)
   - 기존: `/solve`에서 QR 없이도 `PUZZLES.answer`를 입력해 단서를 수집할 수 있었음
   - 변경: "문제는 QR을 찍어야 뜬다"로 되돌림. `/solve` 페이지, 하단 네비 '정답' 탭, 홈 화면 '정답 입력' 버튼 제거

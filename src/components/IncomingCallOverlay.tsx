@@ -23,14 +23,6 @@ export default function IncomingCallOverlay() {
   const [seconds, setSeconds] = useState(0);
   const [audioError, setAudioError] = useState(false);
 
-  // 밀어서 받기 슬라이더
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const draggingRef = useRef(false);
-  const dragStartX = useRef(0);
-  const dragStartOffset = useRef(0);
-  const [dragX, setDragX] = useState(0);
-  const [dragging, setDragging] = useState(false);
-
   // 전화는 수신 전용 기기(공기계, /phone에서 지정)에만 뜬다.
   const canShow = pathname !== "/admin" && pathname !== "/ending" && getIsCallDevice();
   const visible = loaded && active && canShow && !!eventId;
@@ -40,49 +32,11 @@ export default function IncomingCallOverlay() {
       setScreen("incoming");
       setSeconds(0);
       setAudioError(false);
-      setDragX(0);
-      setDragging(false);
-      draggingRef.current = false;
       if (timerRef.current) clearInterval(timerRef.current);
       audioRef.current?.pause();
       audioRef.current = null;
     }
   }, [visible]);
-
-  const KNOB = 56; // 노브 지름(px) — 트랙 패딩(p-1.5=6px) 양쪽 제외
-  function getMaxX() {
-    const track = trackRef.current;
-    if (!track) return 0;
-    return track.clientWidth - KNOB - 12;
-  }
-
-  function onKnobDown(e: React.PointerEvent) {
-    draggingRef.current = true;
-    setDragging(true);
-    dragStartX.current = e.clientX;
-    dragStartOffset.current = dragX;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  }
-
-  function onKnobMove(e: React.PointerEvent) {
-    if (!draggingRef.current) return;
-    const maxX = getMaxX();
-    const next = Math.min(Math.max(dragStartOffset.current + (e.clientX - dragStartX.current), 0), maxX);
-    setDragX(next);
-  }
-
-  function onKnobUp() {
-    if (!draggingRef.current) return;
-    draggingRef.current = false;
-    setDragging(false);
-    const maxX = getMaxX();
-    if (maxX > 0 && dragX >= maxX * 0.85) {
-      setDragX(maxX);
-      accept();
-    } else {
-      setDragX(0);
-    }
-  }
 
   useEffect(() => {
     armAudioUnlock();
@@ -197,53 +151,28 @@ export default function IncomingCallOverlay() {
             <p className="mt-8 hidden text-sm text-white/52">휴대전화 수신 중</p>
           </div>
 
-          <div className="relative px-10 pb-[max(2.75rem,env(safe-area-inset-bottom))]">
-            <div className="mb-5 flex items-center justify-between px-5">
-              <button
-                type="button"
-                onClick={decline}
-                className="flex flex-col items-center gap-2.5 text-[13px] font-medium text-[#202124]/78 active:scale-95"
-                aria-label="전화 거절"
-              >
-                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#ef5247] text-2xl font-black text-white shadow-[0_3px_8px_rgba(182,53,50,0.28)]">
-                  ✕
-                </span>
-                거절
-              </button>
-
-              <div className="hidden flex-col items-center gap-2 text-sm font-medium text-white/72" aria-hidden="true">
-                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/12 text-xl text-white/70 ring-1 ring-white/12">
-                  ⋯
-                </span>
-                메시지
-              </div>
-            </div>
-
-            <div
-              ref={trackRef}
-              className="relative flex h-[68px] items-center rounded-full bg-white/20 p-1.5 shadow-[inset_0_0_0_1px_rgba(60,72,94,0.10)] backdrop-blur-sm"
+          <div className="relative flex items-center justify-between px-14 pb-[max(3rem,env(safe-area-inset-bottom))]">
+            <button
+              type="button"
+              onClick={accept}
+              className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[#16a77a] text-white shadow-[0_3px_10px_rgba(23,133,106,0.32)] active:scale-95"
+              aria-label="전화 받기"
             >
-              <span
-                className="pointer-events-none absolute inset-0 flex items-center justify-center pl-8 text-sm font-semibold text-[#385d74]/76 animate-slide-hint"
-                style={{ opacity: dragX > 8 ? 0 : undefined }}
-              >
-                밀어서 받기
-              </span>
-              <button
-                type="button"
-                onPointerDown={onKnobDown}
-                onPointerMove={onKnobMove}
-                onPointerUp={onKnobUp}
-                onPointerCancel={onKnobUp}
-                style={{ transform: `translateX(${dragX}px)` }}
-                className={`relative z-10 flex h-14 w-14 touch-none select-none items-center justify-center rounded-full bg-[#16a77a] text-2xl font-black text-white shadow-[0_3px_8px_rgba(23,133,106,0.3)] ${
-                  dragging ? "" : "transition-transform duration-200"
-                }`}
-                aria-label="밀어서 전화 받기"
-              >
-                ✓
-              </button>
-            </div>
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-7 w-7">
+                <path d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-.836 1.66l-1.183.516a11.037 11.037 0 006.105 6.105l.516-1.183a1.5 1.5 0 011.66-.836l3.223.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5H15c-1.149 0-2.263-.15-3.326-.43A13.022 13.022 0 012.43 8.326 13.019 13.019 0 012 5V3.5z" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              onClick={decline}
+              className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[#ef5247] text-white shadow-[0_3px_10px_rgba(182,53,50,0.32)] active:scale-95"
+              aria-label="전화 거절"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-7 w-7 rotate-[135deg]">
+                <path d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-.836 1.66l-1.183.516a11.037 11.037 0 006.105 6.105l.516-1.183a1.5 1.5 0 011.66-.836l3.223.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5H15c-1.149 0-2.263-.15-3.326-.43A13.022 13.022 0 012.43 8.326 13.019 13.019 0 012 5V3.5z" />
+              </svg>
+            </button>
           </div>
         </div>
       ) : (
