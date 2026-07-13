@@ -8,6 +8,7 @@
 
 - [x] `docs/01_md/14_PHOTO_EVIDENCE_SPEC.md` 기준으로 증거함을 사진(폴라로이드) 업로드 보드로 전환하고, QR은 심문권 퀴즈 획득 플로우로 변경한다.
 - [x] 최신 사진 증거 명세에 맞춰 사진 제외/복원(status), 사진 장수 실시간 랭킹, 관리자 사진 점검 패널을 구현한다.
+- [x] `docs/01_md/15_ENDING_REVISION.md` 기준으로 엔딩 화면(`/ending`)의 범인 공개 + 모세 이야기 반전을 걷어내고 "EXIT SEASON 2 / TO BE CONTINUED..." 화면으로 교체한다(기존 코드는 주석 보존, 코드만 변경·문서 정리는 별도).
 
 
 ## 진행 기록 운영 규칙
@@ -214,6 +215,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 문서에 `status` 컬럼과 기존 DB용 `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` SQL, 관리자 사진 점검 절차를 기록.
   - 검증: `npm run lint` 통과(기존 `useGameState.ts` 경고 1건), Supabase env 주입 후 `npm run build` 통과.
   - 수정 파일: `src/lib/image.ts`, `src/lib/usePhotoEvidence.ts`, `src/lib/useAllTeamsProgress.ts`, `src/app/evidence/page.tsx`, `src/app/ranking/page.tsx`, `src/app/admin/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `docs/01_md/07_DATA_SCHEMA.md`, `progress.md`
+- [x] 엔딩 시즌 예고 화면 전환 (2026-07-14)
+  - `/ending`의 진실 공개 버튼, 범인 공개, 모세 이야기 반전 및 귀환 링크를 제거하고 정적 `EXIT SEASON 2` / `TO BE CONTINUED...` 화면으로 교체.
+  - 기존 엔딩 코드는 `src/app/ending/page.tsx` 내부 주석으로 보존. `ending_open` 기반 자동 이동 로직은 변경하지 않음.
+  - 검증: `npm run lint` 통과(기존 `useGameState.ts` 경고 1건), Supabase env 주입 후 `npm run build` 통과.
+  - 수정 파일: `src/app/ending/page.tsx`, `progress.md`
 
 ## 구조 확정 사항
 
