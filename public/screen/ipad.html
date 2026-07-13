@@ -134,8 +134,11 @@
 
 <script>
   // 뒤로가기(모바일 브라우저 스와이프/버튼)로 화면을 벗어나지 못하게 막음 — 히스토리를 계속 되채워서 popstate를 무력화
+  // ⚠️ 안드로이드 크롬의 "제스처 뒤로가기(예측형 뒤로가기)"는 이 트릭을 우회하는 경우가 있음(크롬/안드로이드 자체 한계).
+  //    2차 안전장치로 beforeunload를 걸어 실제로 페이지를 벗어나려 하면 브라우저 기본 확인창이라도 뜨게 함.
   history.pushState(null, "", location.href);
   window.addEventListener("popstate", () => history.pushState(null, "", location.href));
+  window.addEventListener("beforeunload", (e) => { e.preventDefault(); e.returnValue = ""; });
 
   const SAWON_NO = "2201";  // 공통 사원번호 (사원증 = 스탭 보관)
   let teamNo = null;

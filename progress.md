@@ -281,6 +281,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 디바이스 목업 3종 — 뒤로가기 방지에 2차 안전장치 + 갤럭시 실기기 한계 문서화 (2026-07-13)
+  - 실기기(갤럭시, 크롬) 테스트 결과: 안드로이드 크롬의 "제스처 뒤로가기(예측형)"는 기존 `pushState`+`popstate` 트릭을 우회하고 그대로 사이트를 벗어남 — 크롬/안드로이드 자체 한계, 웹페이지 코드만으로 100% 차단 불가
+  - 2차 안전장치로 `beforeunload` 추가: 트릭이 뚫려 실제로 페이지를 떠나려 하면 브라우저 기본 확인창이라도 뜨게 함
+  - 행사 운영 대책: 프롭 기기(공기계)는 안드로이드 설정에서 제스처 내비게이션 대신 **3버튼 내비게이션**으로 바꿔두면 스와이프 우회 자체가 사라져 안정적으로 막힘 — `EDIT_GUIDE.md`에 권장 사항 명시
+  - 수정 파일: `public/screen/phone2.html`, `public/screen/laptop.html`, `public/screen/ipad.html`, `docs/01_md/EDIT_GUIDE.md`(12절)
+
 - [x] 채소장 폰(`phone2.html`) 홈 화면 UI 최신화 (2026-07-13)
   - 문제: 홈 화면이 이모지 아이콘 + 밋밋한 그라데이션이라 실제 스마트폰처럼 안 느껴짐
   - 배경: 다층 radial-gradient(빛 번짐 + 컬러 오브 3개) + 비네트로 요즘 폰 기본 배경화면 느낌의 깊이감 추가
