@@ -281,6 +281,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 채소장 폰(`phone2.html`) 실기기 확인 후 레이아웃/시인성 수정 (2026-07-13)
+  - 시작 화면: 조 번호 선택 패널이 시계에 너무 붙어 보이던 문제 — `margin-top:auto` 방식 대신 `justify-content:flex-end` + 고정 `gap(14vh)`로 교체해 항상 일정한 간격을 보장하고 화면 아래쪽에 균형있게 배치
+  - 홈 화면: 독(dock) 아이콘이 **아예 안 보이던 실제 원인** — `.app-glyph::before`(유리광택 오버레이)가 z-index 미지정 상태라 아이콘 SVG보다 위에 그려지면서 아이콘을 완전히 가리고 있었음. 오버레이 `z-index:0`, 아이콘 SVG `z-index:1`로 명시해 확실히 위로 오도록 수정 — 근본 수정
+  - 곁들여 배경 그라데이션도 좀 더 밝은 톤으로 조정하고 독 배경/테두리 불투명도를 올려 대비를 개선(가독성 보강용, 근본 원인은 아니었음)
+  - 수정 파일: `public/screen/phone2.html`
+
 - [x] 채소장 폰(`phone2.html`) 홈 화면 — 실기기 참고 이미지 기준 4버튼 구성으로 단순화 (2026-07-13)
   - 참고: `docs/03_src/01_Images/홈화면 UI.png` (실제 갤럭시 홈 화면 스크린샷)
   - 앱 아이콘 그리드(전화·메시지·카메라·갤러리·캘린더·설정 6개) 전체 삭제, 독(dock)에 **전화·문자·인터넷·카메라 4개만** 남김

@@ -64,14 +64,14 @@
   }
   .screen.active { display: flex; }
 
-  /* 공통 배경 — 실기기 참고 이미지 기준 절제된 다크 배경화면 + 은은한 빛 번짐 + 비네트 */
+  /* 공통 배경 — 실기기 참고 이미지 기준 다크 배경화면 + 은은한 빛 번짐 + 비네트 (하단 아이콘이 묻히지 않게 너무 어둡지 않게 조정) */
   /* 비네트를 배경 레이어 맨 위에 얹어서(background는 항상 자식 콘텐츠보다 아래) z-index 없이 처리 */
   .wallpaper {
     position: relative;
     background:
-      radial-gradient(ellipse 120% 90% at 50% 50%, transparent 55%, rgba(0,0,0,.5) 100%),
-      radial-gradient(ellipse 70% 45% at 50% 28%, rgba(120,140,255,.18), transparent 65%),
-      linear-gradient(180deg, #12141c 0%, #0b0c12 55%, #08090d 100%);
+      radial-gradient(ellipse 120% 90% at 50% 50%, transparent 60%, rgba(0,0,0,.32) 100%),
+      radial-gradient(ellipse 75% 50% at 50% 26%, rgba(125,150,255,.26), transparent 68%),
+      linear-gradient(180deg, #262c48 0%, #1a1e30 50%, #0d0e16 100%);
   }
 
   /* 상태바 (홈/앱 화면 상단) */
@@ -97,15 +97,15 @@
   /* ---------- 시작(잠금) 화면 ---------- */
   #start {
     align-items: center;
-    justify-content: flex-start;
-    padding: 74px 24px 40px;
+    justify-content: flex-end;
+    gap: 14vh;
+    padding: 74px 24px 64px;
   }
   .lock-clock { text-align: center; }
   .lock-clock .time { font-size: clamp(52px, 14vw, 78px); font-weight: 300; letter-spacing: -.02em; }
   .lock-clock .date { margin-top: 6px; font-size: 15px; color: rgba(245,245,247,.82); }
 
   .start-panel {
-    margin-top: auto;
     width: min(360px, 100%);
     background: rgba(255,255,255,.12);
     border: 1px solid rgba(255,255,255,.24);
@@ -178,9 +178,10 @@
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 0;
     background: linear-gradient(160deg, rgba(255,255,255,.32), transparent 45%);
   }
-  .app-glyph svg { position: relative; width: 26px; height: 26px; }
+  .app-glyph svg { position: relative; z-index: 1; width: 26px; height: 26px; }
   .app-glyph.phone { background: linear-gradient(150deg, #4ade80, #059669); }
   .app-glyph.msg { background: linear-gradient(150deg, #60a5fa, #2563eb); }
   .app-glyph.net { background: linear-gradient(150deg, #60a5fa, #7c3aed); }
@@ -194,11 +195,11 @@
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    background: rgba(255,255,255,.16);
-    border: 1px solid rgba(255,255,255,.28);
+    background: rgba(255,255,255,.24);
+    border: 1px solid rgba(255,255,255,.4);
     border-radius: 24px;
     backdrop-filter: blur(20px) saturate(1.4);
-    box-shadow: 0 10px 30px rgba(0,0,0,.28);
+    box-shadow: 0 10px 30px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.18);
   }
   .dock .app-icon { gap: 0; }
   .dock .app-glyph { width: 52px; height: 52px; border-radius: 13px; }
