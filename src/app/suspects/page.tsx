@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { SUSPECTS, EVIDENCE, type Suspect } from "@/lib/data";
+import { INTERROGATION_QUIZZES, SUSPECTS, type Suspect } from "@/lib/data";
+import { usePhotoEvidence } from "@/lib/usePhotoEvidence";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 import { getTeamInfo, getSuspectNotes, saveSuspectNote } from "@/lib/store";
 
@@ -33,12 +34,15 @@ function formatUsedTime(iso: string): string {
 }
 
 export default function SuspectsPage() {
-  const { collected, interrogationUsed, markInterrogationUsed } = useTeamEvidence();
+  const { collected, interrogationEarned, interrogationUsed, markInterrogationUsed } =
+    useTeamEvidence();
+  const { photos } = usePhotoEvidence();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [teamNumber, setTeamNumber] = useState<string | null>(null);
   const [confirmUseId, setConfirmUseId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<string | null>(null);
 
   useEffect(() => {
     setTeamNumber(getTeamInfo()?.teamNumber ?? null);
@@ -64,9 +68,11 @@ export default function SuspectsPage() {
       <div className="space-y-3">
         {SUSPECTS.map((s) => {
           const isExpanded = expanded === s.id;
-          const interrogationEarned = s.interrogationTriggerId
-            ? collected.includes(s.interrogationTriggerId)
-            : false;
+          const taggedPhotos = photos.filter((photo) => photo.suspectTag === s.id);
+          const hasQuiz = Object.values(INTERROGATION_QUIZZES).some(
+            (quiz) => quiz.suspectId === s.id
+          );
+          const earned = interrogationEarned.includes(s.id);
           const interrogationUse = interrogationUsed.find((u) => u.suspectId === s.id);
           const interrogationDone = !!interrogationUse;
 
@@ -145,50 +151,56 @@ export default function SuspectsPage() {
                     </p>
                   </div>
 
-                  {s.relatedEvidenceIds.length > 0 && (
+                  {/*
+                    구버전 관련 단서(E01~E16) 블록은 사진 증거 방식 전환으로 비노출한다.
+                    기존 데이터(Suspect.relatedEvidenceIds)는 data.ts에 보존되어 있다.
+                  */}
+
+                  <div className="space-y-1.5">
+                    <span className="text-zinc-500 font-mono text-xs">
+                      관련 사진 {taggedPhotos.length}장
+                    </span>
+                    {taggedPhotos.length === 0 ? (
+                      <div className="rounded px-3 py-3 text-xs bg-zinc-800/60 text-zinc-600">
+                        이 인물로 태그된 사진이 없습니다.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2">
+                        {taggedPhotos.map((photo) => (
+                          <button
+                            key={photo.id}
+                            type="button"
+                            onClick={() => setLightbox(photo.imageUrl)}
+                            className="overflow-hidden rounded border border-zinc-700 bg-zinc-950"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={photo.imageUrl}
+                              alt={photo.caption ?? `${s.name} 관련 사진`}
+                              className="aspect-square w-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {false && s.relatedEvidenceIds.length > 0 && (
                     <div className="space-y-1.5">
                       <span className="text-zinc-500 font-mono text-xs">
                         관련 단서 ({s.relatedEvidenceIds.filter((id) => collected.includes(id)).length}/
                         {s.relatedEvidenceIds.length})
                       </span>
-                      <div className="space-y-1.5">
-                        {s.relatedEvidenceIds.map((id) => {
-                          const isCollected = collected.includes(id);
-                          const ev = EVIDENCE.find((e) => e.id === id);
-                          if (isCollected) {
-                            return (
-                              <Link
-                                key={id}
-                                href={`/evidence?focus=${id}`}
-                                className="flex items-center gap-2 rounded px-3 py-2 text-xs bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition-colors"
-                              >
-                                <span>🔎</span>
-                                <span className="font-medium">{ev?.title ?? id}</span>
-                                <span className="ml-auto text-amber-400/50 font-mono">증거함 →</span>
-                              </Link>
-                            );
-                          }
-                          return (
-                            <div
-                              key={id}
-                              className="flex items-center gap-2 rounded px-3 py-2 text-xs bg-zinc-800/60 text-zinc-600"
-                            >
-                              <span>🔒</span>
-                              <span>미확보 단서</span>
-                            </div>
-                          );
-                        })}
-                      </div>
                     </div>
                   )}
 
-                  {s.interrogationTriggerId && (
+                  {hasQuiz && (
                     <div className="space-y-1.5">
                       <span className="text-zinc-500 font-mono text-xs">심문권</span>
-                      {!interrogationEarned ? (
+                      {!earned ? (
                         <div className="flex items-center gap-2 rounded px-3 py-3 text-xs bg-zinc-800/60 text-zinc-600">
                           <span>🔒</span>
-                          <span>특정 단서를 찾으면 이 용의자의 심문권을 얻습니다</span>
+                          <span>해당 QR 문제를 풀면 이 용의자의 심문권을 얻습니다</span>
                         </div>
                       ) : interrogationDone ? (
                         <div className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/60 px-3 py-3 text-zinc-500">
@@ -283,6 +295,16 @@ export default function SuspectsPage() {
           범인 지목하기 →
         </Link>
       </div>
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setLightbox(null)}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={lightbox} alt="관련 사진 확대" className="max-h-full max-w-full object-contain" />
+        </div>
+      )}
     </div>
   );
 }

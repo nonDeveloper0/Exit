@@ -1,74 +1,56 @@
 "use client";
 
-import { useState, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { Evidence, LOCKED_EVIDENCE, EVIDENCE_QUIZ } from "@/lib/data";
+import { useState } from "react";
+import type { InterrogationQuiz } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
 interface Props {
   qrId: string;
   location: string;
-  evidence: Evidence[];
+  quiz: InterrogationQuiz | null;
+  suspectName: string | null;
 }
 
 function normalizeAnswer(value: string) {
   return value.replace(/\s+/g, "").toLowerCase();
 }
 
-export default function QrPageClient({ qrId, location, evidence }: Props) {
-  const { collected, unlocked, collect, unlock } = useTeamEvidence();
-  const [passwords, setPasswords] = useState<Record<string, string>>({});
-  const [wrongIds, setWrongIds] = useState<string[]>([]);
-  const [playingId, setPlayingId] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [videoOpenId, setVideoOpenId] = useState<string | null>(null);
-  const [poppedId, setPoppedId] = useState<string | null>(null);
+export default function QrPageClient({ qrId, location, quiz, suspectName }: Props) {
+  const { interrogationEarned, earnInterrogation } = useTeamEvidence();
+  const [answer, setAnswer] = useState("");
+  const [wrong, setWrong] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handlePlay(e: Evidence) {
-    if (!e.audioUrl) return;
-    if (playingId === e.id) {
-      audioRef.current?.pause();
-      setPlayingId(null);
+  const earned = quiz ? interrogationEarned.includes(quiz.suspectId) || success : false;
+
+  async function handleSubmit() {
+    if (!quiz || submitting) return;
+
+    if (normalizeAnswer(answer) !== normalizeAnswer(quiz.answer)) {
+      setWrong(true);
       return;
     }
-    audioRef.current?.pause();
-    const audio = new Audio(e.audioUrl);
-    audioRef.current = audio;
-    audio.play();
-    setPlayingId(e.id);
-    audio.onended = () => setPlayingId(null);
-  }
 
-  async function handleCollect(id: string) {
-    navigator.vibrate?.(30); // 안드로이드 진동 (iOS Safari 미지원)
-    setPoppedId(id);
-    setTimeout(() => setPoppedId((prev) => (prev === id ? null : prev)), 500);
-    await collect(id);
-  }
-
-  async function handlePasswordSubmit(e: Evidence) {
-    const input = (passwords[e.id] ?? "").trim();
-    const correct = LOCKED_EVIDENCE[e.id];
-    if (normalizeAnswer(input) === normalizeAnswer(correct)) {
-      await unlock(e.id);
-      setWrongIds((prev) => prev.filter((id) => id !== e.id));
-      await handleCollect(e.id);
-    } else {
-      setWrongIds((prev) => (prev.includes(e.id) ? prev : [...prev, e.id]));
+    setSubmitting(true);
+    setWrong(false);
+    try {
+      await earnInterrogation(quiz.suspectId);
+      navigator.vibrate?.(30);
+      setSuccess(true);
+    } finally {
+      setSubmitting(false);
     }
   }
-
-  const hasEvidence = evidence.length > 0;
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
-      {/* Back link */}
       <Link
         href="/home"
-        className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-300 transition-colors w-fit"
+        className="flex w-fit items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
       >
-        <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+        <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
           <path
             fillRule="evenodd"
             d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
@@ -78,186 +60,73 @@ export default function QrPageClient({ qrId, location, evidence }: Props) {
         수사본부
       </Link>
 
-      {/* QR header */}
       <div className="space-y-1">
-        <div className="text-xs font-mono text-amber-400 tracking-widest uppercase">
-          {qrId}
-        </div>
+        <div className="text-xs font-mono text-amber-400 tracking-widest uppercase">{qrId}</div>
         <h1 className="text-2xl font-bold text-zinc-100">{location}</h1>
       </div>
 
-
-      {/* Evidence list */}
-      <div className="space-y-2">
-        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-wider">
-          수집 가능한 증거
-        </h2>
-
-        {hasEvidence ? (
-          <div className="space-y-3">
-            {evidence.map((e) => {
-              const isCollected = collected.includes(e.id);
-              const isLocked = e.id in LOCKED_EVIDENCE;
-              const isUnlocked = unlocked.includes(e.id);
-              const isWrong = wrongIds.includes(e.id);
-              const showLockUI = isLocked && !isUnlocked && !isCollected;
-
-              return (
-                <div
-                  key={e.id}
-                  className={`rounded-lg border p-4 space-y-3 transition-colors ${
-                    poppedId === e.id ? "animate-collect-pop " : ""
-                  }${
-                    isCollected
-                      ? "border-emerald-500/30 bg-emerald-500/5"
-                      : showLockUI
-                      ? "border-zinc-700 bg-zinc-900"
-                      : "border-zinc-800 bg-zinc-900"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-zinc-500">{e.id}</span>
-                        {isCollected && (
-                          <span className="text-xs text-emerald-400 font-medium">✓ 수집 완료</span>
-                        )}
-                        {showLockUI && (
-                          <span className="text-xs text-amber-500 font-medium">🔒 잠김</span>
-                        )}
-                      </div>
-                      <h3 className="text-base font-semibold text-zinc-100">{e.title}</h3>
-                    </div>
-                    {isCollected ? (
-                      <div className="shrink-0 rounded bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-400">
-                        완료
-                      </div>
-                    ) : !showLockUI && !isLocked ? (
-                      <button
-                        onClick={() => handleCollect(e.id)}
-                        className="shrink-0 rounded bg-amber-400 px-4 py-1.5 text-xs font-bold text-zinc-900 hover:bg-amber-300 active:scale-95 transition-all"
-                      >
-                        수집
-                      </button>
-                    ) : null}
-                  </div>
-
-                  {showLockUI && (
-                    <div className="space-y-2">
-                      {EVIDENCE_QUIZ[e.id] ? (
-                        <p className="text-sm text-zinc-200 font-medium leading-relaxed">
-                          {EVIDENCE_QUIZ[e.id]}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-zinc-500">비밀번호를 입력하면 단서가 공개됩니다.</p>
-                      )}
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={passwords[e.id] ?? ""}
-                          onChange={(ev) =>
-                            setPasswords((prev) => ({ ...prev, [e.id]: ev.target.value }))
-                          }
-                          onKeyDown={(ev) => ev.key === "Enter" && handlePasswordSubmit(e)}
-                          placeholder="비밀번호"
-                          className="flex-1 rounded bg-zinc-800 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-amber-400"
-                        />
-                        <button
-                          onClick={() => handlePasswordSubmit(e)}
-                          className="shrink-0 rounded bg-amber-400 px-4 py-1.5 text-xs font-bold text-zinc-900 hover:bg-amber-300 active:scale-95 transition-all"
-                        >
-                          확인
-                        </button>
-                      </div>
-                      {isWrong && (
-                        <p className="text-xs text-red-400">비밀번호가 틀렸습니다.</p>
-                      )}
-                    </div>
-                  )}
-
-                  {!showLockUI && (
-                    <>
-                      {e.imageUrl && (
-                        <div className="relative w-full aspect-video rounded overflow-hidden mb-2">
-                          <Image src={e.imageUrl} alt={e.title} fill className="object-cover" />
-                        </div>
-                      )}
-                      <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-                        {e.description}
-                      </p>
-                      {e.videoUrl && (
-                        <div className="space-y-2">
-                          <button
-                            onClick={() => setVideoOpenId(videoOpenId === e.id ? null : e.id)}
-                            className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all active:scale-95 ${
-                              videoOpenId === e.id
-                                ? "border-amber-400/50 bg-amber-400/10 text-amber-400"
-                                : "border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-zinc-600"
-                            }`}
-                          >
-                            <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                              <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm12.553 1.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-                            </svg>
-                            {videoOpenId === e.id ? "영상 닫기" : "영상 힌트 보기"}
-                          </button>
-                          {videoOpenId === e.id && (
-                            <video
-                              src={e.videoUrl}
-                              controls
-                              playsInline
-                              className="w-full rounded-lg"
-                            />
-                          )}
-                        </div>
-                      )}
-                      {e.audioUrl && (
-                        <button
-                          onClick={() => handlePlay(e)}
-                          className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all active:scale-95 ${
-                            playingId === e.id
-                              ? "border-amber-400/50 bg-amber-400/10 text-amber-400"
-                              : "border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-zinc-600"
-                          }`}
-                        >
-                          {playingId === e.id ? (
-                            <>
-                              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v4a1 1 0 11-2 0V8z" clipRule="evenodd" />
-                              </svg>
-                              재생 중
-                            </>
-                          ) : (
-                            <>
-                              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                              </svg>
-                              음성 힌트 재생
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </>
-                  )}
-                </div>
-              );
-            })}
+      {!quiz ? (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 text-center">
+          <p className="text-sm font-medium text-zinc-300">이 지점에는 아직 등록된 문제가 없습니다.</p>
+          <p className="mt-1 text-xs text-zinc-600">다른 QR을 확인하세요.</p>
+        </div>
+      ) : earned ? (
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-5">
+          <p className="text-xs font-mono uppercase tracking-widest text-emerald-300">
+            Interrogation Pass
+          </p>
+          <h2 className="mt-2 text-xl font-black text-emerald-100">
+            {suspectName ?? quiz.suspectId} 심문권 획득
+          </h2>
+          <p className="mt-2 text-sm text-emerald-100/70">
+            이미 심문권을 획득했습니다. 용의자 파일에서 티켓을 확인하세요.
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-4">
+          <div className="space-y-2">
+            <p className="text-xs font-mono uppercase tracking-widest text-zinc-500">
+              심문권 퀴즈
+            </p>
+            <p className="text-base font-semibold leading-relaxed text-zinc-100">
+              {quiz.question}
+            </p>
+            <p className="text-xs text-zinc-500">
+              정답을 맞히면 {suspectName ?? quiz.suspectId} 심문권을 얻습니다.
+            </p>
           </div>
-        ) : (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8 text-center space-y-1">
-            <p className="text-sm text-zinc-500">이 구역에서는 수집 가능한 증거가 없습니다.</p>
-            <p className="text-xs text-zinc-600">주변을 더 살펴보세요.</p>
-          </div>
-        )}
-      </div>
 
-      {/* Navigation hint */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 flex items-center justify-between">
-        <span className="text-xs text-zinc-500">증거를 모두 수집했나요?</span>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={answer}
+                onChange={(event) => setAnswer(event.target.value)}
+                onKeyDown={(event) => event.key === "Enter" && handleSubmit()}
+                placeholder="정답 입력"
+                className="min-w-0 flex-1 rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="shrink-0 rounded bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-950 transition-colors disabled:opacity-50"
+              >
+                확인
+              </button>
+            </div>
+            {wrong && <p className="text-xs text-red-400">정답이 아닙니다.</p>}
+          </div>
+        </div>
+      )}
+
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 flex items-center justify-between gap-3">
+        <span className="text-xs text-zinc-500">획득한 심문권은 용의자 파일에서 확인합니다.</span>
         <Link
-          href="/evidence"
-          className="text-xs text-amber-400 hover:text-amber-300 font-medium"
+          href="/suspects"
+          className="shrink-0 text-xs font-medium text-amber-400 hover:text-amber-300"
         >
-          증거함 확인 →
+          용의자 파일 →
         </Link>
       </div>
     </div>

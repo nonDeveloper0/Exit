@@ -4,6 +4,11 @@
 
 - [x] `/phone` 대기 화면을 시계와 `나팀장 개인폰`만 표시하도록 단순화하고, 첨부 레퍼런스를 기준으로 수신전화 One UI 화면을 재구성한다.
 
+## 작업 시작 (2026-07-14)
+
+- [x] `docs/01_md/14_PHOTO_EVIDENCE_SPEC.md` 기준으로 증거함을 사진(폴라로이드) 업로드 보드로 전환하고, QR은 심문권 퀴즈 획득 플로우로 변경한다.
+- [x] 최신 사진 증거 명세에 맞춰 사진 제외/복원(status), 사진 장수 실시간 랭킹, 관리자 사진 점검 패널을 구현한다.
+
 
 ## 진행 기록 운영 규칙
 
@@ -190,6 +195,25 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 진동은 `navigator.vibrate` — Android만 동작, iOS Safari는 웹 제약으로 무시
   - **제약**: 자동재생 정책상 첫 사용자 터치에서 AudioContext 언락 필요(`armAudioUnlock`) + 앱이 화면에 떠 있을 때만 울림. 백그라운드/화면잠금은 불가
   - 신규 파일: `src/lib/ringtone.ts` / 수정: `src/components/IncomingCallOverlay.tsx`, `docs/01_md/EDIT_GUIDE.md`(1-4절)
+- [x] 사진 증거(폴라로이드) + QR 심문권 퀴즈 구현 (2026-07-14)
+  - `/evidence`: 직접 촬영 파일 입력(`capture="environment"`) → 미리보기 → 캡션 20자 + 관련 인물 태그 → Supabase Storage 업로드 + `photo_evidence` 저장 → 2열 폴라로이드 보드/라이트박스 표시
+  - `usePhotoEvidence`: 사진 압축(긴 변 1280px, JPEG 0.8), `evidence-photos` 버킷 업로드, 같은 조 + 짝 조 사진 Realtime 공유
+  - `/qr/[id]`: 기존 증거 수집 UI 제거, `INTERROGATION_QUIZZES` 기반 심문권 퀴즈로 전환. 현재 `w3n5k7` → 채소장(B), 정답 `poison kill`
+  - `useTeamEvidence`: `interrogation_earned` 마커 추가. 정답 성공 시 용의자 ID 기준 심문권 획득을 조/짝 조 공유
+  - `/suspects`: 관련 단서 목록 대신 인물 태그 사진 표시, 심문권 티켓 조건을 QR 퀴즈 획득 마커 기준으로 변경
+  - `/home`: 증거 수집 진행률 대신 팀 사진 장수와 새 수사 방법 안내 표시
+  - 문서: `EDIT_GUIDE.md`에 사진 태그/QR 퀴즈 운영법 추가, `07_DATA_SCHEMA.md`에 `photo_evidence`와 `interrogation_earned` 반영
+  - 검증: `npm run lint` 통과(기존 `useGameState.ts` 경고 1건), Supabase env 주입 후 `npm run build` 통과
+  - 신규 파일: `src/lib/image.ts`, `src/lib/usePhotoEvidence.ts`
+  - 수정 파일: `src/lib/data.ts`, `src/lib/useTeamEvidence.ts`, `src/app/evidence/page.tsx`, `src/app/qr/[id]/page.tsx`, `src/app/qr/[id]/QrPageClient.tsx`, `src/app/suspects/page.tsx`, `src/app/home/page.tsx`, `src/app/globals.css`, `docs/01_md/EDIT_GUIDE.md`, `docs/01_md/07_DATA_SCHEMA.md`, `progress.md`
+- [x] 사진 증거 운영 보강: 제외/복원 + 사진 랭킹 + 관리자 점검 (2026-07-14)
+  - `photo_evidence.status`(`ok`/`rejected`)를 사진 훅의 조회·Realtime UPDATE에 반영. 제외 사진은 참가자 보드에 흐리게 `제외됨`으로 유지.
+  - 이미지 압축을 긴 변 1080px, JPEG 품질 0.72로 조정하고 사진 그리드/관리자 목록에 lazy loading 적용.
+  - `useAllTeamsProgress`를 `status='ok'` 사진 행 수 기반으로 전환. joined 마커의 0장 조 표시와 짝 조 합산은 유지.
+  - `/ranking`을 사진 장수 표기로 전환하고, `/admin`에 조 필터·원본 라이트박스·제외/복원 기능을 추가.
+  - 문서에 `status` 컬럼과 기존 DB용 `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` SQL, 관리자 사진 점검 절차를 기록.
+  - 검증: `npm run lint` 통과(기존 `useGameState.ts` 경고 1건), Supabase env 주입 후 `npm run build` 통과.
+  - 수정 파일: `src/lib/image.ts`, `src/lib/usePhotoEvidence.ts`, `src/lib/useAllTeamsProgress.ts`, `src/app/evidence/page.tsx`, `src/app/ranking/page.tsx`, `src/app/admin/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `docs/01_md/07_DATA_SCHEMA.md`, `progress.md`
 
 ## 구조 확정 사항
 
@@ -221,6 +245,75 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
 | m1d7k5 | 채소장 연구실 | E13 |
 | n4v8z3 | 채소장 연구실 | E14 |
 | w3n5k7 | 채소장 연구실 | E15 |
+
+---
+
+## 기획 변경 확정 (2026-07-14) — 증거 수집: QR → 직접 촬영 사진(폴라로이드)
+
+**핵심 전환:** 증거 "수집"을 QR 스캔에서 **참가자가 물리 단서를 직접 사진 찍어 업로드**하는 방식으로 바꾼다. QR은 폐기하지 않고 **심문권 획득용 퀴즈**로 용도 변경한다. (아직 구현 전 — 방향/스펙만 확정, 이 세션에서 코딩 시작 예정)
+
+### 확정된 결정 (사용자 답변)
+
+1. **증거 수집 = 직접 촬영 사진 (폴라로이드)**
+   - 브라우저 카메라 버튼 → 폰 기본 카메라 실행(`<input type="file" accept="image/*" capture="environment">`) → 촬영 사진 업로드
+   - 폴라로이드 UI: 흰 프레임 + 사진 + 아래 **캡션 20자 이내**(`maxLength=20`)
+   - 업로드 전 클라이언트 압축(canvas, 긴 변 **1080px·JPEG 0.72**, 장당 ~200KB) — 스토리지·전송량 대비
+   - **용량 결론**: 조당 사진담당 1명 → 동시 업로더 6~8명뿐. 총 150~400장(50~150MB)로 무료 1GB 여유. 쿨다운/조당 상한은 불필요. 남는 변수는 "보는 쪽" 전송량뿐 → 그리드 작게+탭 시 원본, CDN 캐시로 충분
+
+2. **하이브리드 — 관련 인물 드롭다운 태그**
+   - 사진 업로드 시 "어느 인물 관련인지" 드롭다운으로 선택: **6명** = A 나사장 / B 채소장 / C 나팀장 / D 이대리 / E 김사원 / **박실장(피해자, 태그 전용)**
+   - 용의자 파일(`/suspects`)에서 `suspect_tag`로 필터 → 그 인물 관련 사진만 표시(하이브리드 연결 유지)
+   - (미정: `미지정` 옵션 포함 여부 — 사용자 확인 대기)
+
+3. **QR = 심문권 획득 퀴즈로 용도 변경**
+   - QR 스캔 → 웹에서 문제 출제 → 정답 입력 시 **심문권 획득**(더 이상 단서 수집용 아님)
+   - 용의자별 심문권 1개씩은 지금처럼 웹에서 획득하는 구조 유지
+
+4. **공유 범위 = 조별 공유 보드 (현재와 동일)**
+   - 같은 조 번호 기기끼리 폴라로이드 보드 실시간 공유. 기존 조별 Realtime 구조 재활용. 짝 조 공유도 유지 가능
+
+5. **기존 지정 증거 시스템(E01~E16) = 삭제하지 말고 보존**
+   - 관련 로직(잠금 퀴즈·동기 공개·공통단서·용의자-단서 연결)은 주석/비노출로 보존. ⚠️ `EVIDENCE`/`QR_CODES` 배열을 통째로 주석 처리하면 import하는 파일에서 빌드가 깨지므로, **진입점(홈 안내·네비·라우트)만 차단**하고 데이터/로직 코드는 보존
+
+### 사전 준비 (Supabase — 구현 전 필요)
+
+사진 파일 저장용 **Storage 버킷 + 메타 테이블**이 필요하다. Supabase SQL Editor에서 실행:
+
+```sql
+create table photo_evidence (
+  id uuid primary key default gen_random_uuid(),
+  pair_id text not null,
+  image_url text not null,
+  caption text,            -- 20자 이내
+  suspect_tag text,        -- 'A'|'B'|'C'|'D'|'E'|'PARK'|null
+  created_at timestamptz default now()
+);
+alter table photo_evidence enable row level security;
+create policy "anon rw" on photo_evidence for all using (true) with check (true);
+alter publication supabase_realtime add table photo_evidence;
+
+insert into storage.buckets (id, name, public) values ('evidence-photos','evidence-photos', true);
+create policy "anon upload" on storage.objects for insert to anon with check (bucket_id = 'evidence-photos');
+create policy "anon read" on storage.objects for select to anon using (bucket_id = 'evidence-photos');
+```
+
+### 확인 사항 (모두 확정됨)
+
+- [x] Supabase SQL 실행 — 완료(photo_evidence 테이블 + evidence-photos 버킷)
+- [x] 드롭다운에 `미지정` 옵션 포함 — 포함(빈 값)
+- [x] 기존 `/evidence`를 폴라로이드 보드로 **완전 교체** — 교체로 확정
+- [x] QR 퀴즈 매핑 — 채소장(B)만 QR `w3n5k7`·정답 `poison kill` 연결. A·C·D·E는 데이터만 나중에
+
+6. **실시간 랭킹 = 조별 사진 개수 기준** (확정)
+   - 모더레이션: **즉시 카운트 + 사후 제외(soft-reject)**. 사진은 올리면 바로 카운트, 스탭이 `/admin` 사진 점검에서 스팸을 `제외`하면 카운트에서 빠짐(삭제 아님, 복원 가능)
+   - 스키마 추가 필요(⚠️ 아직 미실행): `alter table photo_evidence add column status text not null default 'ok';`
+   - `useAllTeamsProgress`를 `photo_evidence` 개수 집계로 전환(0장 조는 joined 마커로 계속 표시, 짝 조 합산 유지). `/admin`에 사진 점검 패널(제외/복원) 신설
+
+### 구현 지시서 (Codex에게 위임)
+
+- **직접 구현하지 않고 지시서만 작성**하기로 함. 코드 작성은 Codex가 수행.
+- 지시서: `docs/01_md/14_PHOTO_EVIDENCE_SPEC.md` — 파일별 변경·참조 구현·수용 기준까지 명시(랭킹 사진화 + 스탭 점검 포함).
+- 요지: 새 파일 `src/lib/image.ts`(압축)·`src/lib/usePhotoEvidence.ts`(조별 사진 공유 훅), `useTeamEvidence.ts`에 `interrogation_earned` 상태/`earnInterrogation` 추가, `/evidence` 폴라로이드 보드 교체, QR(`page.tsx`+`QrPageClient.tsx`) 심문권 퀴즈로 교체, `useAllTeamsProgress`·`/ranking` 사진 개수 집계 전환, `/admin` 사진 점검 패널 신설, `/suspects`·`/home` 안내 최신화. 기존 `EVIDENCE`/`QR_CODES` 데이터는 보존.
 
 ---
 

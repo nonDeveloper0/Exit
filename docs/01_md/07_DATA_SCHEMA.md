@@ -33,7 +33,28 @@
 {
   id: string;          // 6자 opaque slug (예: "x4k9m2") — QR 코드 URL에 사용
   location: string;    // 장소명 — LOCATIONS 상수 값 사용
-  evidenceIds: string[]; // 이 QR로 수집 가능한 증거 ID 목록 (1~2개)
+  evidenceIds: string[]; // 구버전 QR 증거 매핑 보존용. 현재 참가자 UI에서는 직접 수집에 사용하지 않음
+}
+```
+
+## PhotoItem / `photo_evidence`
+```ts
+{
+  id: string;          // uuid
+  pairId: string;      // 조 번호. 짝 조가 있으면 함께 조회
+  imageUrl: string;    // Supabase Storage 공개 URL
+  caption: string | null;    // 20자 이내
+  suspectTag: string | null; // "A"|"B"|"C"|"D"|"E"|"PARK"|null
+  createdAt: string;
+}
+```
+
+## InterrogationQuiz
+```ts
+{
+  suspectId: string; // "A" | "B" | "C" | "D" | "E"
+  question: string;
+  answer: string;
 }
 ```
 
@@ -57,16 +78,47 @@ export const LOCATIONS = {
 CREATE TABLE team_evidence_items (
   pair_id     TEXT NOT NULL,           -- 조 번호 (숫자 문자열, 예: "1", "2")
   evidence_id TEXT NOT NULL,           -- 증거 ID: "E01" ~, "_joined"(입장 마커), 또는 심문권은 용의자 ID("A"~"E")
-  type        TEXT NOT NULL,           -- "collected" | "joined" | "interrogation_used" | "incoming_call"
+  type        TEXT NOT NULL,           -- "collected" | "joined" | "interrogation_earned" | "interrogation_used" | "incoming_call"
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   PRIMARY KEY (pair_id, evidence_id, type)
 );
 ```
 
 - `type='joined'`, `evidence_id='_joined'`: 입장 시 기록되는 마커. 현황 페이지에서 증거 0개인 조도 표시하기 위해 사용.
+- `type='interrogation_earned'`, `evidence_id=용의자 ID`: QR 문제 정답으로 해당 용의자 심문권을 획득했다는 마커. 조 전체·짝 조가 공유하며 랭킹 집계에서는 제외됨.
 - `type='interrogation_used'`, `evidence_id=용의자 ID`: 해당 용의자 심문권을 사용(소모)했다는 마커. 조 전체·짝 조가 공유하며 랭킹 집계에서는 제외됨.
 - `pair_id='__global'`: 공통 단서(`COMMON_EVIDENCE_IDS`) 저장소. 어느 조가 찾든 이 가상 조에 기록되고, 모든 조가 이 pair_id를 함께 구독해 전체 공개된다. 랭킹/관리자 조 목록에서는 제외됨.
 - `pair_id=대상 조 번호`, `evidence_id='_incoming_call'`, `type='incoming_call'`: 수신전화 연출 활성 마커. 공기계에서 전화를 받으면 이 `pair_id` 조에 `CALL01`이 수집되고, 마커를 삭제하면 전화가 종료된다.
+
+## Supabase 테이블: `photo_evidence`
+
+사진 증거(폴라로이드) 보드의 메타데이터. 실제 이미지 파일은 Storage `evidence-photos` 버킷에 저장된다.
+
+```sql
+CREATE TABLE photo_evidence (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  pair_id     TEXT NOT NULL,
+  image_url   TEXT NOT NULL,
+  caption     TEXT,
+  suspect_tag TEXT,
+  status      TEXT NOT NULL DEFAULT 'ok', -- ok | rejected
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+기존 테이블에는 아래 SQL을 한 번 실행한다.
+
+```sql
+ALTER TABLE photo_evidence
+ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ok';
+```
+
+- `pair_id`: 업로드한 조 번호. `game_state.pairings`에 짝 조가 있으면 두 조의 사진을 함께 조회한다.
+- `image_url`: public 버킷 `evidence-photos`의 공개 URL.
+- `caption`: UI에서 20자까지 입력 가능. 빈 값은 `null`.
+- `suspect_tag`: `PHOTO_TAGS`의 value. `A`~`E`는 용의자 파일의 관련 사진으로 표시되고, `PARK`는 피해자 태그 전용이다.
+- `status`: 기본값 `ok`는 보드와 사진 랭킹에 포함된다. 스탭이 스팸을 `rejected`로 바꾸면 사진은 보드에 제외됨으로 남지만 랭킹에서는 빠진다.
+- Realtime INSERT/UPDATE/DELETE를 구독해 같은 조와 짝 조 기기에 즉시 반영한다. 수사 현황 랭킹은 `status='ok'` 사진 행 수를 기준으로 한다.
 
 ## Supabase 테이블: `game_state`
 

@@ -1,114 +1,57 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import Image from "next/image";
-import { EVIDENCE, INCOMING_CALL_EVIDENCE_ID } from "@/lib/data";
-import { useTeamEvidence } from "@/lib/useTeamEvidence";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { PHOTO_TAGS, photoTagLabel } from "@/lib/data";
+import { usePhotoEvidence } from "@/lib/usePhotoEvidence";
 
-function EvidenceContent() {
-  const { collected } = useTeamEvidence();
-  const [expanded, setExpanded] = useState<string | null>(null);
+export default function EvidencePage() {
+  const { photos, loading, uploading, uploadPhoto, ownTeamId } = usePhotoEvidence();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [caption, setCaption] = useState("");
+  const [suspectTag, setSuspectTag] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
-  const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const searchParams = useSearchParams();
-  const focusId = searchParams.get("focus");
-  const [highlightId, setHighlightId] = useState<string | null>(null);
-  const focusedRef = useRef<string | null>(null);
-
-  // 용의자 페이지에서 넘어온 focus 단서를 펼치고 스크롤 + 강조
-  useEffect(() => {
-    if (!focusId || focusedRef.current === focusId || !collected.includes(focusId)) return;
-    focusedRef.current = focusId;
-    setExpanded(focusId);
-    setHighlightId(focusId);
-    document
-      .getElementById(`evidence-${focusId}`)
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
-    const t = setTimeout(() => setHighlightId(null), 1600);
-    return () => clearTimeout(t);
-  }, [focusId, collected]);
-
-  const progress = EVIDENCE.length > 0 ? (collected.length / EVIDENCE.length) * 100 : 0;
 
   useEffect(() => {
     return () => {
-      audioRef.current?.pause();
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
-  }, []);
+  }, [previewUrl]);
 
-  function getDisplayId(id: string) {
-    if (id === INCOMING_CALL_EVIDENCE_ID) return "CALL";
-    return id.replace("E", "");
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setCaption("");
+    setSuspectTag("");
+    setError(null);
   }
 
-  function formatTime(seconds: number) {
-    if (!Number.isFinite(seconds)) return "0:00";
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60)
-      .toString()
-      .padStart(2, "0");
-    return `${minutes}:${remainingSeconds}`;
+  function closeSheet() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setSelectedFile(null);
+    setCaption("");
+    setSuspectTag("");
+    setError(null);
   }
 
-  function loadAudio(id: string, audioUrl: string) {
-    if (audioRef.current && activeAudioId === id) return audioRef.current;
+  async function handleUpload() {
+    if (!selectedFile) return;
 
-    audioRef.current?.pause();
-    const audio = new Audio(audioUrl);
-    audioRef.current = audio;
-    setActiveAudioId(id);
-    setCurrentTime(0);
-    setDuration(0);
-    setIsPlaying(false);
-
-    audio.onloadedmetadata = () => setDuration(audio.duration || 0);
-    audio.ontimeupdate = () => setCurrentTime(audio.currentTime || 0);
-    audio.onplay = () => setIsPlaying(true);
-    audio.onpause = () => setIsPlaying(false);
-    audio.onended = () => {
-      audio.currentTime = 0;
-      setCurrentTime(0);
-      setIsPlaying(false);
-    };
-    audio.onerror = () => {
-      setIsPlaying(false);
-      setActiveAudioId(null);
-      setCurrentTime(0);
-      setDuration(0);
-    };
-
-    return audio;
-  }
-
-  function handleAudioPlay(id: string, audioUrl: string) {
-    const audio = loadAudio(id, audioUrl);
-    void audio.play().catch(() => setIsPlaying(false));
-  }
-
-  function handleAudioPause() {
-    audioRef.current?.pause();
-  }
-
-  function handleAudioReset() {
-    if (!audioRef.current) return;
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
-    setCurrentTime(0);
-  }
-
-  function handleAudioSeek(value: string) {
-    const nextTime = Number(value);
-    if (!Number.isFinite(nextTime)) return;
-    if (audioRef.current) {
-      audioRef.current.currentTime = nextTime;
+    setError(null);
+    try {
+      await uploadPhoto(selectedFile, caption, suspectTag);
+      closeSheet();
+    } catch {
+      setError("업로드 실패. 네트워크 상태를 확인하고 다시 시도하세요.");
     }
-    setCurrentTime(nextTime);
   }
 
   return (
@@ -118,197 +61,162 @@ function EvidenceContent() {
           Evidence Vault
         </div>
         <h1 className="text-2xl font-bold text-zinc-100">증거 보관함</h1>
+        <p className="text-sm text-zinc-500">
+          {ownTeamId ? `${ownTeamId}조 폴라로이드 ${photos.length}장` : "조 정보를 찾을 수 없습니다"}
+        </p>
       </div>
 
-      {/* Progress */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-zinc-400">수집 현황</span>
-          <span className="font-mono text-amber-400 font-bold">
-            {collected.length} / {EVIDENCE.length}
-          </span>
-        </div>
-        <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-amber-400 rounded-full transition-all duration-700"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        {collected.length === EVIDENCE.length && (
-          <p className="text-xs text-emerald-400">모든 증거를 수집했습니다. 최종 추리를 제출하세요.</p>
-        )}
-      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={handleFileChange}
+      />
 
-      {/* Evidence list */}
-      <div className="space-y-2">
-        {EVIDENCE.map((e) => {
-          const isCollected = collected.includes(e.id);
-          const isExpanded = expanded === e.id;
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={!ownTeamId}
+        className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-lg border border-amber-400/40 bg-amber-400/10 p-5 text-amber-200 transition-colors active:scale-[0.99] disabled:opacity-50"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-8 w-8 stroke-2">
+          <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
+          <circle cx="12" cy="13.5" r="4" />
+        </svg>
+        <span className="text-base font-bold">현장 증거 촬영</span>
+      </button>
 
-          return (
-            <div
-              key={e.id}
-              id={`evidence-${e.id}`}
-              className={`scroll-mt-20 rounded-lg border transition-all ${
-                highlightId === e.id ? "ring-2 ring-amber-400 " : ""
-              }${
-                isCollected
-                  ? "border-zinc-700 bg-zinc-900"
-                  : "border-zinc-800 bg-zinc-900/40"
-              }`}
-            >
+      {loading ? (
+        <div className="grid grid-cols-2 gap-3">
+          {[0, 1, 2, 3].map((item) => (
+            <div key={item} className="aspect-[3/4] animate-pulse rounded bg-zinc-900" />
+          ))}
+        </div>
+      ) : photos.length === 0 ? (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8 text-center">
+          <p className="text-sm text-zinc-400">아직 촬영한 증거가 없습니다.</p>
+          <p className="mt-1 text-xs text-zinc-600">현장을 사진으로 남기세요.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {photos.map((photo) => {
+            const tagLabel = photoTagLabel(photo.suspectTag);
+            return (
               <button
-                onClick={() => isCollected && setExpanded(isExpanded ? null : e.id)}
-                disabled={!isCollected}
-                className="w-full text-left p-3"
+                key={photo.id}
+                type="button"
+                onClick={() => setLightbox(photo.imageUrl)}
+                className={`relative rotate-[-0.5deg] bg-zinc-100 p-2 pb-4 text-left shadow-lg transition-transform active:scale-[0.98] even:rotate-[0.7deg] ${
+                  photo.status === "rejected" ? "opacity-45 grayscale" : ""
+                }`}
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-8 h-8 rounded flex items-center justify-center shrink-0 text-xs font-mono font-bold ${
-                      isCollected
-                        ? "bg-amber-400/20 text-amber-400"
-                        : "bg-zinc-800 text-zinc-600"
-                    }`}
-                  >
-                    {getDisplayId(e.id)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={`text-sm font-medium ${
-                        isCollected ? "text-zinc-100" : "text-zinc-600"
-                      }`}
-                    >
-                      {isCollected ? e.title : "???"}
-                    </p>
-                    <p className="text-xs text-zinc-600 font-mono">{e.id}</p>
-                  </div>
-                  {isCollected ? (
-                    <svg
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className={`w-4 h-4 text-zinc-500 transition-transform shrink-0 ${
-                        isExpanded ? "rotate-180" : ""
-                      }`}
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  ) : (
-                    <div className="w-4 h-4 rounded-full border border-zinc-700 shrink-0" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photo.imageUrl}
+                  alt={photo.caption ?? "촬영 증거"}
+                  className="aspect-square w-full bg-zinc-300 object-cover"
+                  loading="lazy"
+                />
+                {photo.status === "rejected" && (
+                  <span className="absolute left-3 top-3 rounded bg-red-600 px-2 py-1 text-[10px] font-bold text-white">
+                    제외됨
+                  </span>
+                )}
+                <div className="mt-2 min-h-10 space-y-1">
+                  <p className="font-hand text-center text-sm leading-tight text-zinc-900">
+                    {photo.caption || "— 기록 없음 —"}
+                  </p>
+                  {tagLabel && (
+                    <span className="mx-auto block w-fit rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-bold text-zinc-700">
+                      {tagLabel}
+                    </span>
                   )}
                 </div>
               </button>
+            );
+          })}
+        </div>
+      )}
 
-              {isExpanded && isCollected && (
-                <div className="px-3 pb-3 border-t border-zinc-800 pt-3 space-y-2">
-                  {e.imageUrl && (
-                    <button
-                      onClick={() => setLightbox(e.imageUrl!)}
-                      className="relative w-full aspect-video rounded overflow-hidden block"
-                    >
-                      <Image src={e.imageUrl} alt={e.title} fill className="object-cover" />
-                      <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <span className="opacity-0 hover:opacity-100 text-white text-xs font-mono bg-black/50 px-2 py-1 rounded">
-                          눌러서 크게 보기
-                        </span>
-                      </div>
-                    </button>
-                  )}
-                  <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-                    {e.description}
-                  </p>
-                  {e.audioUrl && (
-                    <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-xs font-mono font-bold text-emerald-300">
-                          통화녹음 내역
-                        </span>
-                        <span className="text-xs font-mono text-zinc-400">
-                          {formatTime(activeAudioId === e.id ? currentTime : 0)} /{" "}
-                          {formatTime(activeAudioId === e.id ? duration : 0)}
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max={activeAudioId === e.id && duration > 0 ? duration : 1}
-                        step="0.1"
-                        value={activeAudioId === e.id ? Math.min(currentTime, duration || 1) : 0}
-                        onChange={(event) => handleAudioSeek(event.target.value)}
-                        disabled={activeAudioId !== e.id || duration <= 0}
-                        className="w-full accent-emerald-400"
-                        aria-label="통화녹음 재생 위치"
-                      />
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleAudioPlay(e.id, e.audioUrl!)}
-                          disabled={activeAudioId === e.id && isPlaying}
-                          className="flex h-10 w-11 items-center justify-center rounded border border-emerald-500/40 bg-emerald-500/15 text-emerald-200 transition-colors disabled:opacity-40"
-                          aria-label="통화녹음 재생"
-                          title="재생"
-                        >
-                          <span className="ml-0.5 h-0 w-0 border-y-[7px] border-l-[11px] border-y-transparent border-l-current" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleAudioPause}
-                          disabled={activeAudioId !== e.id || !isPlaying}
-                          className="flex h-10 w-11 items-center justify-center gap-1 rounded border border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors disabled:opacity-40"
-                          aria-label="통화녹음 일시정지"
-                          title="일시정지"
-                        >
-                          <span className="h-4 w-1.5 rounded-sm bg-current" />
-                          <span className="h-4 w-1.5 rounded-sm bg-current" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleAudioReset}
-                          disabled={activeAudioId !== e.id}
-                          className="flex h-10 w-11 items-center justify-center rounded border border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors disabled:opacity-40"
-                          aria-label="통화녹음 정지 후 처음으로"
-                          title="정지"
-                        >
-                          <span className="h-4 w-4 rounded-[2px] bg-current" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
+      {previewUrl && (
+        <div className="fixed inset-0 z-50 flex items-end bg-black/70 p-3">
+          <div className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-4 shadow-2xl">
+            <div className="space-y-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewUrl}
+                alt="업로드 미리보기"
+                className="max-h-[42vh] w-full rounded bg-zinc-900 object-contain"
+              />
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="caption" className="text-xs font-mono text-zinc-500">
+                    캡션
+                  </label>
+                  <span className="text-xs font-mono text-zinc-600">{caption.length}/20</span>
                 </div>
-              )}
+                <input
+                  id="caption"
+                  value={caption}
+                  onChange={(event) => setCaption(event.target.value)}
+                  maxLength={20}
+                  placeholder="20자 이내"
+                  className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400 focus:outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="suspectTag" className="text-xs font-mono text-zinc-500">
+                  관련 인물
+                </label>
+                <select
+                  id="suspectTag"
+                  value={suspectTag}
+                  onChange={(event) => setSuspectTag(event.target.value)}
+                  className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-amber-400 focus:outline-none"
+                >
+                  <option value="">미지정</option>
+                  {PHOTO_TAGS.map((tag) => (
+                    <option key={tag.value} value={tag.value}>
+                      {tag.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {error && <p className="text-xs text-red-400">{error}</p>}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  className="flex-1 rounded bg-amber-400 py-2.5 text-sm font-bold text-zinc-950 transition-colors disabled:opacity-50"
+                >
+                  {uploading ? "업로드 중..." : "업로드"}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeSheet}
+                  disabled={uploading}
+                  className="rounded border border-zinc-700 bg-zinc-900 px-5 py-2.5 text-sm font-bold text-zinc-300 disabled:opacity-50"
+                >
+                  취소
+                </button>
+              </div>
             </div>
-          );
-        })}
-      </div>
-      {/* Lightbox */}
-      {lightbox && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setLightbox(null)}
-        >
-          <div className="relative w-full max-w-md">
-            <Image
-              src={lightbox}
-              alt="증거 이미지"
-              width={800}
-              height={600}
-              className="w-full h-auto rounded object-contain"
-            />
-            <p className="text-center text-xs text-zinc-500 mt-2">탭하면 닫힘</p>
           </div>
         </div>
       )}
-    </div>
-  );
-}
 
-export default function EvidencePage() {
-  return (
-    <Suspense>
-      <EvidenceContent />
-    </Suspense>
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setLightbox(null)}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={lightbox} alt="촬영 증거 확대" className="max-h-full max-w-full object-contain" />
+        </div>
+      )}
+    </div>
   );
 }

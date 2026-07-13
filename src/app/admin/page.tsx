@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
-import { EVIDENCE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, TIMER_EVENT_ID, TIMER_EVENT_TYPE } from "@/lib/data";
+import { EVIDENCE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, photoTagLabel, TIMER_EVENT_ID, TIMER_EVENT_TYPE } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 import { useBroadcastEvent } from "@/lib/useBroadcastEvent";
 
@@ -15,6 +15,16 @@ const OPEN_ALL_EVIDENCE_SNAPSHOT_PREFIX = "_open_all_evidence_snapshot:";
 interface TeamRow {
   pairId: string;
   count: number;
+}
+
+interface AdminPhotoRow {
+  id: string;
+  pair_id: string;
+  image_url: string;
+  caption: string | null;
+  suspect_tag: string | null;
+  status: string | null;
+  created_at: string;
 }
 
 function encodeOpenAllEvidenceSnapshot(evidenceIds: string[]) {
@@ -107,6 +117,11 @@ function PinGate({ onSuccess }: { onSuccess: () => void }) {
 function AdminPanel() {
   const { voteOpen, ending_open, loaded } = useGameState();
   const [teams, setTeams] = useState<TeamRow[]>([]);
+  const [photos, setPhotos] = useState<AdminPhotoRow[]>([]);
+  const [photoFilter, setPhotoFilter] = useState("");
+  const [photosLoading, setPhotosLoading] = useState(true);
+  const [photoUpdatingId, setPhotoUpdatingId] = useState<string | null>(null);
+  const [photoLightbox, setPhotoLightbox] = useState<string | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [myPairId, setMyPairId] = useState<string | null>(null);
   const [settingVoteRound, setSettingVoteRound] = useState(false);
@@ -261,6 +276,60 @@ function AdminPanel() {
   useEffect(() => {
     fetchTeams();
   }, [fetchTeams]);
+
+  const fetchPhotos = useCallback(async () => {
+    setPhotosLoading(true);
+    const { data } = await supabase
+      .from("photo_evidence")
+      .select("id, pair_id, image_url, caption, suspect_tag, status, created_at")
+      .order("created_at", { ascending: false });
+    if (data) setPhotos(data as AdminPhotoRow[]);
+    setPhotosLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void fetchPhotos();
+    const channel = supabase
+      .channel("admin_photo_evidence")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "photo_evidence" },
+        (payload) => {
+          const photo = payload.new as AdminPhotoRow;
+          setPhotos((prev) => (prev.some((item) => item.id === photo.id) ? prev : [photo, ...prev]));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "photo_evidence" },
+        (payload) => {
+          const photo = payload.new as AdminPhotoRow;
+          setPhotos((prev) => prev.map((item) => (item.id === photo.id ? photo : item)));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "photo_evidence" },
+        (payload) => {
+          const id = (payload.old as { id?: string }).id;
+          if (id) setPhotos((prev) => prev.filter((photo) => photo.id !== id));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchPhotos]);
+
+  async function setPhotoStatus(id: string, status: "ok" | "rejected") {
+    setPhotoUpdatingId(id);
+    const { error } = await supabase.from("photo_evidence").update({ status }).eq("id", id);
+    if (!error) {
+      setPhotos((prev) => prev.map((photo) => (photo.id === id ? { ...photo, status } : photo)));
+    }
+    setPhotoUpdatingId(null);
+  }
 
   // 중복 없는 쌍 목록 (1↔3, 3↔1 중 하나만)
   const currentPairs: [string, string][] = [];
@@ -496,6 +565,11 @@ function AdminPanel() {
     await fetchTeams();
     setLoadingId(null);
   }
+
+  const photoTeamIds = Array.from(new Set(photos.map((photo) => photo.pair_id))).sort((a, b) =>
+    a.localeCompare(b, "ko", { numeric: true })
+  );
+  const filteredPhotos = photoFilter ? photos.filter((photo) => photo.pair_id === photoFilter) : photos;
 
   return (
     <div className="flex flex-col gap-6 p-4 pt-6">
@@ -792,6 +866,97 @@ function AdminPanel() {
           </>
         )}
       </div>
+
+      {/* Divider */}
+      <div className="border-t border-zinc-800" />
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">사진 점검</h2>
+          <select
+            value={photoFilter}
+            onChange={(event) => setPhotoFilter(event.target.value)}
+            className="rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+            aria-label="사진 조 필터"
+          >
+            <option value="">전체 조</option>
+            {photoTeamIds.map((teamId) => (
+              <option key={teamId} value={teamId}>{teamId}조</option>
+            ))}
+          </select>
+        </div>
+        <p className="text-xs text-zinc-600">제외한 사진은 보존되며 랭킹에서만 빠집니다.</p>
+
+        {photosLoading ? (
+          <p className="py-4 text-center text-sm text-zinc-600">사진 불러오는 중...</p>
+        ) : filteredPhotos.length === 0 ? (
+          <p className="py-4 text-center text-sm text-zinc-600">표시할 사진이 없습니다.</p>
+        ) : (
+          <div className="space-y-2">
+            {filteredPhotos.map((photo) => {
+              const rejected = photo.status === "rejected";
+              const tagLabel = photoTagLabel(photo.suspect_tag);
+              return (
+                <div
+                  key={photo.id}
+                  className={`flex gap-3 rounded-lg border p-3 ${
+                    rejected ? "border-red-500/30 bg-red-500/5 opacity-65" : "border-zinc-800 bg-zinc-900"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setPhotoLightbox(photo.image_url)}
+                    className="h-20 w-20 shrink-0 overflow-hidden rounded bg-zinc-800"
+                    aria-label={`${photo.pair_id}조 사진 확대`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={photo.image_url}
+                      alt={photo.caption ?? "촬영 증거"}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </button>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-bold text-zinc-200">{photo.pair_id}조</span>
+                      <span className={`text-[10px] font-bold ${rejected ? "text-red-400" : "text-emerald-400"}`}>
+                        {rejected ? "제외됨" : "정상"}
+                      </span>
+                    </div>
+                    <p className="truncate text-xs text-zinc-400">{photo.caption || "기록 없음"}</p>
+                    <p className="text-[11px] text-zinc-600">
+                      {[tagLabel, new Date(photo.created_at).toLocaleString("ko-KR")].filter(Boolean).join(" · ")}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => void setPhotoStatus(photo.id, rejected ? "ok" : "rejected")}
+                      disabled={photoUpdatingId === photo.id}
+                      className={`mt-1 rounded border px-3 py-1.5 text-xs font-bold disabled:opacity-40 ${
+                        rejected
+                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                          : "border-red-500/30 bg-red-500/10 text-red-400"
+                      }`}
+                    >
+                      {photoUpdatingId === photo.id ? "처리 중..." : rejected ? "복원" : "제외"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {photoLightbox && (
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setPhotoLightbox(null)}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photoLightbox} alt="사진 확대" className="max-h-full max-w-full object-contain" />
+        </div>
+      )}
 
       {/* Divider */}
       <div className="border-t border-zinc-800" />

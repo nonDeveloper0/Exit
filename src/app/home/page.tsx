@@ -1,12 +1,9 @@
 "use client";
 
-import { EVIDENCE, LOCATIONS, QR_CODES } from "@/lib/data";
-import { useTeamEvidence } from "@/lib/useTeamEvidence";
+import { usePhotoEvidence } from "@/lib/usePhotoEvidence";
 
 export default function MainPage() {
-  const { collected } = useTeamEvidence();
-
-  const progress = EVIDENCE.length > 0 ? (collected.length / EVIDENCE.length) * 100 : 0;
+  const { photos } = usePhotoEvidence();
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
@@ -53,73 +50,31 @@ export default function MainPage() {
       {/* Progress */}
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-zinc-300">증거 수집 현황</span>
+          <span className="text-sm font-medium text-zinc-300">팀 사진 증거</span>
           <span className="text-sm font-mono text-amber-400 font-bold">
-            {collected.length} / {EVIDENCE.length}
+            {photos.length}장
           </span>
         </div>
-        <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-amber-400 rounded-full transition-all duration-700"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <p className="text-xs text-zinc-500">QR을 스캔해 현장 곳곳의 증거를 수집하세요. 일부 증거는 문제를 풀어야 열립니다.</p>
+        <p className="text-xs text-zinc-500">
+          현장의 물리 단서를 촬영해 증거함에 올리고, 관련 인물을 태그하세요.
+        </p>
       </div>
 
       {/* Instructions */}
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 space-y-2">
         <h2 className="text-sm font-semibold text-amber-400">수사 방법</h2>
         <ol className="text-sm text-zinc-400 space-y-1.5 list-decimal list-inside">
-          <li>각 장소의 QR을 스캔한다</li>
-          <li>잠긴 증거는 문제를 풀어 정답을 입력한다</li>
-          <li>단서를 수집하거나 용의자 심문권을 얻는다</li>
+          <li>현장의 물리 단서를 사진으로 촬영해 증거함에 올린다</li>
+          <li>사진마다 관련 인물을 태그한다</li>
+          <li>QR을 찍어 문제를 풀면 용의자 심문권을 얻는다</li>
           <li>범인을 선택하고 최종 추리를 제출한다</li>
         </ol>
       </div>
 
-      {/* Location Evidence Status */}
-      <div className="space-y-2">
-        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-wider">장소별 단서 현황</h2>
-        <div className="space-y-2">
-          {Object.entries(LOCATIONS).map(([key, locationName], index) => {
-            const evidenceIds = [
-              ...new Set(
-                QR_CODES.filter((qr) => qr.location === locationName).flatMap((qr) => qr.evidenceIds)
-              ),
-            ];
-            const total = evidenceIds.length;
-            const collectedCount = evidenceIds.filter((id) => collected.includes(id)).length;
-            const allDone = total > 0 && collectedCount === total;
-            const someDone = collectedCount > 0;
-
-            return (
-              <div
-                key={key}
-                className={`rounded-lg border p-3 flex items-center justify-between ${
-                  allDone
-                    ? "border-emerald-500/30 bg-emerald-500/5"
-                    : someDone
-                    ? "border-amber-500/30 bg-amber-500/5"
-                    : "border-zinc-800 bg-zinc-900"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-zinc-500">장소#{index + 1}</span>
-                  <span className="text-sm text-zinc-300">{locationName}</span>
-                </div>
-                <span
-                  className={`text-xs font-mono font-bold ${
-                    allDone ? "text-emerald-400" : someDone ? "text-amber-400" : "text-zinc-500"
-                  }`}
-                >
-                  단서 {collectedCount}/{total}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {/*
+        구버전 장소별 단서 현황은 E01~E16 QR 수집 방식 전용이라 사진 증거 방식에서는 비노출한다.
+        QR_CODES/EVIDENCE 데이터 자체는 data.ts에 보존한다.
+      */}
     </div>
   );
 }

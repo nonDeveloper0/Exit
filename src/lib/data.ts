@@ -43,6 +43,25 @@ export const COMMON_EVIDENCE_IDS: string[] = ["E10"];
 // 공통 단서를 저장하는 가상의 조 ID (실제 조 번호와 겹치지 않아야 함)
 export const GLOBAL_PAIR_ID = "__global";
 
+// 사진 증거(폴라로이드) 방식
+// 참가자가 물리 단서를 직접 촬영해 업로드한다. Supabase Storage 'evidence-photos' + photo_evidence 테이블.
+export const PHOTO_BUCKET = "evidence-photos";
+
+// 업로드 시 "관련 인물" 태그 드롭다운. 미지정은 UI에서 빈 문자열("")로 처리하고 DB에는 null로 저장한다.
+export const PHOTO_TAGS: { value: string; label: string }[] = [
+  { value: "A", label: "나사장" },
+  { value: "B", label: "채소장" },
+  { value: "C", label: "나팀장" },
+  { value: "D", label: "이대리" },
+  { value: "E", label: "김사원" },
+  { value: "PARK", label: "박실장 (피해자)" },
+];
+
+export function photoTagLabel(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return PHOTO_TAGS.find((tag) => tag.value === value)?.label ?? null;
+}
+
 // 수신전화 연출 이벤트. pair_id에는 CALL01을 수집할 대상 조 번호가 들어간다.
 export const INCOMING_CALL_EVENT_ID = "_incoming_call";
 export const INCOMING_CALL_EVENT_TYPE = "incoming_call";
@@ -252,3 +271,19 @@ export const QR_CODES: QrCode[] = [
   { id: "n4v8z3", location: LOCATIONS.L4, evidenceIds: ["E14"] },
   { id: "w3n5k7", location: LOCATIONS.L4, evidenceIds: ["E15"] },
 ];
+
+// QR 심문권 퀴즈
+// 구버전에서는 QR이 증거 수집용이었지만, 사진 방식 전환 후에는 심문권 획득용 퀴즈로 사용한다.
+export interface InterrogationQuiz {
+  suspectId: string;
+  question: string;
+  answer: string;
+}
+
+export const INTERROGATION_QUIZZES: Record<string, InterrogationQuiz> = {
+  w3n5k7: {
+    suspectId: "B",
+    question: "부검표의 독성 반응을 일으킨 살해 방식 두 단어를 영어로 입력하세요.",
+    answer: "poison kill",
+  },
+};

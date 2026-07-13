@@ -18,6 +18,10 @@ body {
   font-family: var(--font-sans), Arial, sans-serif;
 }
 
+.font-hand {
+  font-family: "Segoe Script", "Comic Sans MS", cursive;
+}
+
 @keyframes blob-one {
   0%, 100% { transform: translate(0px, 0px) scale(1); }
   33% { transform: translate(-30px, 25px) scale(1.05); }

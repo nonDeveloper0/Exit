@@ -139,6 +139,46 @@ export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_I
 
 ---
 
+## 1-6. 사진 증거(폴라로이드) 설정
+
+**파일:** `src/lib/data.ts`, `src/lib/usePhotoEvidence.ts`
+
+현재 참가자용 증거함(`/evidence`)은 E01~E16 목록이 아니라 **직접 촬영 사진 보드**입니다.
+
+- 저장 테이블: Supabase `photo_evidence`
+- 이미지 저장소: Supabase Storage `evidence-photos` 버킷
+- 업로드 전 압축: `src/lib/image.ts`에서 긴 변 1080px, JPEG 품질 0.72
+- 캡션 제한: `/evidence`의 입력칸 `maxLength={20}`
+
+관련 인물 태그 목록은 `PHOTO_TAGS`에서 수정합니다.
+
+```ts
+export const PHOTO_TAGS = [
+  { value: "A", label: "나사장" },
+  { value: "B", label: "채소장" },
+  { value: "C", label: "나팀장" },
+  { value: "D", label: "이대리" },
+  { value: "E", label: "김사원" },
+  { value: "PARK", label: "박실장 (피해자)" },
+];
+```
+
+- `value`는 DB `photo_evidence.suspect_tag`에 저장되는 값입니다.
+- `A`~`E`는 용의자 파일(`/suspects`)에서 해당 용의자 관련 사진으로 필터됩니다.
+- `PARK`는 피해자 태그 전용입니다. 용의자 카드에는 표시되지 않습니다.
+- 미지정은 UI의 첫 옵션이며 빈 문자열로 선택되고 DB에는 `null`로 저장됩니다.
+
+사진 점검은 관리자(`/admin`)의 **사진 점검**에서 합니다. 조별 필터로 사진을 찾고, 스팸 사진은 `제외`를 누릅니다. 제외 사진은 삭제되지 않으며 참가자 보드에는 `제외됨`으로 표시되고 사진 랭킹에서만 빠집니다. 잘못 제외한 사진은 같은 자리에서 `복원`하면 즉시 원래 상태로 돌아옵니다.
+
+사진 제외/복원 기능을 사용하려면 Supabase SQL Editor에서 아래 SQL을 한 번 실행해야 합니다.
+
+```sql
+ALTER TABLE photo_evidence
+ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ok';
+```
+
+---
+
 ## 2. 장소명 수정
 
 **파일:** `src/lib/data.ts` → 상단 `LOCATIONS` 상수
@@ -237,24 +277,33 @@ export const QR_CODES: QrCode[] = [
 
 ---
 
-## 5-2. 용의자 심문권 트리거
+## 5-2. QR 심문권 퀴즈
 
-**파일:** `src/lib/data.ts` → `SUSPECTS` 배열의 `interrogationTriggerId`
+**파일:** `src/lib/data.ts` → `INTERROGATION_QUIZZES`
 
-각 용의자에 `interrogationTriggerId`(증거 ID 1개)를 지정하면, 그 증거를 수집한 조는 용의자 파일(`/suspects`)에서 해당 용의자의 **심문권**을 얻는다.
+현재 심문권은 증거 수집 트리거가 아니라 **QR 문제 정답**으로 획득합니다.
+인쇄된 QR slug는 `QR_CODES`에 남아 있어야 하고, 그중 심문권 문제로 쓸 slug를 `INTERROGATION_QUIZZES`에 등록합니다.
 
 ```ts
-// 예시: E16을 수집하면 A의 심문권 획득
-{ id: "A", interrogationTriggerId: "E16", ... }
-
-// 미지정(휴면): 심문권 UI가 아예 표시되지 않음
-{ id: "B", interrogationTriggerId: undefined, ... }
+export const INTERROGATION_QUIZZES = {
+  w3n5k7: {
+    suspectId: "B",
+    question: "부검표의 독성 반응을 일으킨 살해 방식 두 단어를 영어로 입력하세요.",
+    answer: "poison kill",
+  },
+  // 예시: A용 문제 추가
+  // h6t4c3: { suspectId: "A", question: "문제 문구", answer: "정답" },
+};
 ```
 
-- **획득**: 지정 증거를 수집하면 즉시 (조 전체 공유. 짝지은 조도 함께 획득)
+- key(`w3n5k7`)는 QR URL의 slug이며 `QR_CODES.id`와 일치해야 합니다.
+- `suspectId`는 `"A"`~`"E"` 중 하나입니다.
+- 정답 비교는 공백 제거 + 소문자 변환으로 처리됩니다. 예: `poison kill`, `PoisonKill`, `poison   kill` 모두 동일.
+- 문제 등록이 없는 QR은 "이 지점에는 아직 등록된 문제가 없습니다"만 표시됩니다.
+- **획득**: 정답을 맞히면 `team_evidence_items`에 `type='interrogation_earned'`, `evidence_id=용의자ID`로 저장됩니다. 조 전체·짝 조가 공유합니다.
 - **제시**: 용의자 카드를 펼치면 관련 단서 아래에 빨간 심문권 티켓이 뜬다 → 배우에게 화면 제시
 - **사용(1회 소모)**: 배우가 `심문 사용` → 확인 → `사용 완료`로 바뀌고 버튼 비활성. **짝지은 조도 함께 사용완료**로 전환된다. 사용완료에는 **사용 시각·사용한 조**가 표시된다 (예: `11:04 1조 사용완료`) — 오해 방지용
-- 트리거 증거는 QR에 연결돼 있어야 수집 가능하다(3절 `QR_CODES` 참고). 트리거용 새 증거를 추가한 뒤 여기에 그 ID를 넣으면 된다
+- `SUSPECTS.interrogationTriggerId` 필드는 구버전 데이터 호환을 위해 보존하지만, 현재 UI의 심문권 노출 여부는 `INTERROGATION_QUIZZES` 기준입니다.
 - 사용 상태는 Supabase `team_evidence_items`의 `type='interrogation_used'` 행으로 저장되며, 조 초기화(`/admin`) 시 함께 삭제된다
 
 ---

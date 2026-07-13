@@ -22,12 +22,15 @@ export function useTeamEvidence() {
   const [partnerId, setPartnerId] = useState<string | null>(null);
   const [collected, setCollected] = useState<string[]>([]);
   const [unlocked, setUnlocked] = useState<string[]>([]);
+  const [interrogationEarned, setInterrogationEarned] = useState<string[]>([]);
   const [interrogationUsed, setInterrogationUsed] = useState<InterrogationUse[]>([]);
   const [loading, setLoading] = useState(true);
   const collectedRef = useRef<string[]>([]);
   const unlockedRef = useRef<string[]>([]);
+  const interrogationEarnedRef = useRef<string[]>([]);
   collectedRef.current = collected;
   unlockedRef.current = unlocked;
+  interrogationEarnedRef.current = interrogationEarned;
 
   // game_state에서 pairings 구독 → 내 팀의 파트너 ID 추적
   useEffect(() => {
@@ -76,10 +79,17 @@ export function useTeamEvidence() {
       .from("team_evidence_items")
       .select("evidence_id, type, pair_id, created_at")
       .in("pair_id", teamIds)
-      .in("type", ["collected", "interrogation_used"])
+      .in("type", ["collected", "interrogation_used", "interrogation_earned"])
       .then(({ data }) => {
         if (data) {
           setCollected([...new Set(data.filter((r) => r.type === "collected").map((r) => r.evidence_id))]);
+          setInterrogationEarned([
+            ...new Set(
+              data
+                .filter((r) => r.type === "interrogation_earned")
+                .map((r) => r.evidence_id)
+            ),
+          ]);
           setInterrogationUsed(
             data
               .filter((r) => r.type === "interrogation_used")
@@ -109,6 +119,10 @@ export function useTeamEvidence() {
             };
             if (item.type === "collected") {
               setCollected((prev) =>
+                prev.includes(item.evidence_id) ? prev : [...prev, item.evidence_id]
+              );
+            } else if (item.type === "interrogation_earned") {
+              setInterrogationEarned((prev) =>
                 prev.includes(item.evidence_id) ? prev : [...prev, item.evidence_id]
               );
             } else if (item.type === "interrogation_used") {
@@ -152,6 +166,23 @@ export function useTeamEvidence() {
     setUnlocked((prev) => (prev.includes(id) ? prev : [...prev, id]));
   }, []);
 
+  // 심문권 획득 처리 — 증거 수집과 별개로 용의자 ID를 마커로 저장한다.
+  const earnInterrogation = useCallback(
+    async (suspectId: string) => {
+      if (!ownTeamId || interrogationEarnedRef.current.includes(suspectId)) return;
+      setInterrogationEarned((prev) =>
+        prev.includes(suspectId) ? prev : [...prev, suspectId]
+      );
+      await supabase
+        .from("team_evidence_items")
+        .upsert(
+          { pair_id: ownTeamId, evidence_id: suspectId, type: "interrogation_earned" },
+          { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
+        );
+    },
+    [ownTeamId]
+  );
+
   // 심문권 사용 처리 — 내 조로 기록. 짝 조도 구독 중이므로 함께 사용완료로 반영됨.
   const markInterrogationUsed = useCallback(
     async (suspectId: string) => {
@@ -171,5 +202,15 @@ export function useTeamEvidence() {
     [ownTeamId]
   );
 
-  return { collected, unlocked, interrogationUsed, loading, collect, unlock, markInterrogationUsed };
+  return {
+    collected,
+    unlocked,
+    interrogationEarned,
+    interrogationUsed,
+    loading,
+    collect,
+    unlock,
+    earnInterrogation,
+    markInterrogationUsed,
+  };
 }

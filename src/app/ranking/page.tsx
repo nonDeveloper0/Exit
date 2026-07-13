@@ -5,7 +5,7 @@ import { useAllTeamsProgress } from "@/lib/useAllTeamsProgress";
 import { getTeamInfo } from "@/lib/store";
 
 export default function RankingPage() {
-  const { groups, total } = useAllTeamsProgress();
+  const { groups } = useAllTeamsProgress();
   const [myTeamId, setMyTeamId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function RankingPage() {
           Live Ranking
         </div>
         <h1 className="text-2xl font-bold text-zinc-100">수사 현황</h1>
-        <p className="text-sm text-zinc-500">전체 조 증거 수집 실시간 순위</p>
+        <p className="text-sm text-zinc-500">전체 조 사진 증거 실시간 순위</p>
       </div>
 
       {groups.length === 0 ? (
@@ -31,7 +31,6 @@ export default function RankingPage() {
         <div className="space-y-2">
           {groups.map((group, index) => {
             const isMe = myTeamId !== null && group.teamIds.includes(myTeamId);
-            const pct = total > 0 ? Math.round((group.count / total) * 100) : 0;
             const rank = index + 1;
             const rankColor =
               rank === 1 ? "text-amber-400" :
@@ -58,19 +57,8 @@ export default function RankingPage() {
                         {group.label}{isMe && " (나)"}
                       </span>
                       <span className="text-xs font-mono text-zinc-400">
-                        {group.count} / {total}
+                        사진 {group.count}장
                       </span>
-                    </div>
-                    <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-700 ${
-                          rank === 1 ? "bg-amber-400" :
-                          rank === 2 ? "bg-zinc-400" :
-                          rank === 3 ? "bg-amber-800" :
-                          isMe ? "bg-amber-600" : "bg-zinc-600"
-                        }`}
-                        style={{ width: `${pct}%` }}
-                      />
                     </div>
                   </div>
                 </div>
