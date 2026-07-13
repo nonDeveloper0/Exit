@@ -26,11 +26,13 @@ export const VOTE_UNLOCK_COUNT = 0;
 
 // 비밀번호로 잠긴 증거 목록. { 증거ID: "비밀번호" } 형태로 지정.
 export const LOCKED_EVIDENCE: Record<string, string> = {
+  E15: "poison kill",
   E01: "1234",
 };
 
 // 잠긴 증거 퀴즈 문제. { 증거ID: "문제" } 형태로 지정. 없으면 기본 안내 문구 표시.
 export const EVIDENCE_QUIZ: Record<string, string> = {
+  E15: "부검표의 독성 반응을 일으킨 살해 방식 두 단어를 영어로 입력하세요.",
   E01: "퀴즈 문제를 여기에 입력하세요.",
 };
 
@@ -180,7 +182,7 @@ export const SUSPECTS: Suspect[] = [
     motive: "김사원 보호와 현장 조작 의혹",
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E02", "E06"])
     relatedEvidenceIds: ["E13", "E14", "E15"],
-    interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
+    interrogationTriggerId: "E15", // E15 정답 입력 시 채소장 심문권 획득
     description:
       "위험물관리사. 김사원과 가까운 사이이며 독극물 취급 권한을 갖고 있다. 사건 이후 현장에 접근했고, 박실장의 사망 원인을 흐리게 만들 수 있는 위치에 있었다.",
     motiveLevel: "높음",

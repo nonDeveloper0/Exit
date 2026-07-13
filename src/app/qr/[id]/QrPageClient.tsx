@@ -12,6 +12,10 @@ interface Props {
   evidence: Evidence[];
 }
 
+function normalizeAnswer(value: string) {
+  return value.replace(/\s+/g, "").toLowerCase();
+}
+
 export default function QrPageClient({ qrId, location, evidence }: Props) {
   const { collected, unlocked, collect, unlock } = useTeamEvidence();
   const [passwords, setPasswords] = useState<Record<string, string>>({});
@@ -46,7 +50,7 @@ export default function QrPageClient({ qrId, location, evidence }: Props) {
   async function handlePasswordSubmit(e: Evidence) {
     const input = (passwords[e.id] ?? "").trim();
     const correct = LOCKED_EVIDENCE[e.id];
-    if (input === correct) {
+    if (normalizeAnswer(input) === normalizeAnswer(correct)) {
       await unlock(e.id);
       setWrongIds((prev) => prev.filter((id) => id !== e.id));
       await handleCollect(e.id);
