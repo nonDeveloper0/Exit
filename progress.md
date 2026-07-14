@@ -6,6 +6,14 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] 수사본부 페어 팀 배지에 팀 이름별 색상을 적용했다.
+  - 노랑·파랑·분홍 팀은 각각 노랑·파랑·분홍 배지로 표시하며, 다른 이름은 기본 앰버 색상을 사용한다.
+  - 수정 파일: `src/lib/pairTeam.ts`, `src/app/home/page.tsx`, `progress.md`
+
+- [x] 수사본부 페어 팀 이름 표기를 `노랑 팀` 형식으로 간결하게 변경했다.
+  - 입력값에 이미 `팀`이 포함되어도 중복 표기하지 않는다.
+  - 수정 파일: `src/app/home/page.tsx`, `src/app/admin/page.tsx`, `progress.md`
+
 - [x] 재실행 가능한 Supabase SQL 안내로 보완했다.
   - 기존 `suspect_notes` 정책 또는 Realtime publication이 있어도 오류 없이 넘어가도록 중복 검사를 추가했다.
   - 수정 파일: `docs/01_md/07_DATA_SCHEMA.md`, `progress.md`

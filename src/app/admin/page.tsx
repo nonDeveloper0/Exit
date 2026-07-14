@@ -867,7 +867,7 @@ function AdminPanel() {
               value={pairTeamName}
               onChange={(e) => setPairTeamName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addPairing()}
-              placeholder="팀 이름 (예: 노랑팀)"
+              placeholder="팀 이름 (예: 노랑)"
               className="min-w-36 flex-1 rounded bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-amber-400"
             />
             <input
