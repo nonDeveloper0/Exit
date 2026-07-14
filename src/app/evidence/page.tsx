@@ -10,6 +10,7 @@ import {
 } from "@/lib/data";
 import { filterPhotoEvidence } from "@/lib/photoEvidenceFilter";
 import { PhotoItem, usePhotoEvidence } from "@/lib/usePhotoEvidence";
+import QrScannerModal from "@/components/QrScannerModal";
 
 export default function EvidencePage() {
   const { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, ownTeamId } =
@@ -28,6 +29,7 @@ export default function EvidencePage() {
   const [editedSuspectTag, setEditedSuspectTag] = useState("");
   const [editedLocationTag, setEditedLocationTag] = useState("");
   const [metadataError, setMetadataError] = useState<string | null>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const lightboxPhoto = photos.find((photo) => photo.id === lightboxPhotoId) ?? null;
 
   useEffect(() => {
@@ -127,18 +129,36 @@ export default function EvidencePage() {
         onChange={handleFileChange}
       />
 
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={!ownTeamId}
-        className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-lg border border-amber-400/40 bg-amber-400/10 p-5 text-amber-200 transition-colors active:scale-[0.99] disabled:opacity-50"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-8 w-8 stroke-2">
-          <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
-          <circle cx="12" cy="13.5" r="4" />
-        </svg>
-        <span className="text-base font-bold">현장 증거 촬영</span>
-      </button>
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={!ownTeamId}
+          className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-lg border border-amber-400/40 bg-amber-400/10 p-4 text-amber-200 transition-colors active:scale-[0.99] disabled:opacity-50"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
+            <path d="M4 8a2 2 0 0 1 2-2h1.2a1 1 0 0 0 .86-.5l.9-1.5a1 1 0 0 1 .86-.5h4.36a1 1 0 0 1 .86.5l.9 1.5a1 1 0 0 0 .86.5H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
+            <circle cx="12" cy="13" r="3.5" />
+          </svg>
+          <span className="text-sm font-bold leading-tight text-center">현장 증거 촬영</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setScannerOpen(true)}
+          disabled={!ownTeamId}
+          className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-lg border border-amber-400/40 bg-amber-400/10 p-4 text-amber-200 transition-colors active:scale-[0.99] disabled:opacity-50"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
+            <path d="M4 8V6a2 2 0 0 1 2-2h2" />
+            <path d="M16 4h2a2 2 0 0 1 2 2v2" />
+            <path d="M20 16v2a2 2 0 0 1-2 2h-2" />
+            <path d="M8 20H6a2 2 0 0 1-2-2v-2" />
+            <rect x="9" y="9" width="6" height="6" rx="1" />
+          </svg>
+          <span className="text-sm font-bold leading-tight text-center">QR 스캐너</span>
+        </button>
+      </div>
 
       <div className="relative">
         <button
@@ -361,6 +381,8 @@ export default function EvidencePage() {
           </div>
         </div>
       )}
+
+      <QrScannerModal open={scannerOpen} onClose={() => setScannerOpen(false)} />
     </div>
   );
 }

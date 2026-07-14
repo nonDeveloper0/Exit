@@ -81,12 +81,9 @@ export default function MainPage() {
         </ol>
       </div>
 
-      <div className="space-y-1">
-        <div className="text-xs font-mono text-amber-400 tracking-widest uppercase">
-          Live Ranking
-        </div>
-        <h2 className="text-2xl font-bold text-zinc-100">수사 현황</h2>
-        <p className="text-sm text-zinc-500">전체 조 사진 증거 실시간 순위</p>
+      <div className="flex items-center justify-between pt-1">
+        <h2 className="text-sm font-semibold text-zinc-300">수사 현황 · 증거수집 순위</h2>
+        <span className="text-xs text-zinc-600">전체 조 실시간</span>
       </div>
 
       {groups.length === 0 ? (

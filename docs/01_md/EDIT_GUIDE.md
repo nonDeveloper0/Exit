@@ -216,6 +216,18 @@ export const QR_CODES: QrCode[] = [
 
 ---
 
+## 3-1. 증거함 인앱 QR 스캐너
+
+**파일:** `src/lib/qrScan.ts`, `src/components/QrScannerModal.tsx`
+
+증거함(`/evidence`)의 "QR 스캐너" 버튼은 폰 기본 카메라 앱으로 나가지 않고, 앱 안에서 바로 카메라를 열어(`getUserMedia` + `jsQR`) QR을 인식한다. 인식된 QR 원문(전체 URL 또는 slug)은 `resolveQrPath()`가 `QR_CODES`(위 3번 항목)에 등록된 id인지 확인한 뒤 `/qr/[id]`로 이동시킨다.
+
+- `QR_CODES`에 없는 id를 스캔하면 "등록되지 않은 QR입니다" 안내만 뜨고 이동하지 않는다 — 즉 3번 항목에서 QR을 추가/변경하면 스캐너도 자동으로 인식한다(별도 수정 불필요).
+- 카메라 권한을 거부하거나 카메라가 없는 기기는 화면에 에러 메시지만 표시되고 앱은 정상 동작한다.
+- 카카오톡 등 인앱 브라우저로 사이트를 열면 iOS에서 카메라 권한 자체가 막힐 수 있다 — 참가자에게는 항상 기본 브라우저(Safari/Chrome)로 열도록 안내할 것.
+
+---
+
 ## 4. 용의자 정보 수정
 
 **파일:** `src/lib/data.ts`

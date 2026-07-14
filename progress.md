@@ -6,6 +6,11 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] `/home`(수사본부) 하단의 "Live Ranking / 수사 현황" 큰 제목을 페이지 타이틀처럼 보이지 않도록 작은 인라인 라벨로 축소했다. 순위 리스트 기능 자체는 그대로 유지.
+  - 수정 파일: `src/app/home/page.tsx`, `progress.md`
+- [x] 증거함(`/evidence`)의 "현장 증거 촬영" 버튼을 반으로 나눠 왼쪽은 촬영(기존 기능, 아이콘 세련되게 교체), 오른쪽은 새로운 "QR 스캐너"로 만들었다. QR 스캐너는 `getUserMedia` + `jsQR`로 앱을 벗어나지 않고 카메라를 열어 QR을 인식하고, `QR_CODES`에 등록된 id면 `/qr/[id]`로 자동 이동한다.
+  - 새 의존성: `jsqr`
+  - 수정/추가 파일: `src/app/evidence/page.tsx`, `src/lib/qrScan.ts`(신규), `src/components/QrScannerModal.tsx`(신규), `package.json`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
 - [x] 증거 사진 업로드 시 크롬 모바일이 "메모리가 부족하여 실행하지 못했습니다"로 죽는 문제를 수정했다.
   - 원인: `compressImage()`가 `createImageBitmap(file)`로 원본 고화소 사진을 통째로 디코딩한 뒤 2048px로 축소해, 순간 메모리 사용량이 폭증했다.
   - 조치: `<img>`로 크기만 먼저 가볍게 읽고, `createImageBitmap`에 `resizeWidth`/`resizeHeight`를 넘겨 축소본을 바로 디코딩하도록 변경(원본 풀사이즈 디코딩 회피).
