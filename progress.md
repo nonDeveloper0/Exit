@@ -6,6 +6,9 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] 진행 기록과 미추적 사진 메타데이터/필터 작업 파일을 검토했다.
+  - `photoEvidenceFilter.user-pre-merge.*`는 현재 구현과 중복되는 병합 전 임시 파일이며, 확장자 없는 import로 전체 `npm test`를 실패시킨다.
+  - 사진 메타데이터·필터·용의자 단순화 계획의 기능은 현재 코드와 최근 커밋에 반영됐다. 중복 임시 파일을 삭제한 뒤 `npm test` 4개 통과로 확인했다.
 - [x] `/screen/phone2` 정적 화면의 브라우저 제목을 `채소장 폰`으로 변경했다. (대화·연락처의 동그리 인물명은 유지)
   - 수정 파일: `public/screen/dongguri_phone_room.html`, `progress.md`
 - [x] 용의자 파일을 심문권·개인 메모 중심으로 단순화하고, 사진 인물 태그를 인물별 고정 파스텔 색상으로 통일했다.
@@ -14,7 +17,7 @@
   - 수정 파일: `src/lib/data.ts`, `src/app/evidence/page.tsx`, `src/app/admin/page.tsx`, `src/app/suspects/page.tsx`, `tests/photoTagPresentation.test.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
 - [x] `/screen/phone2` URL은 유지하고 rewrite의 연결 대상을 `public/screen/dongguri_phone_room.html`로 교체했다.
   - 수정 파일: `next.config.ts`, `progress.md`
-- [ ] /home에 전체 조 사진 증거 실시간 현황을 통합하고, 하단 `현황` 탭과 /ranking 경로를 제거한다.
+- [x] /home에 전체 조 사진 증거 실시간 현황을 통합하고, 하단 `현황` 탭과 /ranking 경로를 제거했다. (아래 완료 기록 참조)
 - [x] `docs/01_md/14_PHOTO_EVIDENCE_SPEC.md` 기준으로 증거함을 사진(폴라로이드) 업로드 보드로 전환하고, QR은 심문권 퀴즈 획득 플로우로 변경한다.
 - [x] 최신 사진 증거 명세에 맞춰 사진 제외/복원(status), 사진 장수 실시간 랭킹, 관리자 사진 점검 패널을 구현한다.
 - [x] `docs/01_md/15_ENDING_REVISION.md` 기준으로 엔딩 화면(`/ending`)의 범인 공개 + 모세 이야기 반전을 걷어내고 "EXIT SEASON 2 / TO BE CONTINUED..." 화면으로 교체한다(기존 코드는 주석 보존, 코드만 변경·문서 정리는 별도).
@@ -559,7 +562,7 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   - ⚠️ Chrome 확장 미연결로 실기기 렌더링은 직접 확인 필요. `laptop.html`/`ipad.html`도 동일한 `.screen{position:absolute;inset:0}` + body static 구조라 같은 증상 가능성 있음 — 보고되면 동일하게 고칠 것
   - 수정 파일: `public/screen/phone2.html`, `progress.md`
 
-- [ ] 수사본부·사진 메타데이터·용의자 화면 개편 구현 시작 (2026-07-14): Supabase SQL migration은 적용 완료 상태로 앱 계약·UI·문서 변경을 진행한다.
+- [x] 수사본부·사진 메타데이터·용의자 화면 개편 완료 (2026-07-14): SQL migration 적용 후 장소·영구 번호·인물 필터/편집·수사본부 통합·용의자 심문/메모 단순화를 반영했다. 중복 임시 `photoEvidenceFilter.user-pre-merge.*` 파일을 삭제했고 전체 `npm test` 4개 통과를 확인했다.
 
 - [x] 수사본부에 전체 조 사진 증거 실시간 현황 통합 (2026-07-14)
   - `/home`의 수사 방법 카드 바로 아래로 기존 랭킹 UI를 이동했다: 1~3위 색상, 내 조 `(나)` 강조, 사진 장수, 빈 상태, 실시간 상태를 보존했다.
