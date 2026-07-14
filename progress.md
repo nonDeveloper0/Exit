@@ -6,6 +6,8 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] 현재 작업분을 Git 커밋하고 원격 `origin/master`로 푸시한다.`n  - 수정 파일: `progress.md`
+
 - [x] `/home`(수사본부) 하단의 "Live Ranking / 수사 현황" 큰 제목을 페이지 타이틀처럼 보이지 않도록 작은 인라인 라벨로 축소했다. 순위 리스트 기능 자체는 그대로 유지.
   - 수정 파일: `src/app/home/page.tsx`, `progress.md`
 - [x] 증거함(`/evidence`)의 "현장 증거 촬영" 버튼을 반으로 나눠 왼쪽은 촬영(기존 기능, 아이콘 세련되게 교체), 오른쪽은 새로운 "QR 스캐너"로 만들었다. QR 스캐너는 `getUserMedia` + `jsQR`로 앱을 벗어나지 않고 카메라를 열어 QR을 인식하고, `QR_CODES`에 등록된 id면 `/qr/[id]`로 자동 이동한다.
@@ -254,6 +256,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7fmKV4M3gSPA0iPEgzghw_THQWVXAH
   - 검증: 타이머/단서 개방 식별자가 `src/`에 남지 않음을 확인. `npm run lint` 통과(기존 `useGameState.ts` 경고 1건), Supabase env 주입 후 `npm run build` 통과.
   - 삭제 파일: `src/components/TimerOverlay.tsx`
   - 수정 파일: `src/app/admin/page.tsx`, `src/app/layout.tsx`, `src/lib/data.ts`, `src/lib/ringtone.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+- [x] 검토: 증거 사진 — 미리 찍어둔 사진 갤러리 업로드 허용 여부 (2026-07-14)
+  - 결론: 허용하지 않음. 치팅 위험(현장에서 실제로 촬영하지 않은 사진을 증거로 제출) 때문에 `capture="environment"` 강제 촬영 방식을 그대로 유지하기로 결정.
+  - 코드 변경 없음.
 
 ## 구조 확정 사항
 
