@@ -23,36 +23,21 @@ export function castVote(suspectId: string): void {
   localStorage.setItem(VOTE_KEY, suspectId);
 }
 
-export function getTeamInfo(): { teamNumber: string; leaderName: string } | null {
+export function getTeamInfo(): { teamNumber: string; name: string } | null {
   if (typeof window === "undefined") return null;
   try {
     const stored = localStorage.getItem(TEAM_KEY);
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    const parsed = JSON.parse(stored) as { teamNumber?: string; name?: string; leaderName?: string };
+    if (!parsed.teamNumber) return null;
+    return { teamNumber: parsed.teamNumber, name: parsed.name ?? parsed.leaderName ?? "" };
   } catch {
     return null;
   }
 }
 
-export function saveTeamInfo(teamNumber: string, leaderName: string): void {
-  localStorage.setItem(TEAM_KEY, JSON.stringify({ teamNumber, leaderName }));
-}
-
-// 용의자별 수사 노트 (이 기기에만 저장). suspectId → 노트 텍스트
-export function getSuspectNotes(): Record<string, string> {
-  if (typeof window === "undefined") return {};
-  try {
-    const stored = localStorage.getItem(SUSPECT_NOTES_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch {
-    return {};
-  }
-}
-
-export function saveSuspectNote(suspectId: string, note: string): void {
-  const notes = getSuspectNotes();
-  if (note.trim()) notes[suspectId] = note;
-  else delete notes[suspectId];
-  localStorage.setItem(SUSPECT_NOTES_KEY, JSON.stringify(notes));
+export function saveTeamInfo(teamNumber: string, name: string): void {
+  localStorage.setItem(TEAM_KEY, JSON.stringify({ teamNumber, name }));
 }
 
 export function resetAll(): void {

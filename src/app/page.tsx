@@ -8,21 +8,21 @@ import { supabase } from "@/lib/supabase";
 export default function LandingPage() {
   const router = useRouter();
   const [teamNumber, setTeamNumber] = useState("");
-  const [leaderName, setLeaderName] = useState("");
+  const [name, setName] = useState("");
 
   useEffect(() => {
     const team = getTeamInfo();
     if (team) {
       setTeamNumber(team.teamNumber);
-      setLeaderName(team.leaderName);
+      setName(team.name);
     }
   }, []);
 
   async function handleEnter() {
     const num = parseInt(teamNumber);
-    if (!num || num < 1 || !leaderName.trim()) return;
+    if (!num || num < 1 || !name.trim()) return;
     const pairId = String(num);
-    saveTeamInfo(pairId, leaderName.trim());
+    saveTeamInfo(pairId, name.trim());
     await supabase
       .from("team_evidence_items")
       .upsert(
@@ -32,7 +32,7 @@ export default function LandingPage() {
     router.push("/home");
   }
 
-  const canEnter = parseInt(teamNumber) >= 1 && leaderName.trim().length > 0;
+  const canEnter = parseInt(teamNumber) >= 1 && name.trim().length > 0;
 
   return (
     <div className="relative h-screen overflow-hidden bg-zinc-950 flex flex-col">
@@ -99,13 +99,13 @@ export default function LandingPage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-mono text-zinc-500 tracking-wider uppercase">조장 이름</p>
+          <p className="text-xs font-mono text-zinc-500 tracking-wider uppercase">이름</p>
           <input
             type="text"
-            value={leaderName}
-            onChange={(e) => setLeaderName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleEnter()}
-            placeholder="조장 이름 입력"
+            placeholder="이름 입력"
             className="w-full rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400/50 focus:outline-none transition-colors"
           />
         </div>

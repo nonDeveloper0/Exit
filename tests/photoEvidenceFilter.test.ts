@@ -2,18 +2,18 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { filterPhotoEvidence } from "../src/lib/photoEvidenceFilter.ts";
 
-const photos = [{ id: "a", suspectTag: "A" }, { id: "b", suspectTag: null }];
+const photos = [{ id: "a", locationTag: "WAREHOUSE" }, { id: "b", locationTag: "NA_CEO_OFFICE" }];
 
-test("filters a suspect", () =>
+test("filters a location", () =>
   assert.deepEqual(
-    filterPhotoEvidence(photos, "A").map((photo) => photo.id),
+    filterPhotoEvidence(photos, "WAREHOUSE").map((photo) => photo.id),
     ["a"]
   )
 );
 
-test("filters untagged photos", () =>
+test("returns no photos from another location", () =>
   assert.deepEqual(
-    filterPhotoEvidence(photos, "untagged").map((photo) => photo.id),
-    ["b"]
+    filterPhotoEvidence(photos, "CHAE_MANAGER_LAB").map((photo) => photo.id),
+    []
   )
 );

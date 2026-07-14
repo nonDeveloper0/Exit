@@ -150,6 +150,8 @@ export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_I
 - 업로드 전 압축: `src/lib/image.ts`에서 긴 변 1080px, JPEG 품질 0.72
 - 캡션 제한: `/evidence`의 입력칸 `maxLength={20}`
 
+사진 보드의 장소 탭을 선택한 뒤 촬영하면 그 장소로 자동 저장됩니다. 업로드에는 캡션만 입력하며, 라이트박스 → **정보 수정**에서 증거 설명(20자 메모)과 장소를 수정할 수 있습니다. 저장하면 같은 조(짝 조 포함)에 실시간 반영됩니다.
+
 관련 인물 태그 목록은 `PHOTO_TAGS`에서 수정합니다.
 
 ```ts

@@ -247,3 +247,16 @@ CREATE TABLE game_state (
 - `evidence_id='_open_all_evidence_snapshot:{encoded-json}'`
 
 `encoded-json`은 전체 개방 직전 이미 전역 공개되어 있던 evidence id 배열이다. `이전 상태로 되돌리기`는 이 스냅샷에 없던 전역 `type='collected'` 단서만 삭제한다. `단서 전체 초기화`는 모든 조의 `type='collected'` evidence id와 이 스냅샷 마커를 함께 삭제한다.
+# 17번 명세 사전 SQL (공유 노트·조장)
+
+```sql
+create table if not exists suspect_notes (
+  id uuid primary key default gen_random_uuid(), pair_id text not null,
+  suspect_id text not null, author_name text not null, body text not null,
+  created_at timestamptz default now()
+);
+alter table suspect_notes enable row level security;
+create policy "anon rw" on suspect_notes for all using (true) with check (true);
+alter publication supabase_realtime add table suspect_notes;
+alter table game_state add column if not exists leaders jsonb not null default '{}'::jsonb;
+```

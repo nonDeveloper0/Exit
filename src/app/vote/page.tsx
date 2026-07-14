@@ -5,18 +5,19 @@ import { SUSPECTS, VOTE_UNLOCK_COUNT } from "@/lib/data";
 import { getVote, castVote, getTeamInfo } from "@/lib/store";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 import { useGameState } from "@/lib/useGameState";
+import { useRole } from "@/lib/useRole";
 
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSclsS9dAFGB2YgYNMNYd8NVQ5tBbdUBYwUF9tWosu5patyHXg/formResponse";
 
-async function submitToGoogleForm(teamNumber: string, leaderName: string, suspect: string) {
+async function submitToGoogleForm(teamNumber: string, name: string, suspect: string) {
   await fetch(FORM_URL, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       "entry.197462467": teamNumber,
-      "entry.1747885092": leaderName,
+      "entry.1747885092": name,
       "entry.795452093": suspect,
     }).toString(),
   });
@@ -25,10 +26,11 @@ async function submitToGoogleForm(teamNumber: string, leaderName: string, suspec
 export default function VotePage() {
   const { collected } = useTeamEvidence();
   const { voteOpen, loaded: gameStateLoaded } = useGameState();
+  const { isLeader, loaded: roleLoaded } = useRole();
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [team, setTeam] = useState<{ teamNumber: string; leaderName: string } | null>(null);
+  const [team, setTeam] = useState<{ teamNumber: string; name: string } | null>(null);
 
   useEffect(() => {
     setTeam(getTeamInfo());
@@ -39,7 +41,7 @@ export default function VotePage() {
   const collectedCount = collected.length;
   const voteLocked = VOTE_UNLOCK_COUNT > 0 && collectedCount < VOTE_UNLOCK_COUNT;
 
-  if (!gameStateLoaded) return null;
+  if (!gameStateLoaded || !roleLoaded) return null;
 
   if (!voteOpen) {
     return (
@@ -61,7 +63,7 @@ export default function VotePage() {
     if (!selected || !team) return;
     setSubmitting(true);
     try {
-      await submitToGoogleForm(team.teamNumber, team.leaderName, selected);
+      await submitToGoogleForm(team.teamNumber, team.name, selected);
     } catch {
       // no-cors 응답은 읽을 수 없으나 제출은 정상 처리됨
     }
@@ -85,7 +87,7 @@ export default function VotePage() {
           <p className="text-sm text-zinc-400">{team?.teamNumber}조의 최종 선택</p>
           <p className="text-5xl font-black text-emerald-400">{selected}</p>
           <p className="text-base font-semibold text-zinc-200">{votedSuspect?.name}</p>
-          <p className="text-xs text-zinc-500 pt-1">조장: {team?.leaderName}</p>
+          <p className="text-xs text-zinc-500 pt-1">제출자: {team?.name}</p>
         </div>
 
         <p className="text-sm text-zinc-500 text-center">
@@ -104,9 +106,11 @@ export default function VotePage() {
         <h1 className="text-2xl font-bold text-zinc-100">최종 추리</h1>
         <p className="text-sm text-zinc-500">범인은 누구인가? 조의 최종 결론을 선택하세요.</p>
         {team && (
-          <p className="text-xs text-zinc-600 font-mono">{team.teamNumber}조 · {team.leaderName}</p>
+          <p className="text-xs text-zinc-600 font-mono">{team.teamNumber}조 · {team.name}</p>
         )}
       </div>
+
+      {!isLeader && <p className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm text-zinc-400">최종 추리는 조장만 제출할 수 있습니다.</p>}
 
       <div className="space-y-3">
         {SUSPECTS.map((s) => (
@@ -147,15 +151,17 @@ export default function VotePage() {
 
       <button
         onClick={handleSubmit}
-        disabled={!selected || submitting || voteLocked}
+        disabled={!selected || submitting || voteLocked || !isLeader}
         className={`w-full rounded-lg py-4 text-base font-bold transition-all active:scale-[0.98] ${
-          selected && !submitting && !voteLocked
+          selected && !submitting && !voteLocked && isLeader
             ? "bg-amber-400 text-zinc-900 hover:bg-amber-300"
             : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
         }`}
       >
         {submitting
           ? "제출 중..."
+          : !isLeader
+          ? "조장만 최종 추리를 제출할 수 있습니다"
           : voteLocked
           ? `증거 ${VOTE_UNLOCK_COUNT - collectedCount}개 추가 수집 시 제출 가능`
           : selected

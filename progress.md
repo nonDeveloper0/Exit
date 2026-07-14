@@ -6,6 +6,15 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] `17_ROLES_NOTES_LOCATION_SPEC.md` 기준으로 조장/조원 권한, 조별 실시간 수사노트, 사진 장소 탭 업로드를 구현했다.
+  - 랜딩의 조장 이름을 참가자 이름으로 바꾸고, `game_state.leaders` 기반 실시간 `useRole` 훅과 관리자 조장 지정/해제를 추가했다. 조장만 최종 투표·심문권 사용·사진 업로드를 할 수 있다.
+  - 용의자 수사 노트를 `suspect_notes`의 조별 실시간 작성자 메모 목록으로 전환했다. 본인 메모만 삭제할 수 있고, 조/전체 초기화 때 함께 삭제된다.
+  - 증거함을 4개 장소 탭으로 전환하고 해당 탭의 장소로만 사진을 업로드하도록 변경했다. 인물 태그 입력/표시는 제거하고, 사진 정보 수정은 캡션+장소만 지원한다.
+  - Supabase SQL Editor에서 `docs/01_md/07_DATA_SCHEMA.md` 상단의 `suspect_notes`·`game_state.leaders` SQL을 배포 전에 한 번 실행해야 한다.
+  - 검증: `npm run lint` 오류 0(기존 `useGameState` 경고 1개), `npm test` 6개 통과. `npx.cmd tsc --noEmit`은 기존 삭제된 `/ranking`의 `.next/types` 참조 및 테스트의 `.ts` import 설정 때문에 실패했다.
+  - 수정 파일: `src/app/page.tsx`, `src/app/vote/page.tsx`, `src/app/suspects/page.tsx`, `src/app/evidence/page.tsx`, `src/app/admin/page.tsx`, `src/lib/store.ts`, `src/lib/useRole.ts`(신규), `src/lib/useSuspectNotes.ts`(신규), `src/lib/usePhotoEvidence.ts`, `src/lib/photoEvidenceFilter.ts`, `src/lib/data.ts`, `tests/photoEvidenceFilter.test.ts`, `docs/01_md/07_DATA_SCHEMA.md`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - `feat: add leader roles and shared notes` 커밋을 `origin/master`에 푸시했다.
+
 - [x] 현재 작업분을 Git 커밋하고 원격 `origin/master`로 푸시한다.`n  - 수정 파일: `progress.md`
 
 - [x] `/home`(수사본부) 하단의 "Live Ranking / 수사 현황" 큰 제목을 페이지 타이틀처럼 보이지 않도록 작은 인라인 라벨로 축소했다. 순위 리스트 기능 자체는 그대로 유지.
@@ -418,6 +427,21 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   `<article class="pdf-page">`가 제목만 있고 본문은 `내용 준비 중` 상태. 단서팀 확정본으로 채우기.
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
+
+- [x] 조장/조원 권한 · 공유 수사노트 · 사진 장소 탭 — 기획서 작성 (2026-07-14)
+  - 사용자 요청 3건을 확정 답변과 함께 구현 기획서로 정리. 아직 구현 전(문서만).
+  - 확정: (1) 조장 전용=최종 투표+심문권 사용+사진 업로드, 조원은 용의자 탭 메모 추가만. (2) 촬영 인물 태그 제거, 장소는 상단 탭 선택으로 자동. (3) 수사노트는 작성자별 메모 목록으로 조 전체 실시간 공유.
+  - 조장 지정=`/admin`에서 조 번호+이름 → `game_state.leaders` JSONB. 랜딩 `조장 이름`→개인 `이름`으로 의미 변경. 새 테이블 `suspect_notes` 필요.
+  - Supabase SQL(테이블 `suspect_notes` + `game_state.leaders` 컬럼) 실행 필요 — 문서에 기재.
+  - 신규 파일: `docs/01_md/17_ROLES_NOTES_LOCATION_SPEC.md`
+  - 수정 파일: `progress.md`
+
+- [x] 사진 증거 "정보 수정"에서 캡션(20자 메모)도 수정 가능하게 확장 (2026-07-14)
+  - 기존: 라이트박스 → 정보 수정 시트가 관련 인물·장소 태그만 수정, 캡션은 "촬영 당시 기록으로 유지" 안내로 잠금
+  - 변경: 편집 시트에 업로드와 동일한 증거 설명 입력칸(20자 제한, 글자수 표시)을 추가. 저장 시 캡션·태그를 함께 갱신
+  - 훅: `updatePhotoMetadata(id, suspectTag, locationTag)` → `updatePhotoMetadata(id, caption, suspectTag, locationTag)`로 `caption` 파라미터 추가, `photo_evidence.caption`도 업데이트(빈 값은 `null`). Realtime UPDATE 핸들러가 전체 행을 재매핑하므로 같은 조·짝 조에 즉시 반영
+  - 검증: `npx eslint` 통과. DB 스키마 변경 불필요(`caption` 컬럼 기존 존재)
+  - 수정 파일: `src/lib/usePhotoEvidence.ts`, `src/app/evidence/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
 
 - [x] 홈 화면 "수사 현황 · 증거수집 순위" 비활성화(주석처리) (2026-07-14)
   - `/home` 하단 전체 조 실시간 순위 블록을 JSX 주석으로 비활성화. 관련 훅/import(`useAllTeamsProgress`, `getTeamInfo`, `useEffect/useState`, `myTeamId`)도 함께 주석 처리해 미사용 변수 경고 없이 정리

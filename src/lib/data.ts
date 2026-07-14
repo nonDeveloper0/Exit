@@ -84,8 +84,7 @@ export function photoTagTone(value: string | null | undefined): string {
 
 // 업로드 시 "관련 장소" 태그 드롭다운. 미지정은 UI에서 빈 문자열("")로 처리하고 DB에는 null로 저장한다.
 export const PHOTO_LOCATION_TAGS: { value: string; label: string }[] = [
-  { value: "", label: "미지정" },
-  { value: "WAREHOUSE", label: "자재 물류창고(사건현장)" },
+  { value: "WAREHOUSE", label: "자재 물류창고" },
   { value: "NA_CEO_OFFICE", label: "나사장 사무실" },
   { value: "NA_TEAM_LEADER_OFFICE", label: "나팀장 사무실" },
   { value: "CHAE_MANAGER_LAB", label: "채소장 연구실" },

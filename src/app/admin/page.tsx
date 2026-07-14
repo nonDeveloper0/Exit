@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
-import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, photoTagLabel, photoTagTone } from "@/lib/data";
+import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, photoLocationTagLabel } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 
 const ADMIN_PASSWORD = "0000";
@@ -20,6 +20,7 @@ interface AdminPhotoRow {
   image_url: string;
   caption: string | null;
   suspect_tag: string | null;
+  location_tag: string | null;
   status: string | null;
   created_at: string;
 }
@@ -119,6 +120,9 @@ function AdminPanel() {
   const [pairA, setPairA] = useState("");
   const [pairB, setPairB] = useState("");
   const [savingPair, setSavingPair] = useState(false);
+  const [leaders, setLeaders] = useState<Record<string, string>>({});
+  const [leaderTeam, setLeaderTeam] = useState("");
+  const [leaderName, setLeaderName] = useState("");
 
   useEffect(() => {
     const team = getTeamInfo();
@@ -128,11 +132,12 @@ function AdminPanel() {
   useEffect(() => {
     supabase
       .from("game_state")
-      .select("pairings")
+      .select("pairings, leaders")
       .eq("id", "singleton")
       .single()
       .then(({ data }) => {
         if (data?.pairings) setPairings(data.pairings as Record<string, string>);
+        if (data?.leaders) setLeaders(data.leaders as Record<string, string>);
       });
   }, []);
 
@@ -211,7 +216,7 @@ function AdminPanel() {
     setPhotosLoading(true);
     const { data } = await supabase
       .from("photo_evidence")
-      .select("id, pair_id, image_url, caption, suspect_tag, status, created_at")
+      .select("id, pair_id, image_url, caption, suspect_tag, location_tag, status, created_at")
       .order("created_at", { ascending: false });
     if (data) setPhotos(data as AdminPhotoRow[]);
     setPhotosLoading(false);
@@ -291,6 +296,20 @@ function AdminPanel() {
     delete newPairings[b];
     await supabase.from("game_state").update({ pairings: newPairings }).eq("id", "singleton");
     setPairings(newPairings);
+  }
+
+  async function setLeader() {
+    const team = leaderTeam.trim(); const name = leaderName.trim();
+    if (!team || !name) return;
+    const next = { ...leaders, [team]: name };
+    await supabase.from("game_state").update({ leaders: next }).eq("id", "singleton");
+    setLeaders(next); setLeaderTeam(""); setLeaderName("");
+  }
+
+  async function removeLeader(team: string) {
+    const next = { ...leaders }; delete next[team];
+    await supabase.from("game_state").update({ leaders: next }).eq("id", "singleton");
+    setLeaders(next);
   }
 
   async function setVoteOpen(open: boolean) {
@@ -390,6 +409,7 @@ function AdminPanel() {
       .delete()
       .eq("pair_id", pairId);
     await deleteTeamPhotos(pairId);
+    await supabase.from("suspect_notes").delete().eq("pair_id", pairId);
     if (pairId === myPairId) resetAll();
     await fetchTeams();
     await fetchPhotos();
@@ -401,6 +421,7 @@ function AdminPanel() {
     try {
       await supabase.from("team_evidence_items").delete().neq("pair_id", "");
       await deleteAllPhotos();
+      await supabase.from("suspect_notes").delete().neq("pair_id", "");
       await resetAllPhotoNumberCounters();
       resetAll();
       await fetchTeams();
@@ -653,7 +674,7 @@ function AdminPanel() {
           <div className="space-y-2">
             {filteredPhotos.map((photo) => {
               const rejected = photo.status === "rejected";
-              const tagLabel = photoTagLabel(photo.suspect_tag);
+              const locationLabel = photoLocationTagLabel(photo.location_tag);
               return (
                 <div
                   key={photo.id}
@@ -684,11 +705,7 @@ function AdminPanel() {
                     </div>
                     <p className="truncate text-xs text-zinc-400">{photo.caption || "기록 없음"}</p>
                     <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-zinc-600">
-                      {tagLabel && (
-                        <span className={`rounded-full px-2 py-0.5 font-bold ${photoTagTone(photo.suspect_tag)}`}>
-                          {tagLabel}
-                        </span>
-                      )}
+                      {locationLabel && <span>{locationLabel}</span>}
                       <span>{new Date(photo.created_at).toLocaleString("ko-KR")}</span>
                     </div>
                     <button
@@ -723,6 +740,13 @@ function AdminPanel() {
 
       {/* Divider */}
       <div className="border-t border-zinc-800" />
+
+      <div className="space-y-3">
+        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">조장 지정</h2>
+        <p className="text-xs text-zinc-600">조 번호와 참가자 이름이 정확히 일치해야 조장 권한이 활성화됩니다.</p>
+        <div className="space-y-2">{Object.entries(leaders).sort(([a], [b]) => Number(a) - Number(b)).map(([team, name]) => <div key={team} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-3"><p className="text-sm text-zinc-200">{team}조 — {name}</p><button type="button" onClick={() => void removeLeader(team)} className="rounded border border-red-500/30 px-3 py-1 text-xs text-red-400">해제</button></div>)}</div>
+        <div className="flex gap-2"><input value={leaderTeam} onChange={(event) => setLeaderTeam(event.target.value)} placeholder="조 번호" className="w-20 rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100" /><input value={leaderName} onChange={(event) => setLeaderName(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void setLeader()} placeholder="이름" className="min-w-0 flex-1 rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100" /><button type="button" onClick={() => void setLeader()} disabled={!leaderTeam.trim() || !leaderName.trim()} className="rounded bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 disabled:opacity-40">지정</button></div>
+      </div>
 
       {/* Team pairing */}
       <div className="space-y-3">

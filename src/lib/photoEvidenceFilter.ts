@@ -1,8 +1,6 @@
-export function filterPhotoEvidence<T extends { suspectTag: string | null }>(
+export function filterPhotoEvidence<T extends { locationTag: string | null }>(
   photos: T[],
-  filter: "all" | "untagged" | string
+  location: string
 ): T[] {
-  if (filter === "all") return photos;
-  if (filter === "untagged") return photos.filter((photo) => photo.suspectTag === null);
-  return photos.filter((photo) => photo.suspectTag === filter);
+  return photos.filter((photo) => photo.locationTag === location);
 }

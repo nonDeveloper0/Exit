@@ -167,7 +167,7 @@ export function usePhotoEvidence() {
   }, [ownTeamId, partnerId]);
 
   const uploadPhoto = useCallback(
-    async (file: File, caption: string, suspectTag: string, locationTag = "") => {
+    async (file: File, caption: string, locationTag: string) => {
       if (!ownTeamId) return;
 
       setUploading(true);
@@ -196,7 +196,6 @@ export function usePhotoEvidence() {
             pair_id: ownTeamId,
             image_url: publicData.publicUrl,
             caption: caption.trim() || null,
-            suspect_tag: suspectTag || null,
             location_tag: locationTag || null,
             evidence_group_key: evidenceGroupKey,
             evidence_number: evidenceNumber,
@@ -218,12 +217,15 @@ export function usePhotoEvidence() {
   );
 
   const updatePhotoMetadata = useCallback(
-    async (id: string, suspectTag: string, locationTag: string) => {
+    async (id: string, caption: string, locationTag: string) => {
       setUpdatingPhotoId(id);
       try {
         const { error } = await supabase
           .from("photo_evidence")
-          .update({ suspect_tag: suspectTag || null, location_tag: locationTag || null })
+          .update({
+            caption: caption.trim() || null,
+            location_tag: locationTag || null,
+          })
           .eq("id", id);
 
         if (error) throw error;
