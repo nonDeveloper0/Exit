@@ -97,50 +97,123 @@ CREATE TABLE team_evidence_items (
 사진 증거(폴라로이드) 보드의 메타데이터. 실제 이미지 파일은 Storage `evidence-photos` 버킷에 저장된다.
 
 ```sql
-CREATE SEQUENCE IF NOT EXISTS photo_evidence_number_seq;
-
 CREATE TABLE photo_evidence (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  pair_id     TEXT NOT NULL,
-  image_url   TEXT NOT NULL,
-  caption     TEXT,
-  suspect_tag TEXT,
-  location_tag TEXT,
-  evidence_number BIGINT NOT NULL UNIQUE DEFAULT nextval('photo_evidence_number_seq'),
-  status      TEXT NOT NULL DEFAULT 'ok', -- ok | rejected
-  created_at  TIMESTAMPTZ DEFAULT NOW()
+  id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  pair_id            TEXT NOT NULL,
+  image_url          TEXT NOT NULL,
+  caption            TEXT,
+  suspect_tag        TEXT,
+  location_tag       TEXT,
+  evidence_group_key TEXT NOT NULL,
+  evidence_number    BIGINT NOT NULL,
+  status             TEXT NOT NULL DEFAULT 'ok', -- ok | rejected
+  created_at         TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (evidence_group_key, evidence_number)
 );
 ```
 
-기존 테이블에는 아래 SQL을 한 번 실행한다. `evidence_number`는 기존 사진에도 생성 시각(`created_at`), id 순으로 한 번만 부여하며, 이후 사진을 삭제하거나 제외해도 재사용·재정렬하지 않는 영구 번호다.
+기존 테이블에는 아래 SQL을 한 번 실행한다. 이 SQL은 기존 전역 번호 제약을 그룹별 제약으로 바꾸고, 같은 조 또는 페어 조가 동시에 사진을 올려도 중복 번호가 생기지 않도록 RPC를 만든다.
 
 ```sql
 ALTER TABLE photo_evidence
-ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ok';
+  ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ok';
+ALTER TABLE photo_evidence
+  ADD COLUMN IF NOT EXISTS location_tag TEXT;
+ALTER TABLE photo_evidence
+  ADD COLUMN IF NOT EXISTS evidence_group_key TEXT;
 
-ALTER TABLE photo_evidence ADD COLUMN IF NOT EXISTS location_tag TEXT;
-ALTER TABLE photo_evidence ADD COLUMN IF NOT EXISTS evidence_number BIGINT;
-CREATE SEQUENCE IF NOT EXISTS photo_evidence_number_seq;
-WITH numbered AS (
-  SELECT id, row_number() OVER (ORDER BY created_at ASC, id ASC) AS number
-  FROM photo_evidence WHERE evidence_number IS NULL
+WITH pairing_state AS (
+  SELECT pairings FROM game_state WHERE id = 'singleton'
 )
-UPDATE photo_evidence p SET evidence_number = numbered.number FROM numbered WHERE p.id = numbered.id;
-SELECT setval('photo_evidence_number_seq', COALESCE((SELECT max(evidence_number) FROM photo_evidence), 0) + 1, false);
-ALTER TABLE photo_evidence ALTER COLUMN evidence_number SET DEFAULT nextval('photo_evidence_number_seq');
-ALTER TABLE photo_evidence ALTER COLUMN evidence_number SET NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS photo_evidence_evidence_number_key ON photo_evidence (evidence_number);
+UPDATE photo_evidence AS photo
+SET evidence_group_key = COALESCE(
+  photo.evidence_group_key,
+  CASE
+    WHEN pairing_state.pairings ->> photo.pair_id IS NULL THEN photo.pair_id
+    ELSE LEAST(photo.pair_id, pairing_state.pairings ->> photo.pair_id)
+      || ':' ||
+      GREATEST(photo.pair_id, pairing_state.pairings ->> photo.pair_id)
+  END
+)
+FROM pairing_state
+WHERE photo.evidence_group_key IS NULL;
+
+UPDATE photo_evidence
+SET evidence_group_key = pair_id
+WHERE evidence_group_key IS NULL;
+
+ALTER TABLE photo_evidence
+  ALTER COLUMN evidence_group_key SET NOT NULL;
+ALTER TABLE photo_evidence
+  ALTER COLUMN evidence_number DROP DEFAULT;
+ALTER TABLE photo_evidence
+  DROP CONSTRAINT IF EXISTS photo_evidence_evidence_number_key;
+DROP INDEX IF EXISTS photo_evidence_evidence_number_key;
+CREATE UNIQUE INDEX IF NOT EXISTS photo_evidence_group_number_key
+  ON photo_evidence (evidence_group_key, evidence_number);
+
+CREATE TABLE IF NOT EXISTS photo_evidence_number_counters (
+  group_key   TEXT PRIMARY KEY,
+  last_number BIGINT NOT NULL
+);
+
+INSERT INTO photo_evidence_number_counters (group_key, last_number)
+SELECT evidence_group_key, MAX(evidence_number)
+FROM photo_evidence
+GROUP BY evidence_group_key
+ON CONFLICT (group_key) DO UPDATE
+SET last_number = GREATEST(
+  photo_evidence_number_counters.last_number,
+  EXCLUDED.last_number
+);
+
+CREATE OR REPLACE FUNCTION allocate_photo_evidence_number(p_group_key TEXT)
+RETURNS BIGINT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  next_number BIGINT;
+BEGIN
+  IF COALESCE(BTRIM(p_group_key), '') = '' THEN
+    RAISE EXCEPTION 'photo evidence group key is required';
+  END IF;
+
+  INSERT INTO photo_evidence_number_counters AS counters (group_key, last_number)
+  VALUES (p_group_key, 1)
+  ON CONFLICT (group_key) DO UPDATE
+  SET last_number = counters.last_number + 1
+  RETURNING last_number INTO next_number;
+
+  RETURN next_number;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION reset_photo_evidence_number_counters()
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  DELETE FROM photo_evidence_number_counters;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION allocate_photo_evidence_number(TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION reset_photo_evidence_number_counters() TO anon, authenticated;
 ```
 
 - `pair_id`: 업로드한 조 번호. `game_state.pairings`에 짝 조가 있으면 두 조의 사진을 함께 조회한다.
+- `evidence_group_key`: 번호를 공유하는 수사 그룹 키. 페어 조면 사전순 조합(예: `1:4`), 비페어 조면 해당 조 번호다.
+- `evidence_number`: `evidence_group_key` 안에서만 단조 증가하는 영구 번호다. 다른 조·페어에는 영향을 주지 않으며, 보드 정렬·필터·사진 제외와 관계없이 변하지 않는다.
 - `image_url`: public 버킷 `evidence-photos`의 공개 URL.
 - `caption`: UI에서 20자까지 입력 가능. 빈 값은 `null`.
 - `suspect_tag`: `PHOTO_TAGS`의 value. `A`~`E`는 용의자 파일의 관련 사진으로 표시되고, `PARK`는 피해자 태그 전용이다.
 - `location_tag`: `PHOTO_LOCATION_TAGS`의 value. `미지정`을 선택하면 `null`로 저장한다.
-- `evidence_number`: sequence가 새 사진에 단조 증가하는 번호를 자동 부여한다. 이 값은 보드 정렬·필터·사진 삭제·제외와 관계없이 변하지 않는다.
 - `status`: 기본값 `ok`는 보드와 사진 랭킹에 포함된다. 스탭이 스팸을 `rejected`로 바꾸면 사진은 보드에 제외됨으로 남지만 랭킹에서는 빠진다.
 - Realtime INSERT/UPDATE/DELETE를 구독해 같은 조와 짝 조 기기에 즉시 반영한다. 수사 현황 랭킹은 `status='ok'` 사진 행 수를 기준으로 한다.
-
 ## Supabase 테이블: `game_state`
 
 게임 진행 상태를 담는 단일 행 (`id = 'singleton'`). Realtime 구독으로 전 참가자에 전파.

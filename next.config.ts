@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
       { source: "/screen/ipad", destination: "/screen/ipad.html" },
       { source: "/screen/laptop", destination: "/screen/laptop.html" },
       { source: "/screen/phone2", destination: "/screen/dongguri_phone_room.html" },
+      { source: "/screen/phone3", destination: "/screen/flower_phone_call_log.html" },
     ];
   },
 };

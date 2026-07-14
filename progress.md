@@ -6,6 +6,10 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] 사진 번호를 페어 조 수사 그룹별로 독립 발급하도록 변경했다. 1조·4조처럼 페어인 두 조는 같은 번호 시리즈를 공유하고, 다른 조/페어는 `#1`부터 별도 시작한다.
+  - `/admin`의 사진 전체 삭제와 전체 조 초기화는 번호 카운터도 비워 다음 사진이 `#1`이 되며, 조별 초기화는 번호를 유지한다.
+  - Supabase RPC·테이블 마이그레이션 SQL을 `07_DATA_SCHEMA.md`에 기록했다. 실제 배포 전 Supabase SQL Editor에서 해당 SQL을 한 번 실행해야 한다.
+  - 수정 파일: `src/lib/photoEvidenceNumbering.ts`, `src/lib/usePhotoEvidence.ts`, `src/app/admin/page.tsx`, `tests/photoEvidenceNumbering.test.ts`, `docs/01_md/07_DATA_SCHEMA.md`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
 - [x] 진행 기록과 미추적 사진 메타데이터/필터 작업 파일을 검토했다.
   - `photoEvidenceFilter.user-pre-merge.*`는 현재 구현과 중복되는 병합 전 임시 파일이며, 확장자 없는 import로 전체 `npm test`를 실패시킨다.
   - 사진 메타데이터·필터·용의자 단순화 계획의 기능은 현재 코드와 최근 커밋에 반영됐다. 중복 임시 파일을 삭제한 뒤 `npm test` 4개 통과로 확인했다.
@@ -570,3 +574,9 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   - 하단 네비게이션의 `현황` 항목과 `/ranking` 페이지를 제거했다.
   - 검증: `npm test` 통과(3개), `npm run lint` 오류 0/기존 경고 1개. `npm run build`는 TypeScript 컴파일을 통과했다. 이후 /admin 사전 렌더링은 이 worktree에 Supabase 환경 변수가 없어 실패했다.
   - 수정 파일: `src/app/home/page.tsx`, `src/components/BottomNav.tsx`, `src/app/ranking/page.tsx`(삭제), `tests/investigationHub.test.ts`, `progress.md`
+
+- [x] `/screen/phone3` 추가 + phone2·phone3 뒤로가기 방지 스니펫 보강 (2026-07-14)
+  - 미커밋 상태로 있던 `public/screen/flower_phone_call_log.html`(홈+최근 통화 목록 폰 화면)을 `next.config.ts` rewrite로 연결: `/screen/phone3` → `flower_phone_call_log.html`
+  - `laptop.html`/`ipad.html`에는 있지만 현재 phone2 대상(`dongguri_phone_room.html`)·신규 phone3에는 빠져 있던 뒤로가기 방지 스니펫(`history.pushState` + `popstate` 재작성 + `beforeunload`)을 두 파일에 동일하게 추가
+  - `EDIT_GUIDE.md` 12절에 phone3 파일/URL·뒤로가기 방지 대상 화면 목록을 갱신(소유자 미확정 초안임을 표기)
+  - 수정 파일: `next.config.ts`, `public/screen/dongguri_phone_room.html`, `public/screen/flower_phone_call_log.html`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`

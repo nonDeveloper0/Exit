@@ -364,14 +364,23 @@ function AdminPanel() {
     await supabase.from("photo_evidence").delete().neq("pair_id", "");
   }
 
+  async function resetAllPhotoNumberCounters() {
+    const { error } = await supabase.rpc("reset_photo_evidence_number_counters");
+    if (error) throw error;
+  }
+
   async function resetAllPhotos() {
     if (resetConfirmText.trim() !== "초기화") return;
     setResettingAllPhotos(true);
-    await deleteAllPhotos();
-    setShowResetPhotosConfirm(false);
-    setResetConfirmText("");
-    await fetchPhotos();
-    setResettingAllPhotos(false);
+    try {
+      await deleteAllPhotos();
+      await resetAllPhotoNumberCounters();
+      setShowResetPhotosConfirm(false);
+      setResetConfirmText("");
+      await fetchPhotos();
+    } finally {
+      setResettingAllPhotos(false);
+    }
   }
 
   async function handleReset(pairId: string) {
@@ -389,12 +398,16 @@ function AdminPanel() {
 
   async function handleResetAll() {
     setLoadingId("ALL");
-    await supabase.from("team_evidence_items").delete().neq("pair_id", "");
-    await deleteAllPhotos();
-    resetAll();
-    await fetchTeams();
-    await fetchPhotos();
-    setLoadingId(null);
+    try {
+      await supabase.from("team_evidence_items").delete().neq("pair_id", "");
+      await deleteAllPhotos();
+      await resetAllPhotoNumberCounters();
+      resetAll();
+      await fetchTeams();
+      await fetchPhotos();
+    } finally {
+      setLoadingId(null);
+    }
   }
 
   const photoTeamIds = Array.from(new Set(photos.map((photo) => photo.pair_id))).sort((a, b) =>

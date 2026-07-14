@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { PHOTO_BUCKET } from "./data";
 import { compressImage } from "./image";
+import { getPhotoEvidenceGroupKey } from "./photoEvidenceNumbering";
 import { supabase } from "./supabase";
 import { getTeamInfo } from "./store";
 
@@ -54,6 +55,7 @@ export function usePhotoEvidence() {
     return team ? team.teamNumber.toUpperCase() : null;
   });
   const [partnerId, setPartnerId] = useState<string | null>(null);
+  const [pairings, setPairings] = useState<Record<string, string>>({});
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -69,6 +71,7 @@ export function usePhotoEvidence() {
       .single()
       .then(({ data }) => {
         const pairings = (data as { pairings?: Record<string, string> } | null)?.pairings ?? {};
+        setPairings(pairings);
         setPartnerId(pairings[ownTeamId] ?? null);
       });
 
@@ -80,6 +83,7 @@ export function usePhotoEvidence() {
         (payload) => {
           const pairings =
             (payload.new as { pairings?: Record<string, string> }).pairings ?? {};
+          setPairings(pairings);
           setPartnerId(pairings[ownTeamId] ?? null);
         }
       )
@@ -177,6 +181,15 @@ export function usePhotoEvidence() {
         if (uploadError) throw uploadError;
 
         const { data: publicData } = supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+        const evidenceGroupKey = getPhotoEvidenceGroupKey(ownTeamId, pairings);
+        const { data: evidenceNumber, error: numberError } = await supabase.rpc(
+          "allocate_photo_evidence_number",
+          { p_group_key: evidenceGroupKey }
+        );
+        if (numberError || typeof evidenceNumber !== "number") {
+          throw numberError ?? new Error("사진 번호 발급 실패");
+        }
+
         const { data: inserted, error: insertError } = await supabase
           .from("photo_evidence")
           .insert({
@@ -185,6 +198,8 @@ export function usePhotoEvidence() {
             caption: caption.trim() || null,
             suspect_tag: suspectTag || null,
             location_tag: locationTag || null,
+            evidence_group_key: evidenceGroupKey,
+            evidence_number: evidenceNumber,
           })
           .select(SELECT_COLS)
           .single();
@@ -199,7 +214,7 @@ export function usePhotoEvidence() {
         setUploading(false);
       }
     },
-    [ownTeamId]
+    [ownTeamId, pairings]
   );
 
   const updatePhotoMetadata = useCallback(
