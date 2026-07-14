@@ -419,6 +419,11 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 인앱 QR 스캐너 카메라 재시작 버그 수정 (2026-07-14)
+  - `QrScannerModal`의 카메라 `useEffect`가 부모의 인라인 `onClose`(매 렌더 새 함수)에 의존 → evidence 페이지 실시간 갱신 리렌더마다 카메라가 껐다 켜짐(깜빡임·인식 지연)
+  - `onClose`를 ref로 고정하고 effect 의존성을 `[open, router, stopStream]`으로 축소 → 카메라는 open 토글에만 반응
+  - 수정 파일: `src/components/QrScannerModal.tsx`
+
 - [x] 인앱 QR 스캐너 "등록되지 않은 QR" 진단·보강 (2026-07-14)
   - 증상: 기본 카메라로는 배포 URL(`.../qr/x4k9m2`)로 접속되는데 인앱 스캐너만 "등록되지 않은 QR" 표시
   - 확인: `resolveQrPath`는 소문자 등록 id URL을 정상 변환함(node 재현 테스트). 실패 케이스는 대문자 id 또는 미등록 id뿐

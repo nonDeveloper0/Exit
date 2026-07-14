@@ -20,6 +20,11 @@ export default function QrScannerModal({ open, onClose }: QrScannerModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
+  // 부모가 넘기는 onClose는 매 렌더마다 새 함수라, 카메라 effect 의존성에 넣으면
+  // 부모 리렌더(실시간 갱신 등)마다 카메라가 껐다 켜진다. ref로 고정해 effect는 open에만 반응.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   const stopStream = useCallback(() => {
     if (frameRef.current !== null) {
       cancelAnimationFrame(frameRef.current);
@@ -68,7 +73,7 @@ export default function QrScannerModal({ open, onClose }: QrScannerModalProps) {
               const path = resolveQrPath(code.data);
               if (path) {
                 stopStream();
-                onClose();
+                onCloseRef.current();
                 router.push(path);
                 return;
               }
@@ -98,7 +103,7 @@ export default function QrScannerModal({ open, onClose }: QrScannerModalProps) {
       cancelled = true;
       stopStream();
     };
-  }, [open, onClose, router, stopStream]);
+  }, [open, router, stopStream]);
 
   if (!open) return null;
 
