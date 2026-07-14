@@ -15,7 +15,7 @@ export default function EvidencePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [caption, setCaption] = useState("");
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [activeLocation, setActiveLocation] = useState(PHOTO_LOCATION_TAGS[0].value);
+  const [activeLocation, setActiveLocation] = useState("all");
   const [lightboxPhotoId, setLightboxPhotoId] = useState<string | null>(null);
   const [editingMetadata, setEditingMetadata] = useState(false);
   const [editedCaption, setEditedCaption] = useState("");
@@ -151,8 +151,8 @@ export default function EvidencePage() {
 
       {roleLoaded && !isLeader && <p className="-mt-2 text-center text-xs text-zinc-500">사진 업로드와 QR 스캔은 조장만 할 수 있습니다.</p>}
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {PHOTO_LOCATION_TAGS.map((location) => <button key={location.value} type="button" onClick={() => setActiveLocation(location.value)} className={`shrink-0 rounded-full border px-3 py-2 text-xs font-bold ${activeLocation === location.value ? "border-amber-400 bg-amber-400 text-zinc-950" : "border-zinc-700 bg-zinc-900 text-zinc-300"}`}>{location.label}</button>)}
+      <div className="grid grid-cols-5 gap-1">
+        {[{ value: "all", label: "전체" }, ...PHOTO_LOCATION_TAGS].map((location) => <button key={location.value} type="button" onClick={() => setActiveLocation(location.value)} className={`min-w-0 rounded-full border px-1 py-2 text-[9px] font-bold tracking-tight whitespace-nowrap ${activeLocation === location.value ? "border-amber-400 bg-amber-400 text-zinc-950" : "border-zinc-700 bg-zinc-900 text-zinc-300"}`}>{location.label}</button>)}
       </div>
 
       {loading ? (
@@ -164,7 +164,7 @@ export default function EvidencePage() {
       ) : filteredPhotos.length === 0 ? (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8 text-center">
           <p className="text-sm text-zinc-400">
-            {photos.length === 0 ? "아직 촬영한 증거가 없습니다." : "선택한 장소의 증거가 없습니다."}
+            {photos.length === 0 ? "아직 촬영한 증거가 없습니다." : activeLocation === "all" ? "표시할 증거가 없습니다." : "선택한 장소의 증거가 없습니다."}
           </p>
           <p className="mt-1 text-xs text-zinc-600">현장을 사진으로 남기세요.</p>
         </div>
