@@ -51,11 +51,14 @@ export default function MainPage() {
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">용의자</span>
-            <span>A, B, C, D, E — 5인</span>
+            <span>나사장, 채소장, 나팀장, 이대리, 김사원</span>
           </div>
         </div>
         <p className="text-xs text-zinc-500 border-t border-zinc-800 pt-2">
-          노동자를 폭행하던 피해자와 몸싸움이 벌어졌다. 피해자 사망. 범인은 현장을 떠났다.
+          회사 내부 감사를 하루 앞둔 밤..
+          물류창고 관리자인 박실장이 창고에서 숨진 채 발견됐다.
+          현장에는 외부인 침입 흔적은 없었고, 사건발생 당시 회사에 있던 사람은 단 다섯 명.
+          형사는 이 다섯 사람을 용의자로 특정한다.
         </p>
       </div>
 
