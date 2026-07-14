@@ -6,6 +6,7 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [ ] /home에 전체 조 사진 증거 실시간 현황을 통합하고, 하단 `현황` 탭과 /ranking 경로를 제거한다.
 - [x] `docs/01_md/14_PHOTO_EVIDENCE_SPEC.md` 기준으로 증거함을 사진(폴라로이드) 업로드 보드로 전환하고, QR은 심문권 퀴즈 획득 플로우로 변경한다.
 - [x] 최신 사진 증거 명세에 맞춰 사진 제외/복원(status), 사진 장수 실시간 랭킹, 관리자 사진 점검 패널을 구현한다.
 - [x] `docs/01_md/15_ENDING_REVISION.md` 기준으로 엔딩 화면(`/ending`)의 범인 공개 + 모세 이야기 반전을 걷어내고 "EXIT SEASON 2 / TO BE CONTINUED..." 화면으로 교체한다(기존 코드는 주석 보존, 코드만 변경·문서 정리는 별도).
@@ -549,3 +550,12 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   - `body`에 `position: relative`를 주고, `html, body` 높이를 실제 보장되는 최소 뷰포트 단위(`100svh`, `100vh` 폴백)로 명시해 `.screen`의 기준을 실제 보이는 영역으로 고정
   - ⚠️ Chrome 확장 미연결로 실기기 렌더링은 직접 확인 필요. `laptop.html`/`ipad.html`도 동일한 `.screen{position:absolute;inset:0}` + body static 구조라 같은 증상 가능성 있음 — 보고되면 동일하게 고칠 것
   - 수정 파일: `public/screen/phone2.html`, `progress.md`
+
+- [ ] 수사본부·사진 메타데이터·용의자 화면 개편 구현 시작 (2026-07-14): Supabase SQL migration은 적용 완료 상태로 앱 계약·UI·문서 변경을 진행한다.
+
+- [x] 수사본부에 전체 조 사진 증거 실시간 현황 통합 (2026-07-14)
+  - `/home`의 수사 방법 카드 바로 아래로 기존 랭킹 UI를 이동했다: 1~3위 색상, 내 조 `(나)` 강조, 사진 장수, 빈 상태, 실시간 상태를 보존했다.
+  - `getTeamInfo`는 내 조 강조용 로컬 상태에만 사용하고, 전체 목록은 `useAllTeamsProgress().groups`를 사용한다.
+  - 하단 네비게이션의 `현황` 항목과 `/ranking` 페이지를 제거했다.
+  - 검증: `npm test` 통과(3개), `npm run lint` 오류 0/기존 경고 1개. `npm run build`는 TypeScript 컴파일을 통과했다. 이후 /admin 사전 렌더링은 이 worktree에 Supabase 환경 변수가 없어 실패했다.
+  - 수정 파일: `src/app/home/page.tsx`, `src/components/BottomNav.tsx`, `src/app/ranking/page.tsx`(삭제), `tests/investigationHub.test.ts`, `progress.md`
