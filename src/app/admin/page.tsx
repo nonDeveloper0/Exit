@@ -125,6 +125,7 @@ function AdminPanel() {
   const [leaderName, setLeaderName] = useState("");
   const [resettingInterrogationUses, setResettingInterrogationUses] = useState(false);
   const [resettingVotes, setResettingVotes] = useState(false);
+  const [pendingProgressReset, setPendingProgressReset] = useState<"interrogation" | "vote" | null>(null);
 
   useEffect(() => {
     const team = getTeamInfo();
@@ -347,6 +348,12 @@ function AdminPanel() {
     }
   }
 
+  function confirmProgressReset() {
+    if (pendingProgressReset === "interrogation") void resetInterrogationUses();
+    if (pendingProgressReset === "vote") void resetFinalVotes();
+    setPendingProgressReset(null);
+  }
+
   async function toggleEnding() {
     setTogglingEnding(true);
     await supabase
@@ -512,22 +519,37 @@ function AdminPanel() {
               </div>
               <button
                 type="button"
-                onClick={() => void resetInterrogationUses()}
-                disabled={resettingInterrogationUses}
+                onClick={() => setPendingProgressReset("interrogation")}
+                disabled={resettingInterrogationUses || resettingVotes}
                 className="w-full rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-300 disabled:opacity-40"
               >
                 {resettingInterrogationUses ? "초기화 중..." : "심문권 사용 초기화"}
               </button>
               <button
                 type="button"
-                onClick={() => void resetFinalVotes()}
-                disabled={resettingVotes}
+                onClick={() => setPendingProgressReset("vote")}
+                disabled={resettingInterrogationUses || resettingVotes}
                 className="w-full rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm font-bold text-amber-200 disabled:opacity-40"
               >
                 {resettingVotes ? "초기화 중..." : "최종추리 제출 초기화"}
               </button>
               <p className="text-[10px] leading-relaxed text-zinc-600">최종추리 초기화는 참가자 기기의 제출 상태를 되돌립니다. 이미 Google Form에 전송된 응답은 삭제되지 않습니다.</p>
             </div>
+
+            {pendingProgressReset && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 px-4" role="dialog" aria-modal="true" aria-labelledby="progress-reset-confirm-title">
+              <div className="w-full max-w-sm rounded-lg border border-red-500/30 bg-zinc-900 p-5 shadow-2xl">
+                <h2 id="progress-reset-confirm-title" className="text-lg font-bold text-zinc-100">초기화하시겠습니까?</h2>
+                <p className="mt-2 text-sm text-zinc-400">
+                  {pendingProgressReset === "interrogation"
+                    ? "모든 조의 심문권 사용 완료 기록이 삭제됩니다. 이미 획득한 심문권은 다시 사용할 수 있습니다."
+                    : "모든 참가자 기기의 최종추리 제출 상태가 초기화됩니다. 이미 Google Form에 전송된 응답은 삭제되지 않습니다."}
+                </p>
+                <div className="mt-5 flex gap-2">
+                  <button type="button" onClick={confirmProgressReset} className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white">초기화 실행</button>
+                  <button type="button" onClick={() => setPendingProgressReset(null)} className="rounded border border-zinc-600 px-4 py-2.5 text-sm font-bold text-zinc-300">취소</button>
+                </div>
+              </div>
+            </div>}
 
             {/* Ending toggle */}
             <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-4">

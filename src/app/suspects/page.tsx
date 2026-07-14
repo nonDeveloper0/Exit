@@ -52,7 +52,8 @@ export default function SuspectsPage() {
   return <div className="flex flex-col gap-4 p-4 pt-6">
     <div className="space-y-1"><div className="text-xs font-mono uppercase tracking-widest text-amber-400">Suspect Files</div><h1 className="text-2xl font-bold text-zinc-100">용의자 파일</h1><p className="text-sm text-zinc-500">심문권과 조별 수사 메모를 확인하세요.</p></div>
     <div className="space-y-3">{SUSPECTS.map((suspect) => {
-      const hasQuiz = Object.values(INTERROGATION_QUIZZES).some((quiz) => quiz.suspectId === suspect.id);
+      const quiz = Object.values(INTERROGATION_QUIZZES).find((item) => item.suspectId === suspect.id);
+      const hasQuiz = !!quiz;
       const earned = interrogationEarned.includes(suspect.id);
       const interrogationUse = interrogationUsed.find((item) => item.suspectId === suspect.id);
       const ownNote = (notes[suspect.id] ?? []).find((note) => note.authorName === name);
@@ -61,10 +62,10 @@ export default function SuspectsPage() {
         <div className="space-y-4 border-t border-zinc-800 p-4">
           <div className="space-y-1.5"><span className="text-xs font-mono text-zinc-500">심문권</span>
             {!hasQuiz ? <div className="rounded bg-zinc-800/60 px-3 py-3 text-xs text-zinc-500">🔒 QR 문제 연결 대기 중</div>
-            : !earned ? <div className="rounded bg-zinc-800/60 px-3 py-3 text-xs text-zinc-600">🔒 해당 QR 문제를 풀면 이 용의자의 심문권을 얻습니다.</div>
-            : interrogationUse ? <div className="rounded-lg border border-zinc-700 bg-zinc-800/60 px-3 py-3 text-zinc-500"><p className="text-sm font-bold text-zinc-300">✅ {formatUsedTime(interrogationUse.usedAt)} {interrogationUse.teamId}조 사용완료</p><p className="text-xs">이미 사용된 심문권입니다.</p></div>
-            : <div className="space-y-3 rounded-lg border border-red-500/40 bg-red-500/10 p-4"><p className="text-lg font-black text-red-200">🎫 심문권 · {suspect.name}</p><p className="text-xs text-red-200/70">용의자(배우)에게 이 화면을 제시하세요.</p>
-              {!roleLoaded ? <p className="text-xs text-zinc-500">권한 확인 중...</p> : !isLeader ? <p className="rounded bg-zinc-900/60 px-3 py-2 text-xs text-zinc-400">심문권 사용은 조장만 할 수 있습니다.</p> : <button type="button" onClick={() => setConfirmUseId(suspect.id)} className="w-full rounded bg-red-500/90 py-2.5 text-sm font-bold text-white">심문 사용</button>}
+            : !earned ? <div className="rounded bg-zinc-800/60 px-3 py-3 text-xs text-zinc-600">🔒 {quiz.autoGrant ? "심문권을 찾아 용의자를 심문하세요." : "해당 QR 문제를 풀면 이 용의자의 심문권을 얻습니다."}</div>
+            : interrogationUse ? <div className="rounded-lg border border-zinc-700 bg-zinc-800/60 px-3 py-3 text-zinc-500"><p className="text-sm font-bold text-zinc-400">✅ {formatUsedTime(interrogationUse.usedAt)} {interrogationUse.teamId}조 사용완료</p><p className="text-xs">사용 완료된 심문권입니다.</p></div>
+            : <div className="space-y-3 rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-4"><p className="text-lg font-black text-emerald-200">🎫 심문권 획득 · {suspect.name}</p><p className="text-xs text-emerald-200/70">용의자에게 이 화면을 제시하세요.</p>
+              {!roleLoaded ? <p className="text-xs text-zinc-500">권한 확인 중...</p> : !isLeader ? <p className="rounded bg-zinc-900/60 px-3 py-2 text-xs text-zinc-400">심문권 사용은 조장만 할 수 있습니다.</p> : <button type="button" onClick={() => setConfirmUseId(suspect.id)} className="w-full rounded bg-emerald-500 py-2.5 text-sm font-bold text-white">심문 사용</button>}
             </div>}
           </div>
           <div className="space-y-2"><button type="button" onClick={() => setOpenNotes((prev) => ({ ...prev, [suspect.id]: !prev[suspect.id] }))} aria-expanded={!!openNotes[suspect.id]} className="flex w-full items-center justify-between rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-left"><span className="text-xs font-mono text-zinc-400">수사 노트 ({notes[suspect.id]?.length ?? 0})</span><span className="text-xs text-amber-300">{openNotes[suspect.id] ? "접기 ▲" : "열기 ▼"}</span></button>
