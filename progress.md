@@ -6,7 +6,8 @@
 
 ## 작업 시작 (2026-07-14)
 
-- [ ] `/screen/phone2` rewrite의 연결 대상을 `public/screen/dongguri_phone_room.html`로 교체한다.
+- [x] `/screen/phone2` URL은 유지하고 rewrite의 연결 대상을 `public/screen/dongguri_phone_room.html`로 교체했다.
+  - 수정 파일: `next.config.ts`, `progress.md`
 - [ ] /home에 전체 조 사진 증거 실시간 현황을 통합하고, 하단 `현황` 탭과 /ranking 경로를 제거한다.
 - [x] `docs/01_md/14_PHOTO_EVIDENCE_SPEC.md` 기준으로 증거함을 사진(폴라로이드) 업로드 보드로 전환하고, QR은 심문권 퀴즈 획득 플로우로 변경한다.
 - [x] 최신 사진 증거 명세에 맞춰 사진 제외/복원(status), 사진 장수 실시간 랭킹, 관리자 사진 점검 패널을 구현한다.
