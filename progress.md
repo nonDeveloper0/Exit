@@ -419,6 +419,13 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] phone2·phone3 디바이스 화면 PWA 전환 — 홈화면 설치 → 전체화면 (2026-07-14)
+  - `/screen/phone2`(dongguri_phone_room.html)·`/screen/phone3`(flower_phone_call_log.html)을 설치형 PWA로 전환. 홈 화면 추가 시 브라우저 UI 없이 `display: fullscreen`으로 실행(안드로이드는 상단 상태바까지 숨김 → 목업의 가짜 상태바만 노출). iOS는 상태바 완전 숨김 불가라 겹칠 수 있음 → 프롭은 안드로이드 권장(문서화)
+  - 각 폰 별도 매니페스트로 `start_url`/`scope`를 `/screen/phone2`·`/screen/phone3`로 분리 → 홈 화면에 앱 아이콘 2개로 각각 설치됨
+  - 아이콘: sharp로 SVG→PNG 생성(192/512=안드로이드, 180=iOS). phone2=카카오톡풍 노란 말풍선, phone3=초록 전화 수화기 — 실제 앱 아이콘처럼
+  - 신규 파일: `public/screen/phone2.webmanifest`, `public/screen/phone3.webmanifest`, `public/screen/icons/phone{2,3}-{180,192,512}.png`, `scripts/gen-phone-icons.mjs`(아이콘 생성기)
+  - 수정 파일: `public/screen/dongguri_phone_room.html`, `public/screen/flower_phone_call_log.html`(head에 manifest·apple 메타·viewport-fit 추가), `docs/01_md/EDIT_GUIDE.md`(12장 PWA 설치 절 추가), `progress.md`
+
 - [x] phone2 시작 화면 재배치 + 상단 목업 배너 제거 + 실수 문서화 (2026-07-13)
   - 상단 목업 안내 바(`.demo-banner`) CSS·엘리먼트 삭제. `.screen`의 `padding-top: 26px` 주석을 "상단 상태바/노치 여백"으로 갱신(값 유지)
   - 시작 화면: 시계·조 선택 드롭다운을 아래(`justify-content: flex-end`)에서 위로 이동. 시계는 `#start .lock-clock { top: 16% }`(살짝 위쪽), 조 선택 패널은 `#start .start-panel { top: 50%; transform: translate(-50%,-50%) }`(세로 중앙). `#start`는 `.screen`의 `inset:0`로 화면을 채우므로 자식 absolute 배치가 안전

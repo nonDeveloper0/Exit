@@ -493,6 +493,19 @@ https://(배포주소)/screen/phone3
     시스템 탐색을 **"3버튼 탐색"** 으로 바꿔두면, 스와이프 제스처가 아예 없어져 뒤로가기 방지가 훨씬
     안정적으로 동작한다.
 
+### 홈화면 설치(PWA) — 전체화면 앱처럼 실행
+
+`/screen/phone2`(채소장 폰)와 `/screen/phone3`(전화)는 **홈 화면에 추가**하면 브라우저 주소창 없이 **전체화면**으로 뜨는 PWA로 만들어져 있다. 프롭 폰(공기계)에서 실제 앱처럼 보이게 하는 용도.
+
+**설치 방법 (기기별 1회):**
+- 안드로이드 크롬: 해당 URL 접속 → 메뉴(⋮) → **홈 화면에 추가/앱 설치** → 홈 아이콘 실행 시 전체화면(`display: fullscreen`, 상단 상태바까지 숨김).
+- 아이폰 사파리: URL 접속 → 공유 → **홈 화면에 추가** → 아이콘 실행 시 사파리 UI 없이 실행. ⚠️ iOS는 웹앱에서 **상단 상태바(시계/배터리)를 완전히 숨길 수 없어** 목업의 가짜 상태바와 겹칠 수 있음(안드로이드는 완전히 숨겨져 문제없음). 프롭은 안드로이드 권장.
+
+**아이콘 / 이름 바꾸기:**
+- 매니페스트: `public/screen/phone2.webmanifest`, `public/screen/phone3.webmanifest` — `name`(앱 이름), `display`(fullscreen/standalone), 아이콘 경로를 여기서 수정.
+- 아이콘 이미지: `public/screen/icons/phone2-*.png`, `phone3-*.png`(192/512=안드로이드, 180=iOS). 디자인은 `scripts/gen-phone-icons.mjs`의 SVG를 고치고 `node scripts/gen-phone-icons.mjs`로 다시 생성.
+- HTML `<head>`의 `apple-mobile-web-app-title`(iOS 홈 아이콘 이름)과 `<link rel="manifest">`도 폰별로 연결돼 있음.
+
 **화면 내용 수정:** 위 HTML 파일을 직접 편집. 원본 목업은 `docs/02_mockups/`에 있음.
 
 ### 나팀장 노트북(`laptop.html`) 잠금화면 값 수정
