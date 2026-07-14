@@ -7,6 +7,22 @@ import { PhotoItem, usePhotoEvidence } from "@/lib/usePhotoEvidence";
 import QrScannerModal from "@/components/QrScannerModal";
 import { useRole } from "@/lib/useRole";
 
+function locationTabClass(location: string, selected: boolean): string {
+  const colors: Record<string, string> = {
+    WAREHOUSE: "border-amber-400/40 bg-amber-400/10 text-amber-200",
+    NA_CEO_OFFICE: "border-violet-400/40 bg-violet-400/10 text-violet-200",
+    NA_TEAM_LEADER_OFFICE: "border-sky-400/40 bg-sky-400/10 text-sky-200",
+    CHAE_MANAGER_LAB: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200",
+  };
+  const selectedClass: Record<string, string> = {
+    WAREHOUSE: "ring-2 ring-amber-300/70 bg-amber-400/20",
+    NA_CEO_OFFICE: "ring-2 ring-violet-300/70 bg-violet-400/20",
+    NA_TEAM_LEADER_OFFICE: "ring-2 ring-sky-300/70 bg-sky-400/20",
+    CHAE_MANAGER_LAB: "ring-2 ring-emerald-300/70 bg-emerald-400/20",
+  };
+  return `${colors[location] ?? "border-zinc-700 bg-zinc-900 text-zinc-300"} ${selected ? selectedClass[location] ?? "" : ""}`;
+}
+
 export default function EvidencePage() {
   const { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, ownTeamId } =
     usePhotoEvidence();
@@ -15,7 +31,7 @@ export default function EvidencePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [caption, setCaption] = useState("");
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [activeLocation, setActiveLocation] = useState("all");
+  const [activeLocation, setActiveLocation] = useState(PHOTO_LOCATION_TAGS[0].value);
   const [lightboxPhotoId, setLightboxPhotoId] = useState<string | null>(null);
   const [editingMetadata, setEditingMetadata] = useState(false);
   const [editedCaption, setEditedCaption] = useState("");
@@ -60,7 +76,7 @@ export default function EvidencePage() {
   }
 
   function openMetadataEditor() {
-    if (!lightboxPhoto) return;
+    if (!lightboxPhoto || !isLeader) return;
     setEditedCaption(lightboxPhoto.caption ?? "");
     setEditedLocationTag(lightboxPhoto.locationTag ?? "");
     setMetadataError(null);
@@ -86,7 +102,7 @@ export default function EvidencePage() {
   }
 
   async function handleSaveMetadata() {
-    if (!lightboxPhoto) return;
+    if (!lightboxPhoto || !isLeader) return;
 
     setMetadataError(null);
     try {
@@ -151,9 +167,10 @@ export default function EvidencePage() {
 
       {roleLoaded && !isLeader && <p className="-mt-2 text-center text-xs text-zinc-500">사진 업로드와 QR 스캔은 조장만 할 수 있습니다.</p>}
 
-      <div className="grid grid-cols-5 gap-1">
-        {[{ value: "all", label: "전체" }, ...PHOTO_LOCATION_TAGS].map((location) => <button key={location.value} type="button" onClick={() => setActiveLocation(location.value)} className={`min-w-0 rounded-full border px-1 py-2 text-[9px] font-bold tracking-tight whitespace-nowrap ${activeLocation === location.value ? "border-amber-400 bg-amber-400 text-zinc-950" : "border-zinc-700 bg-zinc-900 text-zinc-300"}`}>{location.label}</button>)}
+      <div className="grid grid-cols-4 gap-1">
+        {PHOTO_LOCATION_TAGS.map((location) => <button key={location.value} type="button" onClick={() => setActiveLocation(location.value)} className={`min-w-0 rounded-full border px-1 py-2 text-[10px] font-bold tracking-tight whitespace-nowrap transition-shadow ${locationTabClass(location.value, activeLocation === location.value)}`}>{location.label}</button>)}
       </div>
+      <p className="-mt-2 text-center text-xs text-zinc-500">현장 증거 촬영은 선택된 장소에 업로드됩니다.</p>
 
       {loading ? (
         <div className="grid grid-cols-2 gap-3">
@@ -164,7 +181,7 @@ export default function EvidencePage() {
       ) : filteredPhotos.length === 0 ? (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8 text-center">
           <p className="text-sm text-zinc-400">
-            {photos.length === 0 ? "아직 촬영한 증거가 없습니다." : activeLocation === "all" ? "표시할 증거가 없습니다." : "선택한 장소의 증거가 없습니다."}
+            {photos.length === 0 ? "아직 촬영한 증거가 없습니다." : "선택한 장소의 증거가 없습니다."}
           </p>
           <p className="mt-1 text-xs text-zinc-600">현장을 사진으로 남기세요.</p>
         </div>
@@ -268,12 +285,12 @@ export default function EvidencePage() {
                 {photoLocationTagLabel(lightboxPhoto.locationTag) && <span className="rounded-full bg-amber-400/20 px-2 py-1 text-xs text-amber-200">{photoLocationTagLabel(lightboxPhoto.locationTag)}</span>}
               </div>
             </div>
-            <button type="button" onClick={openMetadataEditor} className="w-full rounded border border-amber-400/60 py-2.5 text-sm font-bold text-amber-200">정보 수정</button>
+            {roleLoaded && isLeader && <button type="button" onClick={openMetadataEditor} className="w-full rounded border border-amber-400/60 py-2.5 text-sm font-bold text-amber-200">정보 수정</button>}
           </div>
         </div>
       )}
 
-      {editingMetadata && lightboxPhoto && (
+      {editingMetadata && lightboxPhoto && isLeader && (
         <div className="fixed inset-0 z-[90] flex items-end bg-black/70 p-3">
           <div className="max-h-[calc(100dvh-5rem)] w-full overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-950 p-4 pb-24 shadow-2xl">
             <div className="space-y-3">

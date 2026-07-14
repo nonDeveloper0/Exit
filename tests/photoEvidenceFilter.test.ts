@@ -11,13 +11,6 @@ test("filters a location", () =>
   )
 );
 
-test("returns every photo for all", () =>
-  assert.deepEqual(
-    filterPhotoEvidence(photos, "all").map((photo) => photo.id),
-    ["a", "b"]
-  )
-);
-
 test("returns no photos from another location", () =>
   assert.deepEqual(
     filterPhotoEvidence(photos, "CHAE_MANAGER_LAB").map((photo) => photo.id),
