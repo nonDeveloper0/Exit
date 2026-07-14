@@ -1,24 +1,39 @@
 "use client";
 
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { PHOTO_TAGS, photoTagLabel } from "@/lib/data";
-import { usePhotoEvidence } from "@/lib/usePhotoEvidence";
+import {
+  PHOTO_LOCATION_TAGS,
+  PHOTO_TAGS,
+  photoLocationTagLabel,
+  photoTagLabel,
+} from "@/lib/data";
+import { filterPhotoEvidence } from "@/lib/photoEvidenceFilter";
+import { PhotoItem, usePhotoEvidence } from "@/lib/usePhotoEvidence";
 
 export default function EvidencePage() {
-  const { photos, loading, uploading, uploadPhoto, ownTeamId } = usePhotoEvidence();
+  const { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, ownTeamId } =
+    usePhotoEvidence();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [caption, setCaption] = useState("");
   const [suspectTag, setSuspectTag] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [lightbox, setLightbox] = useState<string | null>(null);
+  const [locationTag, setLocationTag] = useState("");
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [lightboxPhoto, setLightboxPhoto] = useState<PhotoItem | null>(null);
+  const [editingMetadata, setEditingMetadata] = useState(false);
+  const [editedSuspectTag, setEditedSuspectTag] = useState("");
+  const [editedLocationTag, setEditedLocationTag] = useState("");
+  const [metadataError, setMetadataError] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
+
+  const filteredPhotos = filterPhotoEvidence(photos, activeFilter);
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -30,36 +45,70 @@ export default function EvidencePage() {
     setPreviewUrl(URL.createObjectURL(file));
     setCaption("");
     setSuspectTag("");
-    setError(null);
+    setLocationTag("");
+    setUploadError(null);
   }
 
-  function closeSheet() {
+  function closeUploadSheet() {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
     setSelectedFile(null);
     setCaption("");
     setSuspectTag("");
-    setError(null);
+    setLocationTag("");
+    setUploadError(null);
+  }
+
+  function openLightbox(photo: PhotoItem) {
+    setLightboxPhoto(photo);
+    setEditingMetadata(false);
+    setMetadataError(null);
+  }
+
+  function openMetadataEditor() {
+    if (!lightboxPhoto) return;
+    setEditedSuspectTag(lightboxPhoto.suspectTag ?? "");
+    setEditedLocationTag(lightboxPhoto.locationTag ?? "");
+    setMetadataError(null);
+    setEditingMetadata(true);
+  }
+
+  function closeMetadataEditor() {
+    if (updatingPhotoId) return;
+    setEditingMetadata(false);
+    setMetadataError(null);
   }
 
   async function handleUpload() {
     if (!selectedFile) return;
 
-    setError(null);
+    setUploadError(null);
     try {
-      await uploadPhoto(selectedFile, caption, suspectTag);
-      closeSheet();
+      await uploadPhoto(selectedFile, caption, suspectTag, locationTag);
+      closeUploadSheet();
     } catch {
-      setError("업로드 실패. 네트워크 상태를 확인하고 다시 시도하세요.");
+      setUploadError("업로드 실패. 네트워크 상태를 확인하고 다시 시도하세요.");
     }
   }
+
+  async function handleSaveMetadata() {
+    if (!lightboxPhoto) return;
+
+    setMetadataError(null);
+    try {
+      await updatePhotoMetadata(lightboxPhoto.id, editedSuspectTag, editedLocationTag);
+      setEditingMetadata(false);
+    } catch {
+      setMetadataError("저장에 실패했습니다. 네트워크 상태를 확인하고 다시 시도하세요.");
+    }
+  }
+
+  const isUpdatingSelectedPhoto = updatingPhotoId === lightboxPhoto?.id;
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
       <div className="space-y-1">
-        <div className="text-xs font-mono text-amber-400 tracking-widest uppercase">
-          Evidence Vault
-        </div>
+        <div className="text-xs font-mono tracking-widest text-amber-400 uppercase">Evidence Vault</div>
         <h1 className="text-2xl font-bold text-zinc-100">증거 보관함</h1>
         <p className="text-sm text-zinc-500">
           {ownTeamId ? `${ownTeamId}조 폴라로이드 ${photos.length}장` : "조 정보를 찾을 수 없습니다"}
@@ -88,30 +137,69 @@ export default function EvidencePage() {
         <span className="text-base font-bold">현장 증거 촬영</span>
       </button>
 
+      <div className="flex gap-2 overflow-x-auto pb-1" aria-label="인물별 사진 필터">
+        <button
+          type="button"
+          onClick={() => setActiveFilter("all")}
+          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
+            activeFilter === "all" ? "bg-amber-400 text-zinc-950" : "bg-zinc-800 text-zinc-300"
+          }`}
+        >
+          전체
+        </button>
+        {PHOTO_TAGS.map((tag) => (
+          <button
+            key={tag.value}
+            type="button"
+            onClick={() => setActiveFilter(tag.value)}
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
+              activeFilter === tag.value ? "bg-amber-400 text-zinc-950" : "bg-zinc-800 text-zinc-300"
+            }`}
+          >
+            {tag.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => setActiveFilter("untagged")}
+          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
+            activeFilter === "untagged" ? "bg-amber-400 text-zinc-950" : "bg-zinc-800 text-zinc-300"
+          }`}
+        >
+          미지정
+        </button>
+      </div>
+
       {loading ? (
         <div className="grid grid-cols-2 gap-3">
           {[0, 1, 2, 3].map((item) => (
             <div key={item} className="aspect-[3/4] animate-pulse rounded bg-zinc-900" />
           ))}
         </div>
-      ) : photos.length === 0 ? (
+      ) : filteredPhotos.length === 0 ? (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8 text-center">
-          <p className="text-sm text-zinc-400">아직 촬영한 증거가 없습니다.</p>
+          <p className="text-sm text-zinc-400">
+            {photos.length === 0 ? "아직 촬영한 증거가 없습니다." : "선택한 인물의 증거가 없습니다."}
+          </p>
           <p className="mt-1 text-xs text-zinc-600">현장을 사진으로 남기세요.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          {photos.map((photo) => {
-            const tagLabel = photoTagLabel(photo.suspectTag);
+          {filteredPhotos.map((photo) => {
+            const suspectLabel = photoTagLabel(photo.suspectTag);
+            const locationLabel = photoLocationTagLabel(photo.locationTag);
             return (
               <button
                 key={photo.id}
                 type="button"
-                onClick={() => setLightbox(photo.imageUrl)}
+                onClick={() => openLightbox(photo)}
                 className={`relative rotate-[-0.5deg] bg-zinc-100 p-2 pb-4 text-left shadow-lg transition-transform active:scale-[0.98] even:rotate-[0.7deg] ${
                   photo.status === "rejected" ? "opacity-45 grayscale" : ""
                 }`}
               >
+                <span className="absolute left-3 top-3 rounded bg-zinc-950/80 px-1.5 py-0.5 text-[10px] font-bold text-amber-300">
+                  #{photo.evidenceNumber}
+                </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photo.imageUrl}
@@ -120,19 +208,29 @@ export default function EvidencePage() {
                   loading="lazy"
                 />
                 {photo.status === "rejected" && (
-                  <span className="absolute left-3 top-3 rounded bg-red-600 px-2 py-1 text-[10px] font-bold text-white">
+                  <span className="absolute right-3 top-3 rounded bg-red-600 px-2 py-1 text-[10px] font-bold text-white">
                     제외됨
                   </span>
                 )}
-                <div className="mt-2 min-h-10 space-y-1">
-                  <p className="font-hand text-center text-sm leading-tight text-zinc-900">
+                <div className="mt-2 min-h-12 space-y-1">
+                  <p
+                    className="text-center text-sm leading-tight text-zinc-900"
+                    style={{ fontFamily: '"Segoe Print", "Bradley Hand", "Comic Sans MS", cursive' }}
+                  >
                     {photo.caption || "— 기록 없음 —"}
                   </p>
-                  {tagLabel && (
-                    <span className="mx-auto block w-fit rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-bold text-zinc-700">
-                      {tagLabel}
-                    </span>
-                  )}
+                  <div className="flex flex-wrap justify-center gap-1">
+                    {suspectLabel && (
+                      <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-bold text-zinc-700">
+                        {suspectLabel}
+                      </span>
+                    )}
+                    {locationLabel && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900">
+                        {locationLabel}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </button>
             );
@@ -142,19 +240,13 @@ export default function EvidencePage() {
 
       {previewUrl && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/70 p-3">
-          <div className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-4 shadow-2xl">
+          <div className="max-h-[calc(100dvh-5rem)] w-full overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-950 p-4 pb-24 shadow-2xl">
             <div className="space-y-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={previewUrl}
-                alt="업로드 미리보기"
-                className="max-h-[42vh] w-full rounded bg-zinc-900 object-contain"
-              />
+              <img src={previewUrl} alt="업로드 미리보기" className="max-h-[42vh] w-full rounded bg-zinc-900 object-contain" />
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="caption" className="text-xs font-mono text-zinc-500">
-                    캡션
-                  </label>
+                  <label htmlFor="caption" className="text-xs font-mono text-zinc-500">증거 설명</label>
                   <span className="text-xs font-mono text-zinc-600">{caption.length}/20</span>
                 </div>
                 <input
@@ -166,40 +258,19 @@ export default function EvidencePage() {
                   className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400 focus:outline-none"
                 />
               </div>
-              <div className="space-y-1">
-                <label htmlFor="suspectTag" className="text-xs font-mono text-zinc-500">
-                  관련 인물
-                </label>
-                <select
-                  id="suspectTag"
-                  value={suspectTag}
-                  onChange={(event) => setSuspectTag(event.target.value)}
-                  className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-amber-400 focus:outline-none"
-                >
-                  <option value="">미지정</option>
-                  {PHOTO_TAGS.map((tag) => (
-                    <option key={tag.value} value={tag.value}>
-                      {tag.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {error && <p className="text-xs text-red-400">{error}</p>}
+              <MetadataSelects
+                suspectTag={suspectTag}
+                locationTag={locationTag}
+                onSuspectChange={setSuspectTag}
+                onLocationChange={setLocationTag}
+                idPrefix="upload"
+              />
+              {uploadError && <p className="text-xs text-red-400">{uploadError}</p>}
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleUpload}
-                  disabled={uploading}
-                  className="flex-1 rounded bg-amber-400 py-2.5 text-sm font-bold text-zinc-950 transition-colors disabled:opacity-50"
-                >
+                <button type="button" onClick={handleUpload} disabled={uploading} className="flex-1 rounded bg-amber-400 py-2.5 text-sm font-bold text-zinc-950 transition-colors disabled:opacity-50">
                   {uploading ? "업로드 중..." : "업로드"}
                 </button>
-                <button
-                  type="button"
-                  onClick={closeSheet}
-                  disabled={uploading}
-                  className="rounded border border-zinc-700 bg-zinc-900 px-5 py-2.5 text-sm font-bold text-zinc-300 disabled:opacity-50"
-                >
+                <button type="button" onClick={closeUploadSheet} disabled={uploading} className="rounded border border-zinc-700 bg-zinc-900 px-5 py-2.5 text-sm font-bold text-zinc-300 disabled:opacity-50">
                   취소
                 </button>
               </div>
@@ -208,15 +279,82 @@ export default function EvidencePage() {
         </div>
       )}
 
-      {lightbox && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-          onClick={() => setLightbox(null)}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={lightbox} alt="촬영 증거 확대" className="max-h-full max-w-full object-contain" />
+      {lightboxPhoto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+          <div className="w-full max-w-lg space-y-3">
+            <div className="flex items-center justify-between text-zinc-300">
+              <span className="font-mono text-xs text-amber-300">#{lightboxPhoto.evidenceNumber}</span>
+              <button type="button" onClick={() => setLightboxPhoto(null)} className="rounded px-2 py-1 text-sm">닫기</button>
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={lightboxPhoto.imageUrl} alt={lightboxPhoto.caption ?? "촬영 증거 확대"} className="max-h-[60vh] w-full object-contain" />
+            <div className="rounded-lg bg-zinc-900 p-3 text-zinc-100">
+              <p className="text-xs font-mono text-zinc-500">증거 설명</p>
+              <p className="mt-1 text-sm">{lightboxPhoto.caption || "— 기록 없음 —"}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {photoTagLabel(lightboxPhoto.suspectTag) && <span className="rounded-full bg-zinc-700 px-2 py-1 text-xs">{photoTagLabel(lightboxPhoto.suspectTag)}</span>}
+                {photoLocationTagLabel(lightboxPhoto.locationTag) && <span className="rounded-full bg-amber-400/20 px-2 py-1 text-xs text-amber-200">{photoLocationTagLabel(lightboxPhoto.locationTag)}</span>}
+              </div>
+            </div>
+            <button type="button" onClick={openMetadataEditor} className="w-full rounded border border-amber-400/60 py-2.5 text-sm font-bold text-amber-200">정보 수정</button>
+          </div>
+        </div>
+      )}
+
+      {editingMetadata && lightboxPhoto && (
+        <div className="fixed inset-0 z-[60] flex items-end bg-black/70 p-3">
+          <div className="max-h-[calc(100dvh-5rem)] w-full overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-950 p-4 pb-24 shadow-2xl">
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-bold text-zinc-100">사진 정보 수정</p>
+                <p className="mt-1 text-xs text-zinc-500">증거 설명은 촬영 당시 기록으로 유지됩니다.</p>
+              </div>
+              <MetadataSelects
+                suspectTag={editedSuspectTag}
+                locationTag={editedLocationTag}
+                onSuspectChange={setEditedSuspectTag}
+                onLocationChange={setEditedLocationTag}
+                idPrefix="edit"
+              />
+              {metadataError && <p className="text-xs text-red-400">{metadataError}</p>}
+              <div className="flex gap-2">
+                <button type="button" onClick={handleSaveMetadata} disabled={isUpdatingSelectedPhoto} className="flex-1 rounded bg-amber-400 py-2.5 text-sm font-bold text-zinc-950 disabled:opacity-50">
+                  {isUpdatingSelectedPhoto ? "저장 중..." : "저장"}
+                </button>
+                <button type="button" onClick={closeMetadataEditor} disabled={isUpdatingSelectedPhoto} className="rounded border border-zinc-700 bg-zinc-900 px-5 py-2.5 text-sm font-bold text-zinc-300 disabled:opacity-50">취소</button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
+  );
+}
+
+interface MetadataSelectsProps {
+  suspectTag: string;
+  locationTag: string;
+  onSuspectChange: (value: string) => void;
+  onLocationChange: (value: string) => void;
+  idPrefix: string;
+}
+
+function MetadataSelects({ suspectTag, locationTag, onSuspectChange, onLocationChange, idPrefix }: MetadataSelectsProps) {
+  return (
+    <>
+      <div className="space-y-1">
+        <label htmlFor={`${idPrefix}-suspect`} className="text-xs font-mono text-zinc-500">관련 인물</label>
+        <select id={`${idPrefix}-suspect`} value={suspectTag} onChange={(event) => onSuspectChange(event.target.value)} className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-amber-400 focus:outline-none">
+          <option value="">미지정</option>
+          {PHOTO_TAGS.map((tag) => <option key={tag.value} value={tag.value}>{tag.label}</option>)}
+        </select>
+      </div>
+      <div className="space-y-1">
+        <label htmlFor={`${idPrefix}-location`} className="text-xs font-mono text-zinc-500">관련 장소</label>
+        <select id={`${idPrefix}-location`} value={locationTag} onChange={(event) => onLocationChange(event.target.value)} className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-amber-400 focus:outline-none">
+          {PHOTO_LOCATION_TAGS.map((tag) => <option key={tag.value || "unspecified"} value={tag.value}>{tag.label}</option>)}
+        </select>
+      </div>
+    </>
   );
 }

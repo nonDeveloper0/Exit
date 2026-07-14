@@ -57,6 +57,7 @@ export function usePhotoEvidence() {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [updatingPhotoId, setUpdatingPhotoId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ownTeamId) return;
@@ -201,5 +202,22 @@ export function usePhotoEvidence() {
     [ownTeamId]
   );
 
-  return { photos, loading, uploading, uploadPhoto, ownTeamId };
+  const updatePhotoMetadata = useCallback(
+    async (id: string, suspectTag: string, locationTag: string) => {
+      setUpdatingPhotoId(id);
+      try {
+        const { error } = await supabase
+          .from("photo_evidence")
+          .update({ suspect_tag: suspectTag || null, location_tag: locationTag || null })
+          .eq("id", id);
+
+        if (error) throw error;
+      } finally {
+        setUpdatingPhotoId(null);
+      }
+    },
+    []
+  );
+
+  return { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, ownTeamId };
 }
