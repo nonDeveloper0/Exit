@@ -45,6 +45,8 @@
   imageUrl: string;    // Supabase Storage 공개 URL
   caption: string | null;    // 20자 이내
   suspectTag: string | null; // "A"|"B"|"C"|"D"|"E"|"PARK"|null
+  locationTag: string | null; // PHOTO_LOCATION_TAGS value. 미지정은 null
+  evidenceNumber: number; // DB가 부여하는 영구 증거 번호
   createdAt: string;
 }
 ```
@@ -101,22 +103,39 @@ CREATE TABLE photo_evidence (
   image_url   TEXT NOT NULL,
   caption     TEXT,
   suspect_tag TEXT,
+  location_tag TEXT,
+  evidence_number BIGINT NOT NULL UNIQUE DEFAULT nextval('photo_evidence_number_seq'),
   status      TEXT NOT NULL DEFAULT 'ok', -- ok | rejected
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 ```
 
-기존 테이블에는 아래 SQL을 한 번 실행한다.
+기존 테이블에는 아래 SQL을 한 번 실행한다. `evidence_number`는 기존 사진에도 생성 시각(`created_at`), id 순으로 한 번만 부여하며, 이후 사진을 삭제하거나 제외해도 재사용·재정렬하지 않는 영구 번호다.
 
 ```sql
 ALTER TABLE photo_evidence
 ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ok';
+
+ALTER TABLE photo_evidence ADD COLUMN IF NOT EXISTS location_tag TEXT;
+ALTER TABLE photo_evidence ADD COLUMN IF NOT EXISTS evidence_number BIGINT;
+CREATE SEQUENCE IF NOT EXISTS photo_evidence_number_seq;
+WITH numbered AS (
+  SELECT id, row_number() OVER (ORDER BY created_at ASC, id ASC) AS number
+  FROM photo_evidence WHERE evidence_number IS NULL
+)
+UPDATE photo_evidence p SET evidence_number = numbered.number FROM numbered WHERE p.id = numbered.id;
+SELECT setval('photo_evidence_number_seq', COALESCE((SELECT max(evidence_number) FROM photo_evidence), 0) + 1, false);
+ALTER TABLE photo_evidence ALTER COLUMN evidence_number SET DEFAULT nextval('photo_evidence_number_seq');
+ALTER TABLE photo_evidence ALTER COLUMN evidence_number SET NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS photo_evidence_evidence_number_key ON photo_evidence (evidence_number);
 ```
 
 - `pair_id`: 업로드한 조 번호. `game_state.pairings`에 짝 조가 있으면 두 조의 사진을 함께 조회한다.
 - `image_url`: public 버킷 `evidence-photos`의 공개 URL.
 - `caption`: UI에서 20자까지 입력 가능. 빈 값은 `null`.
 - `suspect_tag`: `PHOTO_TAGS`의 value. `A`~`E`는 용의자 파일의 관련 사진으로 표시되고, `PARK`는 피해자 태그 전용이다.
+- `location_tag`: `PHOTO_LOCATION_TAGS`의 value. `미지정`을 선택하면 `null`로 저장한다.
+- `evidence_number`: sequence가 새 사진에 단조 증가하는 번호를 자동 부여한다. 이 값은 보드 정렬·필터·사진 삭제·제외와 관계없이 변하지 않는다.
 - `status`: 기본값 `ok`는 보드와 사진 랭킹에 포함된다. 스탭이 스팸을 `rejected`로 바꾸면 사진은 보드에 제외됨으로 남지만 랭킹에서는 빠진다.
 - Realtime INSERT/UPDATE/DELETE를 구독해 같은 조와 짝 조 기기에 즉시 반영한다. 수사 현황 랭킹은 `status='ok'` 사진 행 수를 기준으로 한다.
 

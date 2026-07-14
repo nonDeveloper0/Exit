@@ -12,6 +12,8 @@ export interface PhotoItem {
   imageUrl: string;
   caption: string | null;
   suspectTag: string | null;
+  locationTag: string | null;
+  evidenceNumber: number;
   status: string;
   createdAt: string;
 }
@@ -22,11 +24,14 @@ interface Row {
   image_url: string;
   caption: string | null;
   suspect_tag: string | null;
+  location_tag: string | null;
+  evidence_number: number;
   status: string | null;
   created_at: string;
 }
 
-const SELECT_COLS = "id, pair_id, image_url, caption, suspect_tag, status, created_at";
+const SELECT_COLS =
+  "id, pair_id, image_url, caption, suspect_tag, location_tag, evidence_number, status, created_at";
 let channelCounter = 0;
 
 function mapRow(row: Row): PhotoItem {
@@ -36,6 +41,8 @@ function mapRow(row: Row): PhotoItem {
     imageUrl: row.image_url,
     caption: row.caption,
     suspectTag: row.suspect_tag,
+    locationTag: row.location_tag,
+    evidenceNumber: row.evidence_number,
     status: row.status ?? "ok",
     createdAt: row.created_at,
   };
@@ -155,7 +162,7 @@ export function usePhotoEvidence() {
   }, [ownTeamId, partnerId]);
 
   const uploadPhoto = useCallback(
-    async (file: File, caption: string, suspectTag: string) => {
+    async (file: File, caption: string, suspectTag: string, locationTag = "") => {
       if (!ownTeamId) return;
 
       setUploading(true);
@@ -176,6 +183,7 @@ export function usePhotoEvidence() {
             image_url: publicData.publicUrl,
             caption: caption.trim() || null,
             suspect_tag: suspectTag || null,
+            location_tag: locationTag || null,
           })
           .select(SELECT_COLS)
           .single();
