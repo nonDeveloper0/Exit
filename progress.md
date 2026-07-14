@@ -419,6 +419,12 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] phone2·phone3 첫 화면 뒤로가기 유출 보강 (갤럭시 One UI 예측형 뒤로가기) (2026-07-14)
+  - 증상: 설치 PWA 첫 화면에서 제스처 뒤로가기 시 앱을 벗어남(갤럭시). 원인은 더미 히스토리를 1겹만 쌓아 히스토리가 얕을 때 One UI가 "앱 종료"로 판단
+  - 조치: 더미 히스토리를 5겹 쌓고 popstate마다 2겹씩 재충전해 항상 여유분 유지. `dongguri_phone_room.html`·`flower_phone_call_log.html` 동일 적용
+  - ⚠️ 웹 코드만으로 100% 차단은 불가 — 확실한 잠금은 안드로이드 '앱 고정(Screen Pinning)' + 3버튼 내비 권장(운영 대책)
+  - 수정 파일: `public/screen/dongguri_phone_room.html`, `public/screen/flower_phone_call_log.html`
+
 - [x] phone2·phone3 디바이스 화면 PWA 전환 — 홈화면 설치 → 전체화면 (2026-07-14)
   - `/screen/phone2`(dongguri_phone_room.html)·`/screen/phone3`(flower_phone_call_log.html)을 설치형 PWA로 전환. 홈 화면 추가 시 브라우저 UI 없이 `display: fullscreen`으로 실행(안드로이드는 상단 상태바까지 숨김 → 목업의 가짜 상태바만 노출). iOS는 상태바 완전 숨김 불가라 겹칠 수 있음 → 프롭은 안드로이드 권장(문서화)
   - 각 폰 별도 매니페스트로 `start_url`/`scope`를 `/screen/phone2`·`/screen/phone3`로 분리 → 홈 화면에 앱 아이콘 2개로 각각 설치됨
