@@ -224,11 +224,13 @@ CREATE TABLE game_state (
   vote_round  INTEGER NOT NULL DEFAULT 0, -- 0=닫힘, 2=최종 투표 열림
   ending_open BOOLEAN NOT NULL DEFAULT false, -- 엔딩 공개 여부
   pairings    JSONB DEFAULT '{}',       -- 조 매핑 (양방향), 예: {"1":"3","3":"1"}
+  pair_team_names JSONB DEFAULT '{}',   -- 페어 팀 이름, 예: {"1:3":"노랑팀"}
   updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 ```
 
 - `pairings`: 관리자가 짝지은 두 조를 서로 가리키도록 양방향 저장. 짝 팀끼리 증거 합집합 공유.
+- `pair_team_names`: 조 번호를 정렬한 키(예: `1:3`)별 팀 이름. 해당 페어의 수사본부에 표시한다.
 
 ## localStorage 키 (기기별 독립)
 
@@ -256,7 +258,15 @@ create table if not exists suspect_notes (
   created_at timestamptz default now()
 );
 alter table suspect_notes enable row level security;
-create policy "anon rw" on suspect_notes for all using (true) with check (true);
-alter publication supabase_realtime add table suspect_notes;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'suspect_notes' and policyname = 'anon rw') then
+    create policy "anon rw" on suspect_notes for all using (true) with check (true);
+  end if;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table suspect_notes;
+exception when duplicate_object then null;
+end $$;
 alter table game_state add column if not exists leaders jsonb not null default '{}'::jsonb;
+alter table game_state add column if not exists pair_team_names jsonb not null default '{}'::jsonb;
 ```

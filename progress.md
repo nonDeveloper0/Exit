@@ -6,6 +6,17 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] 재실행 가능한 Supabase SQL 안내로 보완했다.
+  - 기존 `suspect_notes` 정책 또는 Realtime publication이 있어도 오류 없이 넘어가도록 중복 검사를 추가했다.
+  - 수정 파일: `docs/01_md/07_DATA_SCHEMA.md`, `progress.md`
+
+- [x] 관리자 조 매핑 시 페어 팀 이름을 지정하고 수사본부에 표시했다.
+  - `새 짝 추가`의 왼쪽 입력란에 팀 이름(예: 노랑팀)을 적고 두 조 번호와 함께 `매핑`하면 페어 연결과 팀 이름이 동시에 저장된다. 매핑 해제 시 팀 이름도 함께 삭제된다.
+  - 해당 페어 참가자의 수사본부 상단 오른쪽에 `내 팀 · 팀 이름`을 실시간 표시한다.
+  - Supabase SQL Editor에서 `docs/01_md/07_DATA_SCHEMA.md`의 `pair_team_names` 컬럼 추가 SQL을 실행해야 한다.
+  - 검증: `npm run lint` 오류 0(기존 `useGameState` 경고 1개), `npm test` 6개 통과, `npm run build` 통과.
+  - 수정 파일: `src/app/admin/page.tsx`, `src/app/home/page.tsx`, `src/lib/pairTeam.ts`, `src/lib/usePairTeamName.ts`, `docs/01_md/07_DATA_SCHEMA.md`, `progress.md`
+
 - [x] 본부 사건 개요의 장소명을 `녹산건설 자재물류창고 B2 구역`으로 명확히 표기하고, 남은 수정 사항 전체를 확인했다.
   - 확인 결과 해당 문구 변경 1건만 남아 있었으며, 공백·줄바꿈 오류가 없음을 확인했다.
   - 수정 파일: `src/app/home/page.tsx`, `progress.md`

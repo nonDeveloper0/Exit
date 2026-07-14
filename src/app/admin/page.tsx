@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
 import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE, photoLocationTagLabel } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
+import { getPairTeamKey } from "@/lib/pairTeam";
 
 const ADMIN_PASSWORD = "0000";
 
@@ -117,8 +118,10 @@ function AdminPanel() {
   const [showResetPhotosConfirm, setShowResetPhotosConfirm] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState("");
   const [pairings, setPairings] = useState<Record<string, string>>({});
+  const [pairTeamNames, setPairTeamNames] = useState<Record<string, string>>({});
   const [pairA, setPairA] = useState("");
   const [pairB, setPairB] = useState("");
+  const [pairTeamName, setPairTeamName] = useState("");
   const [savingPair, setSavingPair] = useState(false);
   const [leaders, setLeaders] = useState<Record<string, string>>({});
   const [leaderTeam, setLeaderTeam] = useState("");
@@ -135,11 +138,12 @@ function AdminPanel() {
   useEffect(() => {
     supabase
       .from("game_state")
-      .select("pairings, leaders")
+      .select("pairings, pair_team_names, leaders")
       .eq("id", "singleton")
       .single()
       .then(({ data }) => {
         if (data?.pairings) setPairings(data.pairings as Record<string, string>);
+        if (data?.pair_team_names) setPairTeamNames(data.pair_team_names as Record<string, string>);
         if (data?.leaders) setLeaders(data.leaders as Record<string, string>);
       });
   }, []);
@@ -283,13 +287,17 @@ function AdminPanel() {
   async function addPairing() {
     const a = pairA.trim();
     const b = pairB.trim();
-    if (!a || !b || a === b) return;
+    const teamName = pairTeamName.trim();
+    if (!a || !b || !teamName || a === b) return;
     setSavingPair(true);
     const newPairings = { ...pairings, [a]: b, [b]: a };
-    await supabase.from("game_state").update({ pairings: newPairings }).eq("id", "singleton");
+    const newPairTeamNames = { ...pairTeamNames, [getPairTeamKey(a, b)]: teamName };
+    await supabase.from("game_state").update({ pairings: newPairings, pair_team_names: newPairTeamNames }).eq("id", "singleton");
     setPairings(newPairings);
+    setPairTeamNames(newPairTeamNames);
     setPairA("");
     setPairB("");
+    setPairTeamName("");
     setSavingPair(false);
   }
 
@@ -297,8 +305,11 @@ function AdminPanel() {
     const newPairings = { ...pairings };
     delete newPairings[a];
     delete newPairings[b];
-    await supabase.from("game_state").update({ pairings: newPairings }).eq("id", "singleton");
+    const newPairTeamNames = { ...pairTeamNames };
+    delete newPairTeamNames[getPairTeamKey(a, b)];
+    await supabase.from("game_state").update({ pairings: newPairings, pair_team_names: newPairTeamNames }).eq("id", "singleton");
     setPairings(newPairings);
+    setPairTeamNames(newPairTeamNames);
   }
 
   async function setLeader() {
@@ -833,7 +844,7 @@ function AdminPanel() {
                 key={`${a}-${b}`}
                 className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-3"
               >
-                <p className="text-sm font-bold text-zinc-200">{a}조 ↔ {b}조</p>
+                <div><p className="text-sm font-bold text-zinc-200">{a}조 ↔ {b}조</p><p className="mt-0.5 text-xs text-amber-300">팀 이름 · {pairTeamNames[getPairTeamKey(a, b)] ?? "미지정"}</p></div>
                 <button
                   onClick={() => removePairing(a, b)}
                   className="text-xs text-red-400 border border-red-500/30 bg-red-500/10 rounded px-3 py-1.5 hover:bg-red-500/20 transition-all"
@@ -850,7 +861,15 @@ function AdminPanel() {
         {/* Add new pair */}
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
           <p className="text-xs text-zinc-500">새 짝 추가</p>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              value={pairTeamName}
+              onChange={(e) => setPairTeamName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addPairing()}
+              placeholder="팀 이름 (예: 노랑팀)"
+              className="min-w-36 flex-1 rounded bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-amber-400"
+            />
             <input
               type="text"
               value={pairA}
@@ -870,7 +889,7 @@ function AdminPanel() {
             />
             <button
               onClick={addPairing}
-              disabled={savingPair || !pairA.trim() || !pairB.trim() || pairA.trim() === pairB.trim()}
+              disabled={savingPair || !pairTeamName.trim() || !pairA.trim() || !pairB.trim() || pairA.trim() === pairB.trim()}
               className="flex-1 rounded bg-amber-400 px-3 py-2 text-sm font-bold text-zinc-900 hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               {savingPair ? "..." : "매핑"}
