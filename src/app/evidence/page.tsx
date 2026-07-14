@@ -21,11 +21,12 @@ export default function EvidencePage() {
   const [locationTag, setLocationTag] = useState("");
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
-  const [lightboxPhoto, setLightboxPhoto] = useState<PhotoItem | null>(null);
+  const [lightboxPhotoId, setLightboxPhotoId] = useState<string | null>(null);
   const [editingMetadata, setEditingMetadata] = useState(false);
   const [editedSuspectTag, setEditedSuspectTag] = useState("");
   const [editedLocationTag, setEditedLocationTag] = useState("");
   const [metadataError, setMetadataError] = useState<string | null>(null);
+  const lightboxPhoto = photos.find((photo) => photo.id === lightboxPhotoId) ?? null;
 
   useEffect(() => {
     return () => {
@@ -60,7 +61,7 @@ export default function EvidencePage() {
   }
 
   function openLightbox(photo: PhotoItem) {
-    setLightboxPhoto(photo);
+    setLightboxPhotoId(photo.id);
     setEditingMetadata(false);
     setMetadataError(null);
   }
@@ -74,7 +75,7 @@ export default function EvidencePage() {
   }
 
   function closeMetadataEditor() {
-    if (updatingPhotoId) return;
+    if (updatingPhotoId === lightboxPhoto?.id) return;
     setEditingMetadata(false);
     setMetadataError(null);
   }
@@ -284,7 +285,7 @@ export default function EvidencePage() {
           <div className="w-full max-w-lg space-y-3">
             <div className="flex items-center justify-between text-zinc-300">
               <span className="font-mono text-xs text-amber-300">#{lightboxPhoto.evidenceNumber}</span>
-              <button type="button" onClick={() => setLightboxPhoto(null)} className="rounded px-2 py-1 text-sm">닫기</button>
+              <button type="button" onClick={() => setLightboxPhotoId(null)} className="rounded px-2 py-1 text-sm">닫기</button>
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={lightboxPhoto.imageUrl} alt={lightboxPhoto.caption ?? "촬영 증거 확대"} className="max-h-[60vh] w-full object-contain" />
@@ -339,19 +340,19 @@ interface MetadataSelectsProps {
   idPrefix: string;
 }
 
-function MetadataSelects({ suspectTag, locationTag, onSuspectChange, onLocationChange, idPrefix }: MetadataSelectsProps) {
+function MetadataSelects({ suspectTag, locationTag, onSuspectChange, onLocationChange, idPrefix, disabled = false }: MetadataSelectsProps) {
   return (
     <>
       <div className="space-y-1">
         <label htmlFor={`${idPrefix}-suspect`} className="text-xs font-mono text-zinc-500">관련 인물</label>
-        <select id={`${idPrefix}-suspect`} value={suspectTag} onChange={(event) => onSuspectChange(event.target.value)} className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-amber-400 focus:outline-none">
+        <select id={`${idPrefix}-suspect`} value={suspectTag} onChange={(event) => onSuspectChange(event.target.value)} disabled={disabled} className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-amber-400 focus:outline-none disabled:opacity-50">
           <option value="">미지정</option>
           {PHOTO_TAGS.map((tag) => <option key={tag.value} value={tag.value}>{tag.label}</option>)}
         </select>
       </div>
       <div className="space-y-1">
         <label htmlFor={`${idPrefix}-location`} className="text-xs font-mono text-zinc-500">관련 장소</label>
-        <select id={`${idPrefix}-location`} value={locationTag} onChange={(event) => onLocationChange(event.target.value)} className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-amber-400 focus:outline-none">
+        <select id={`${idPrefix}-location`} value={locationTag} onChange={(event) => onLocationChange(event.target.value)} disabled={disabled} className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-amber-400 focus:outline-none disabled:opacity-50">
           {PHOTO_LOCATION_TAGS.map((tag) => <option key={tag.value || "unspecified"} value={tag.value}>{tag.label}</option>)}
         </select>
       </div>
