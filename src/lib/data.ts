@@ -72,7 +72,8 @@ export const PHOTO_LOCATION_TAGS: { value: string; label: string }[] = [
 ];
 
 export function photoLocationTagLabel(value: string | null | undefined): string | null {
-  if (!value) return null;
+  const unspecifiedLabel = PHOTO_LOCATION_TAGS.find((tag) => tag.value === "")?.label ?? null;
+  if (!value) return unspecifiedLabel;
   return PHOTO_LOCATION_TAGS.find((tag) => tag.value === value)?.label ?? null;
 }
 

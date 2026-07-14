@@ -97,6 +97,8 @@ CREATE TABLE team_evidence_items (
 사진 증거(폴라로이드) 보드의 메타데이터. 실제 이미지 파일은 Storage `evidence-photos` 버킷에 저장된다.
 
 ```sql
+CREATE SEQUENCE IF NOT EXISTS photo_evidence_number_seq;
+
 CREATE TABLE photo_evidence (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   pair_id     TEXT NOT NULL,
