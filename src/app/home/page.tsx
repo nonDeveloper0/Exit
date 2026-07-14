@@ -47,7 +47,7 @@ export default function MainPage() {
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">장소</span>
-            <span>녹산건설 물류창고 B2 구역</span>
+            <span>녹산건설 자재물류창고 B2 구역</span>
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">용의자</span>
