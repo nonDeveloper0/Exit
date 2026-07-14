@@ -146,7 +146,7 @@ export default function EvidencePage() {
           onClick={() => setFilterMenuOpen((prev) => !prev)}
           aria-label="인물별 사진 필터"
           aria-expanded={filterMenuOpen}
-          className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
+          className={`flex h-9 items-center gap-1.5 rounded-full border px-3 transition-colors ${
             activeFilter === "all"
               ? "border-zinc-700 bg-zinc-800 text-zinc-300"
               : "border-amber-400/60 bg-amber-400/10 text-amber-300"
@@ -155,6 +155,7 @@ export default function EvidencePage() {
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
             <path d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6l-4.8 6.4V16a1 1 0 01-1.45.89l-2-1A1 1 0 017 15v-4L2.2 4.6A1 1 0 013 4z" />
           </svg>
+          <span className="text-sm font-medium">필터</span>
         </button>
 
         {filterMenuOpen && (
