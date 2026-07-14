@@ -6,6 +6,18 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] 관리자에 심문권 사용 상태 및 참여자 기기의 최종추리 제출 상태 초기화 기능을 추가했다.
+  - `심문권 사용 초기화`는 모든 조의 `interrogation_used` 기록만 삭제해, 이미 획득한 심문권은 유지하면서 다시 사용할 수 있게 한다.
+  - `최종추리 제출 초기화`는 전역 Realtime 이벤트로 모든 참가자 기기의 localStorage 제출 상태를 해제한다. 이미 Google Form에 전송된 응답은 삭제할 수 없음을 관리자 화면에 명시했다.
+  - 검증: `npm run lint` 오류 0(기존 `useGameState` 경고 1개), `npm test` 6개 통과, `npm run build` 통과.
+  - 수정 파일: `src/app/admin/page.tsx`, `src/app/vote/page.tsx`, `src/lib/data.ts`, `src/lib/store.ts`, `progress.md`
+
+- [x] 자동 심문권 QR을 획득 버튼 방식으로 바꾸고, 심문 사용에 별도 최종 확인 팝업을 추가했다.
+  - E11~E14 QR은 문제 없이 `심문권 획득` 버튼을 눌러 진동과 함께 획득한다. 채소장 E15의 정답 퀴즈는 유지한다.
+  - 조장이 `심문 사용`을 누르면 용의자명과 되돌릴 수 없음을 안내하는 확인 팝업이 열리고, 여기서 `사용 처리`를 다시 눌러야 실제 사용된다.
+  - 검증: `npm run lint` 오류 0(기존 `useGameState` 경고 1개), `npm test` 6개 통과, `npm run build` 통과.
+  - 수정 파일: `src/app/qr/[id]/QrPageClient.tsx`, `src/app/suspects/page.tsx`, `progress.md`
+
 - [x] 채소장(E15)을 제외한 E11~E14 QR은 문제 입력 없이 진입 즉시 심문권을 획득하도록 변경했다.
   - 김사원(E11)·나팀장(E12)·나사장(E13)·이대리(E14) QR은 접속 즉시 해당 심문권을 저장·표시한다.
   - 채소장(E15)은 기존 정답 입력 퀴즈를 그대로 유지한다.

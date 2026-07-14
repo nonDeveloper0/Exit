@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { SUSPECTS, VOTE_UNLOCK_COUNT } from "@/lib/data";
-import { getVote, castVote, getTeamInfo } from "@/lib/store";
+import { clearVote, getVote, castVote, getTeamInfo } from "@/lib/store";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 import { useGameState } from "@/lib/useGameState";
 import { useRole } from "@/lib/useRole";
+import { VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE } from "@/lib/data";
+import { useBroadcastEvent } from "@/lib/useBroadcastEvent";
 
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSclsS9dAFGB2YgYNMNYd8NVQ5tBbdUBYwUF9tWosu5patyHXg/formResponse";
@@ -27,6 +29,7 @@ export default function VotePage() {
   const { collected } = useTeamEvidence();
   const { voteOpen, loaded: gameStateLoaded } = useGameState();
   const { isLeader, loaded: roleLoaded } = useRole();
+  const { active: voteResetActive, markHandled: markVoteResetHandled } = useBroadcastEvent(VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE);
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -37,6 +40,14 @@ export default function VotePage() {
     const v = getVote();
     if (v) { setSelected(v); setSubmitted(true); }
   }, []);
+
+  useEffect(() => {
+    if (!voteResetActive) return;
+    clearVote();
+    setSelected(null);
+    setSubmitted(false);
+    markVoteResetHandled();
+  }, [markVoteResetHandled, voteResetActive]);
 
   const collectedCount = collected.length;
   const voteLocked = VOTE_UNLOCK_COUNT > 0 && collectedCount < VOTE_UNLOCK_COUNT;

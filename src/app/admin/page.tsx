@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
-import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, photoLocationTagLabel } from "@/lib/data";
+import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE, photoLocationTagLabel } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 
 const ADMIN_PASSWORD = "0000";
@@ -123,6 +123,8 @@ function AdminPanel() {
   const [leaders, setLeaders] = useState<Record<string, string>>({});
   const [leaderTeam, setLeaderTeam] = useState("");
   const [leaderName, setLeaderName] = useState("");
+  const [resettingInterrogationUses, setResettingInterrogationUses] = useState(false);
+  const [resettingVotes, setResettingVotes] = useState(false);
 
   useEffect(() => {
     const team = getTeamInfo();
@@ -321,6 +323,30 @@ function AdminPanel() {
     setSettingVoteRound(false);
   }
 
+  async function resetInterrogationUses() {
+    setResettingInterrogationUses(true);
+    try {
+      await supabase.from("team_evidence_items").delete().eq("type", "interrogation_used");
+    } finally {
+      setResettingInterrogationUses(false);
+    }
+  }
+
+  async function resetFinalVotes() {
+    setResettingVotes(true);
+    try {
+      await supabase.from("team_evidence_items").delete().eq("pair_id", GLOBAL_PAIR_ID).eq("evidence_id", VOTE_RESET_EVENT_ID).eq("type", VOTE_RESET_EVENT_TYPE);
+      await supabase.from("team_evidence_items").insert({
+        pair_id: GLOBAL_PAIR_ID,
+        evidence_id: VOTE_RESET_EVENT_ID,
+        type: VOTE_RESET_EVENT_TYPE,
+        created_at: new Date().toISOString(),
+      });
+    } finally {
+      setResettingVotes(false);
+    }
+  }
+
   async function toggleEnding() {
     setTogglingEnding(true);
     await supabase
@@ -477,6 +503,30 @@ function AdminPanel() {
                   {settingVoteRound ? "..." : "닫기"}
                 </button>
               </div>
+            </div>
+
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-zinc-200">진행 상태 초기화</p>
+                <p className="text-xs text-zinc-500">심문권의 사용 완료 기록과 각 기기의 최종추리 제출 상태를 별도로 초기화합니다.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void resetInterrogationUses()}
+                disabled={resettingInterrogationUses}
+                className="w-full rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-300 disabled:opacity-40"
+              >
+                {resettingInterrogationUses ? "초기화 중..." : "심문권 사용 초기화"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void resetFinalVotes()}
+                disabled={resettingVotes}
+                className="w-full rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm font-bold text-amber-200 disabled:opacity-40"
+              >
+                {resettingVotes ? "초기화 중..." : "최종추리 제출 초기화"}
+              </button>
+              <p className="text-[10px] leading-relaxed text-zinc-600">최종추리 초기화는 참가자 기기의 제출 상태를 되돌립니다. 이미 Google Form에 전송된 응답은 삭제되지 않습니다.</p>
             </div>
 
             {/* Ending toggle */}

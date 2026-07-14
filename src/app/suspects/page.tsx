@@ -20,6 +20,7 @@ export default function SuspectsPage() {
   const [noteError, setNoteError] = useState<string | null>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
+  const confirmingSuspect = confirmUseId ? SUSPECTS.find((suspect) => suspect.id === confirmUseId) ?? null : null;
 
   async function submitNote(suspectId: string) {
     setAddingId(suspectId);
@@ -42,6 +43,12 @@ export default function SuspectsPage() {
     catch { setNoteError("메모 수정에 실패했습니다. 잠시 후 다시 시도하세요."); }
   }
 
+  function confirmInterrogationUse() {
+    if (!confirmUseId) return;
+    markInterrogationUsed(confirmUseId);
+    setConfirmUseId(null);
+  }
+
   return <div className="flex flex-col gap-4 p-4 pt-6">
     <div className="space-y-1"><div className="text-xs font-mono uppercase tracking-widest text-amber-400">Suspect Files</div><h1 className="text-2xl font-bold text-zinc-100">용의자 파일</h1><p className="text-sm text-zinc-500">심문권과 조별 수사 메모를 확인하세요.</p></div>
     <div className="space-y-3">{SUSPECTS.map((suspect) => {
@@ -57,7 +64,7 @@ export default function SuspectsPage() {
             : !earned ? <div className="rounded bg-zinc-800/60 px-3 py-3 text-xs text-zinc-600">🔒 해당 QR 문제를 풀면 이 용의자의 심문권을 얻습니다.</div>
             : interrogationUse ? <div className="rounded-lg border border-zinc-700 bg-zinc-800/60 px-3 py-3 text-zinc-500"><p className="text-sm font-bold text-zinc-300">✅ {formatUsedTime(interrogationUse.usedAt)} {interrogationUse.teamId}조 사용완료</p><p className="text-xs">이미 사용된 심문권입니다.</p></div>
             : <div className="space-y-3 rounded-lg border border-red-500/40 bg-red-500/10 p-4"><p className="text-lg font-black text-red-200">🎫 심문권 · {suspect.name}</p><p className="text-xs text-red-200/70">용의자(배우)에게 이 화면을 제시하세요.</p>
-              {!roleLoaded ? <p className="text-xs text-zinc-500">권한 확인 중...</p> : !isLeader ? <p className="rounded bg-zinc-900/60 px-3 py-2 text-xs text-zinc-400">심문권 사용은 조장만 할 수 있습니다.</p> : confirmUseId === suspect.id ? <div className="flex gap-2"><button type="button" onClick={() => { markInterrogationUsed(suspect.id); setConfirmUseId(null); }} className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white">사용 처리</button><button type="button" onClick={() => setConfirmUseId(null)} className="rounded border border-zinc-600 px-4 py-2.5 text-sm text-zinc-300">취소</button></div> : <button type="button" onClick={() => setConfirmUseId(suspect.id)} className="w-full rounded bg-red-500/90 py-2.5 text-sm font-bold text-white">심문 사용</button>}
+              {!roleLoaded ? <p className="text-xs text-zinc-500">권한 확인 중...</p> : !isLeader ? <p className="rounded bg-zinc-900/60 px-3 py-2 text-xs text-zinc-400">심문권 사용은 조장만 할 수 있습니다.</p> : <button type="button" onClick={() => setConfirmUseId(suspect.id)} className="w-full rounded bg-red-500/90 py-2.5 text-sm font-bold text-white">심문 사용</button>}
             </div>}
           </div>
           <div className="space-y-2"><button type="button" onClick={() => setOpenNotes((prev) => ({ ...prev, [suspect.id]: !prev[suspect.id] }))} aria-expanded={!!openNotes[suspect.id]} className="flex w-full items-center justify-between rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-left"><span className="text-xs font-mono text-zinc-400">수사 노트 ({notes[suspect.id]?.length ?? 0})</span><span className="text-xs text-amber-300">{openNotes[suspect.id] ? "접기 ▲" : "열기 ▼"}</span></button>
@@ -67,6 +74,7 @@ export default function SuspectsPage() {
         </div>
       </div>;
     })}</div>
+    {confirmingSuspect && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 px-4" role="dialog" aria-modal="true" aria-labelledby="interrogation-confirm-title"><div className="w-full max-w-sm rounded-lg border border-red-500/30 bg-zinc-900 p-5 shadow-2xl"><h2 id="interrogation-confirm-title" className="text-lg font-bold text-zinc-100">심문권을 사용하시겠습니까?</h2><p className="mt-2 text-sm text-zinc-400">{confirmingSuspect.name} 심문권은 사용 처리 후 되돌릴 수 없습니다.</p><div className="mt-5 flex gap-2"><button type="button" onClick={confirmInterrogationUse} className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white">사용 처리</button><button type="button" onClick={() => setConfirmUseId(null)} className="rounded border border-zinc-600 px-4 py-2.5 text-sm font-bold text-zinc-300">취소</button></div></div></div>}
     {noteError && <p className="rounded border border-red-500/30 bg-red-500/10 p-3 text-center text-xs text-red-300">{noteError}</p>}
     <div className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-center"><p className="text-xs text-zinc-500">증거를 충분히 검토한 뒤 범인을 지목하세요.</p><Link href="/vote" className="inline-block text-sm font-medium text-amber-400">범인 지목하기 →</Link></div>
   </div>;

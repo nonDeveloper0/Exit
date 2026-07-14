@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { InterrogationQuiz } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
@@ -25,16 +25,17 @@ export default function QrPageClient({ qrId, location, quiz, suspectName }: Prop
 
   const earned = quiz ? interrogationEarned.includes(quiz.suspectId) || success : false;
 
-  useEffect(() => {
-    if (!quiz?.autoGrant || earned || submitting) return;
+  async function handleAutoGrant() {
+    if (!quiz?.autoGrant || submitting) return;
     setSubmitting(true);
-    void earnInterrogation(quiz.suspectId)
-      .then(() => {
-        navigator.vibrate?.(30);
-        setSuccess(true);
-      })
-      .finally(() => setSubmitting(false));
-  }, [earned, earnInterrogation, quiz?.autoGrant, quiz?.suspectId, submitting]);
+    try {
+      await earnInterrogation(quiz.suspectId);
+      navigator.vibrate?.(30);
+      setSuccess(true);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function handleSubmit() {
     if (!quiz || !quiz.answer || submitting) return;
@@ -95,7 +96,10 @@ export default function QrPageClient({ qrId, location, quiz, suspectName }: Prop
         </div>
       ) : quiz.autoGrant ? (
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-5 text-center">
-          <p className="text-sm font-semibold text-amber-100">심문권을 획득하는 중입니다...</p>
+          <p className="text-sm font-semibold text-amber-100">이 QR을 확인해 심문권을 획득할 수 있습니다.</p>
+          <button type="button" onClick={handleAutoGrant} disabled={submitting} className="mt-4 w-full rounded bg-amber-400 py-3 text-sm font-bold text-zinc-950 disabled:opacity-50">
+            {submitting ? "획득 중..." : "심문권 획득"}
+          </button>
         </div>
       ) : (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-4">

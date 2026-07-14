@@ -101,6 +101,8 @@ export const INCOMING_CALL_EVENT_ID = "_incoming_call";
 export const INCOMING_CALL_EVENT_TYPE = "incoming_call";
 export const INCOMING_CALL_AUDIO_URL = "/audio/incoming-call.mp3";
 export const INCOMING_CALL_EVIDENCE_ID = "CALL01";
+export const VOTE_RESET_EVENT_ID = "_vote_reset";
+export const VOTE_RESET_EVENT_TYPE = "vote_reset";
 export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_ID];
 
 // 장소 이름 — 수정 시 여기서만 변경
