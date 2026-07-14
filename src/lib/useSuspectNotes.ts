@@ -31,6 +31,11 @@ export function useSuspectNotes() {
     const { error } = await supabase.from("suspect_notes").insert({ pair_id: team.teamNumber, suspect_id: suspectId, author_name: team.name.trim(), body: body.trim() });
     if (error) throw error;
   }, [team]);
-  const deleteNote = useCallback(async (id: string) => { await supabase.from("suspect_notes").delete().eq("id", id); }, []);
+  const deleteNote = useCallback(async (id: string) => {
+    const { error } = await supabase.from("suspect_notes").delete().eq("id", id);
+    if (error) throw error;
+    // Realtime DELETE는 설정에 따라 이전 행의 id를 보내지 않을 수 있어 즉시 제거한다.
+    setNotes((prev) => Object.fromEntries(Object.entries(prev).map(([key, items]) => [key, items.filter((item) => item.id !== id)])));
+  }, []);
   return { notes, loading, addNote, deleteNote, name: team?.name.trim() ?? "" };
 }

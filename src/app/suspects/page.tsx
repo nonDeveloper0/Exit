@@ -16,11 +16,21 @@ export default function SuspectsPage() {
   const [confirmUseId, setConfirmUseId] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [addingId, setAddingId] = useState<string | null>(null);
+  const [openNotes, setOpenNotes] = useState<Record<string, boolean>>({});
+  const [noteError, setNoteError] = useState<string | null>(null);
 
   async function submitNote(suspectId: string) {
     setAddingId(suspectId);
+    setNoteError(null);
     try { await addNote(suspectId, drafts[suspectId] ?? ""); setDrafts((prev) => ({ ...prev, [suspectId]: "" })); }
+    catch { setNoteError("메모 저장에 실패했습니다. 잠시 후 다시 시도하세요."); }
     finally { setAddingId(null); }
+  }
+
+  async function removeNote(id: string) {
+    setNoteError(null);
+    try { await deleteNote(id); }
+    catch { setNoteError("메모 삭제에 실패했습니다. 네트워크 상태를 확인하세요."); }
   }
 
   return <div className="flex flex-col gap-4 p-4 pt-6">
@@ -40,14 +50,15 @@ export default function SuspectsPage() {
               {!roleLoaded ? <p className="text-xs text-zinc-500">권한 확인 중...</p> : !isLeader ? <p className="rounded bg-zinc-900/60 px-3 py-2 text-xs text-zinc-400">심문권 사용은 조장만 할 수 있습니다.</p> : confirmUseId === suspect.id ? <div className="flex gap-2"><button type="button" onClick={() => { markInterrogationUsed(suspect.id); setConfirmUseId(null); }} className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white">사용 처리</button><button type="button" onClick={() => setConfirmUseId(null)} className="rounded border border-zinc-600 px-4 py-2.5 text-sm text-zinc-300">취소</button></div> : <button type="button" onClick={() => setConfirmUseId(suspect.id)} className="w-full rounded bg-red-500/90 py-2.5 text-sm font-bold text-white">심문 사용</button>}
             </div>}
           </div>
-          <div className="space-y-2"><span className="text-xs font-mono text-zinc-500">수사 노트</span>
-            {loading ? <p className="text-xs text-zinc-600">메모 불러오는 중...</p> : (notes[suspect.id] ?? []).map((note) => <div key={note.id} className="rounded border border-zinc-800 bg-zinc-950 p-3"><div className="flex justify-between gap-2"><span className="text-xs font-bold text-amber-300">{note.authorName}</span>{note.authorName === name && <button onClick={() => void deleteNote(note.id)} className="text-xs text-zinc-500">삭제</button>}</div><p className="mt-1 whitespace-pre-wrap text-sm text-zinc-200">{note.body}</p></div>)}
+          <div className="space-y-2"><button type="button" onClick={() => setOpenNotes((prev) => ({ ...prev, [suspect.id]: !prev[suspect.id] }))} aria-expanded={!!openNotes[suspect.id]} className="flex w-full items-center justify-between rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-left"><span className="text-xs font-mono text-zinc-400">수사 노트 ({notes[suspect.id]?.length ?? 0})</span><span className="text-xs text-amber-300">{openNotes[suspect.id] ? "접기 ▲" : "열기 ▼"}</span></button>
+            {openNotes[suspect.id] && <div className="space-y-2">{loading ? <p className="text-xs text-zinc-600">메모 불러오는 중...</p> : (notes[suspect.id] ?? []).map((note) => <div key={note.id} className="rounded border border-zinc-800 bg-zinc-950 p-3"><div className="flex justify-between gap-2"><span className="text-xs font-bold text-amber-300">{note.authorName}</span>{note.authorName === name && <button type="button" onClick={() => void removeNote(note.id)} className="text-xs text-zinc-500">삭제</button>}</div><p className="mt-1 whitespace-pre-wrap text-sm text-zinc-200">{note.body}</p></div>)}
             <textarea value={drafts[suspect.id] ?? ""} onChange={(event) => setDrafts((prev) => ({ ...prev, [suspect.id]: event.target.value }))} placeholder="이 용의자에 대한 메모를 남기세요…" rows={3} className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-sm text-zinc-200 placeholder:text-zinc-600 focus:border-amber-500/60 focus:outline-none" />
-            <button type="button" onClick={() => void submitNote(suspect.id)} disabled={!drafts[suspect.id]?.trim() || addingId === suspect.id} className="w-full rounded border border-amber-400/60 py-2 text-sm font-bold text-amber-200 disabled:opacity-40">{addingId === suspect.id ? "추가 중..." : "메모 추가"}</button><p className="text-[10px] text-zinc-600">메모는 조 전체에 공유됩니다.</p>
+            <button type="button" onClick={() => void submitNote(suspect.id)} disabled={!drafts[suspect.id]?.trim() || addingId === suspect.id} className="w-full rounded border border-amber-400/60 py-2 text-sm font-bold text-amber-200 disabled:opacity-40">{addingId === suspect.id ? "추가 중..." : "메모 추가"}</button><p className="text-[10px] text-zinc-600">메모는 조 전체에 공유됩니다.</p></div>}
           </div>
         </div>
       </div>;
     })}</div>
+    {noteError && <p className="rounded border border-red-500/30 bg-red-500/10 p-3 text-center text-xs text-red-300">{noteError}</p>}
     <div className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-center"><p className="text-xs text-zinc-500">증거를 충분히 검토한 뒤 범인을 지목하세요.</p><Link href="/vote" className="inline-block text-sm font-medium text-amber-400">범인 지목하기 →</Link></div>
   </div>;
 }

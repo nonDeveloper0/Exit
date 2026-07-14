@@ -6,6 +6,14 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] 기존 미지정 사진을 자재 물류창고로 보정하고, 조원 QR 제한·수사노트 삭제/접기·랜딩 버튼 잘림을 수정했다.
+  - Supabase `photo_evidence`에서 `location_tag`가 null/빈 값인 기존 사진을 `WAREHOUSE`로 변경했고, 남은 미지정 사진 0건을 확인했다.
+  - 조원은 사진 업로드뿐 아니라 QR 스캐너도 사용할 수 없도록 비활성화했다.
+  - 수사노트 삭제는 성공 즉시 화면에서도 제거하고 오류를 표시하도록 보완했다. 각 용의자의 수사노트는 기본 접힘이며, 열기/접기 버튼으로 확인한다.
+  - 랜딩을 `100dvh`와 safe-area 여백에 맞춰 조정해 작은 모바일 화면에서 입장 버튼이 잘리지 않도록 했다.
+  - 검증: `npm run lint` 오류 0(기존 `useGameState` 경고 1개), `npm test` 6개 통과, `npm run build` 통과.
+  - 수정 파일: `src/app/evidence/page.tsx`, `src/app/suspects/page.tsx`, `src/app/page.tsx`, `src/lib/useSuspectNotes.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
 - [x] `17_ROLES_NOTES_LOCATION_SPEC.md` 기준으로 조장/조원 권한, 조별 실시간 수사노트, 사진 장소 탭 업로드를 구현했다.
   - 랜딩의 조장 이름을 참가자 이름으로 바꾸고, `game_state.leaders` 기반 실시간 `useRole` 훅과 관리자 조장 지정/해제를 추가했다. 조장만 최종 투표·심문권 사용·사진 업로드를 할 수 있다.
   - 용의자 수사 노트를 `suspect_notes`의 조별 실시간 작성자 메모 목록으로 전환했다. 본인 메모만 삭제할 수 있고, 조/전체 초기화 때 함께 삭제된다.

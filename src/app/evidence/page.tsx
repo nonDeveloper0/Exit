@@ -135,7 +135,7 @@ export default function EvidencePage() {
         <button
           type="button"
           onClick={() => setScannerOpen(true)}
-          disabled={!ownTeamId}
+          disabled={!ownTeamId || !roleLoaded || !isLeader}
           className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-lg border border-amber-400/40 bg-amber-400/10 p-4 text-amber-200 transition-colors active:scale-[0.99] disabled:opacity-50"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
@@ -149,7 +149,7 @@ export default function EvidencePage() {
         </button>
       </div>
 
-      {roleLoaded && !isLeader && <p className="-mt-2 text-center text-xs text-zinc-500">사진 업로드는 조장만 할 수 있습니다.</p>}
+      {roleLoaded && !isLeader && <p className="-mt-2 text-center text-xs text-zinc-500">사진 업로드와 QR 스캔은 조장만 할 수 있습니다.</p>}
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         {PHOTO_LOCATION_TAGS.map((location) => <button key={location.value} type="button" onClick={() => setActiveLocation(location.value)} className={`shrink-0 rounded-full border px-3 py-2 text-xs font-bold ${activeLocation === location.value ? "border-amber-400 bg-amber-400 text-zinc-950" : "border-zinc-700 bg-zinc-900 text-zinc-300"}`}>{location.label}</button>)}

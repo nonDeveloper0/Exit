@@ -35,7 +35,7 @@ export default function LandingPage() {
   const canEnter = parseInt(teamNumber) >= 1 && name.trim().length > 0;
 
   return (
-    <div className="relative h-screen overflow-hidden bg-zinc-950 flex flex-col">
+    <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-zinc-950">
       {/* Animated blobs */}
       <div className="absolute inset-0 overflow-hidden">
         <div
@@ -69,11 +69,11 @@ export default function LandingPage() {
       </div>
 
       {/* Title */}
-      <div className="relative z-10 flex flex-col items-center justify-center gap-3 pt-14 pb-4 text-center">
+      <div className="relative z-10 flex shrink-0 flex-col items-center justify-center gap-3 pt-8 pb-4 text-center sm:pt-14">
         <p className="text-xs font-mono text-amber-400/60 tracking-[0.45em] uppercase">
           2026 Summer Camp
         </p>
-        <h1 className="text-[88px] font-black text-white leading-none tracking-tighter text-glow-amber">
+        <h1 className="text-7xl font-black leading-none tracking-tighter text-white text-glow-amber sm:text-[88px]">
           EXIT
         </h1>
         <div className="flex items-center gap-4">
@@ -84,7 +84,7 @@ export default function LandingPage() {
       </div>
 
       {/* Team setup */}
-      <div className="relative z-10 flex flex-col gap-3 px-6 flex-1 justify-center">
+      <div className="relative z-10 flex flex-1 flex-col justify-center gap-3 overflow-y-auto px-6 py-3">
         <div className="space-y-2">
           <p className="text-xs font-mono text-zinc-500 tracking-wider uppercase">조 번호</p>
           <input
@@ -112,7 +112,7 @@ export default function LandingPage() {
       </div>
 
       {/* Enter button */}
-      <div className="relative z-10 px-6 pb-12">
+      <div className="relative z-10 shrink-0 px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-3">
         <button
           onClick={handleEnter}
           disabled={!canEnter}
