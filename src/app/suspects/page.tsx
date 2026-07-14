@@ -12,12 +12,14 @@ function formatUsedTime(iso: string) { return new Date(iso).toLocaleTimeString("
 export default function SuspectsPage() {
   const { interrogationEarned, interrogationUsed, markInterrogationUsed } = useTeamEvidence();
   const { isLeader, loaded: roleLoaded } = useRole();
-  const { notes, loading, addNote, deleteNote, name } = useSuspectNotes();
+  const { notes, loading, addNote, updateNote, deleteNote, name } = useSuspectNotes();
   const [confirmUseId, setConfirmUseId] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [addingId, setAddingId] = useState<string | null>(null);
   const [openNotes, setOpenNotes] = useState<Record<string, boolean>>({});
   const [noteError, setNoteError] = useState<string | null>(null);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editBody, setEditBody] = useState("");
 
   async function submitNote(suspectId: string) {
     setAddingId(suspectId);
@@ -33,12 +35,20 @@ export default function SuspectsPage() {
     catch { setNoteError("메모 삭제에 실패했습니다. 네트워크 상태를 확인하세요."); }
   }
 
+  async function saveEditedNote() {
+    if (!editingNoteId) return;
+    setNoteError(null);
+    try { await updateNote(editingNoteId, editBody); setEditingNoteId(null); setEditBody(""); }
+    catch { setNoteError("메모 수정에 실패했습니다. 잠시 후 다시 시도하세요."); }
+  }
+
   return <div className="flex flex-col gap-4 p-4 pt-6">
     <div className="space-y-1"><div className="text-xs font-mono uppercase tracking-widest text-amber-400">Suspect Files</div><h1 className="text-2xl font-bold text-zinc-100">용의자 파일</h1><p className="text-sm text-zinc-500">심문권과 조별 수사 메모를 확인하세요.</p></div>
     <div className="space-y-3">{SUSPECTS.map((suspect) => {
       const hasQuiz = Object.values(INTERROGATION_QUIZZES).some((quiz) => quiz.suspectId === suspect.id);
       const earned = interrogationEarned.includes(suspect.id);
       const interrogationUse = interrogationUsed.find((item) => item.suspectId === suspect.id);
+      const ownNote = (notes[suspect.id] ?? []).find((note) => note.authorName === name);
       return <div key={suspect.id} className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
         <div className="p-3"><span className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">{suspect.codename}</span><h2 className="mt-0.5 text-lg font-bold leading-tight text-zinc-100">{suspect.name}</h2></div>
         <div className="space-y-4 border-t border-zinc-800 p-4">
@@ -51,9 +61,8 @@ export default function SuspectsPage() {
             </div>}
           </div>
           <div className="space-y-2"><button type="button" onClick={() => setOpenNotes((prev) => ({ ...prev, [suspect.id]: !prev[suspect.id] }))} aria-expanded={!!openNotes[suspect.id]} className="flex w-full items-center justify-between rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-left"><span className="text-xs font-mono text-zinc-400">수사 노트 ({notes[suspect.id]?.length ?? 0})</span><span className="text-xs text-amber-300">{openNotes[suspect.id] ? "접기 ▲" : "열기 ▼"}</span></button>
-            {openNotes[suspect.id] && <div className="space-y-2">{loading ? <p className="text-xs text-zinc-600">메모 불러오는 중...</p> : (notes[suspect.id] ?? []).map((note) => <div key={note.id} className="rounded border border-zinc-800 bg-zinc-950 p-3"><div className="flex justify-between gap-2"><span className="text-xs font-bold text-amber-300">{note.authorName}</span>{note.authorName === name && <button type="button" onClick={() => void removeNote(note.id)} className="text-xs text-zinc-500">삭제</button>}</div><p className="mt-1 whitespace-pre-wrap text-sm text-zinc-200">{note.body}</p></div>)}
-            <textarea value={drafts[suspect.id] ?? ""} onChange={(event) => setDrafts((prev) => ({ ...prev, [suspect.id]: event.target.value }))} placeholder="이 용의자에 대한 메모를 남기세요…" rows={3} className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-sm text-zinc-200 placeholder:text-zinc-600 focus:border-amber-500/60 focus:outline-none" />
-            <button type="button" onClick={() => void submitNote(suspect.id)} disabled={!drafts[suspect.id]?.trim() || addingId === suspect.id} className="w-full rounded border border-amber-400/60 py-2 text-sm font-bold text-amber-200 disabled:opacity-40">{addingId === suspect.id ? "추가 중..." : "메모 추가"}</button><p className="text-[10px] text-zinc-600">메모는 조 전체에 공유됩니다.</p></div>}
+            {openNotes[suspect.id] && <div className="space-y-2">{loading ? <p className="text-xs text-zinc-600">메모 불러오는 중...</p> : (notes[suspect.id] ?? []).map((note) => <div key={note.id} className="rounded border border-zinc-800 bg-zinc-950 p-3"><div className="flex justify-between gap-2"><span className="text-xs font-bold text-amber-300">{note.authorName}</span>{note.authorName === name && <div className="flex gap-3"><button type="button" onClick={() => { setEditingNoteId(note.id); setEditBody(note.body); }} className="text-xs text-amber-300">수정</button><button type="button" onClick={() => void removeNote(note.id)} className="text-xs text-zinc-500">삭제</button></div>}</div>{editingNoteId === note.id ? <div className="mt-2 space-y-2"><textarea value={editBody} onChange={(event) => setEditBody(event.target.value)} rows={3} className="w-full resize-y rounded border border-amber-400/60 bg-zinc-900 p-2 text-sm text-zinc-100 focus:outline-none" /><div className="flex gap-2"><button type="button" onClick={() => void saveEditedNote()} disabled={!editBody.trim()} className="rounded bg-amber-400 px-3 py-1.5 text-xs font-bold text-zinc-950 disabled:opacity-40">저장</button><button type="button" onClick={() => { setEditingNoteId(null); setEditBody(""); }} className="rounded border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300">취소</button></div></div> : <p className="mt-1 whitespace-pre-wrap text-sm text-zinc-200">{note.body}</p>}</div>)}
+            {!loading && !ownNote ? <><textarea value={drafts[suspect.id] ?? ""} onChange={(event) => setDrafts((prev) => ({ ...prev, [suspect.id]: event.target.value }))} placeholder="이 용의자에 대한 메모를 남기세요…" rows={3} className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-sm text-zinc-200 placeholder:text-zinc-600 focus:border-amber-500/60 focus:outline-none" /><button type="button" onClick={() => void submitNote(suspect.id)} disabled={!drafts[suspect.id]?.trim() || addingId === suspect.id} className="w-full rounded border border-amber-400/60 py-2 text-sm font-bold text-amber-200 disabled:opacity-40">{addingId === suspect.id ? "추가 중..." : "메모 추가"}</button></> : !loading ? <p className="text-[10px] text-zinc-600">용의자당 본인 수사노트는 1개만 작성할 수 있습니다.</p> : null}<p className="text-[10px] text-zinc-600">메모는 조 전체에 공유됩니다.</p></div>}
           </div>
         </div>
       </div>;

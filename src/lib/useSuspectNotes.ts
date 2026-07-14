@@ -22,6 +22,10 @@ export function useSuspectNotes() {
     });
     const channel = supabase.channel(`suspect_notes_${team.teamNumber}`).on("postgres_changes", { event: "*", schema: "public", table: "suspect_notes", filter: `pair_id=eq.${team.teamNumber}` }, (payload) => {
       if (payload.eventType === "INSERT") append(mapRow(payload.new as Row));
+      if (payload.eventType === "UPDATE") {
+        const updated = mapRow(payload.new as Row);
+        setNotes((prev) => ({ ...prev, [updated.suspectId]: (prev[updated.suspectId] ?? []).map((note) => note.id === updated.id ? updated : note) }));
+      }
       if (payload.eventType === "DELETE") { const id = (payload.old as { id: string }).id; setNotes((prev) => Object.fromEntries(Object.entries(prev).map(([key, items]) => [key, items.filter((item) => item.id !== id)]))); }
     }).subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -37,5 +41,11 @@ export function useSuspectNotes() {
     // Realtime DELETE는 설정에 따라 이전 행의 id를 보내지 않을 수 있어 즉시 제거한다.
     setNotes((prev) => Object.fromEntries(Object.entries(prev).map(([key, items]) => [key, items.filter((item) => item.id !== id)])));
   }, []);
-  return { notes, loading, addNote, deleteNote, name: team?.name.trim() ?? "" };
+  const updateNote = useCallback(async (id: string, body: string) => {
+    if (!body.trim()) return;
+    const { error } = await supabase.from("suspect_notes").update({ body: body.trim() }).eq("id", id);
+    if (error) throw error;
+    setNotes((prev) => Object.fromEntries(Object.entries(prev).map(([key, items]) => [key, items.map((note) => note.id === id ? { ...note, body: body.trim() } : note)])));
+  }, []);
+  return { notes, loading, addNote, updateNote, deleteNote, name: team?.name.trim() ?? "" };
 }

@@ -218,7 +218,7 @@ export default function EvidencePage() {
       )}
 
       {previewUrl && (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/70 p-3">
+        <div className="fixed inset-0 z-[80] flex items-end bg-black/70 p-3">
           <div className="max-h-[calc(100dvh-5rem)] w-full overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-950 p-4 pb-24 shadow-2xl">
             <div className="space-y-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -253,8 +253,8 @@ export default function EvidencePage() {
       )}
 
       {lightboxPhoto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
-          <div className="w-full max-w-lg space-y-3">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-black/90 p-4">
+          <div className="max-h-full w-full max-w-lg space-y-3 overflow-y-auto pb-[calc(1rem+env(safe-area-inset-bottom))]">
             <div className="flex items-center justify-between text-zinc-300">
               <span className="font-mono text-xs text-amber-300">#{lightboxPhoto.evidenceNumber}</span>
               <button type="button" onClick={() => setLightboxPhotoId(null)} className="rounded px-2 py-1 text-sm">닫기</button>
@@ -274,7 +274,7 @@ export default function EvidencePage() {
       )}
 
       {editingMetadata && lightboxPhoto && (
-        <div className="fixed inset-0 z-[60] flex items-end bg-black/70 p-3">
+        <div className="fixed inset-0 z-[90] flex items-end bg-black/70 p-3">
           <div className="max-h-[calc(100dvh-5rem)] w-full overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-950 p-4 pb-24 shadow-2xl">
             <div className="space-y-3">
               <div>
