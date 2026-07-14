@@ -217,7 +217,7 @@ export const SUSPECTS: Suspect[] = [
     motive: "협박 차단과 회사 보호",
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E07", "E08"])
     relatedEvidenceIds: ["E01", "E02", "E03"],
-    interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
+    interrogationTriggerId: "E13",
     description:
       "녹산건설 대표. 박실장의 자재 횡령과 장부 조작을 알고도 묵인해 왔다. 내부 감사가 다가오자 회사 이미지와 자신의 책임을 지키려 했다는 의심을 받는다.",
     motiveLevel: "높음",
@@ -243,7 +243,7 @@ export const SUSPECTS: Suspect[] = [
     motive: "김사원 보호와 박실장 비리 응징", // TODO: 동기 확정 후 교체
     motiveRevealIds: [], // TODO: 동기 공개 트리거 증거 ID 입력 (예: ["E10"])
     relatedEvidenceIds: ["E04", "E05", "E06"],
-    interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
+    interrogationTriggerId: "E12",
     description:
       "전략기획실 팀장. 정의감이 강하고 박실장의 비리를 오래 의심해 왔다. 김사원과의 관계를 회사에 숨기고 있었으며, 사건 당일 물류창고에 들어간 정황이 있다.",
     motiveLevel: "중간",
@@ -256,7 +256,7 @@ export const SUSPECTS: Suspect[] = [
     motive: "비리 공범 관계와 폭행 방조 부담",
     motiveRevealIds: [],
     relatedEvidenceIds: ["E07", "E08", "E09"],
-    interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
+    interrogationTriggerId: "E14",
     description:
       "물류팀 대리. 박실장의 장부 조작을 가까이서 도운 인물로, 사건 당일 김사원 폭행 장면을 보고도 창고를 떠났다. 이후 약국에 다녀온 기록이 있어 행적 확인이 필요하다.",
     motiveLevel: "중간",
@@ -269,7 +269,7 @@ export const SUSPECTS: Suspect[] = [
     motive: "지속적인 폭행 피해와 허위장부 지시 거부",
     motiveRevealIds: [],
     relatedEvidenceIds: ["E10", "E11", "E12"],
-    interrogationTriggerId: undefined, // TODO: QR 확정 후 심문권 트리거 증거 ID 지정
+    interrogationTriggerId: "E11",
     description:
       "물류팀 사원. 박실장에게 지속적으로 폭행을 당했고, 사건 당일 허위장부 작업 지시를 거부했다. 퇴근 후 행적은 일부 확인되지만 나팀장과의 숨겨진 관계가 사건의 핵심 변수로 남아 있다.",
     motiveLevel: "높음",
@@ -305,11 +305,28 @@ export const QR_CODES: QrCode[] = [
 // 구버전에서는 QR이 증거 수집용이었지만, 사진 방식 전환 후에는 심문권 획득용 퀴즈로 사용한다.
 export interface InterrogationQuiz {
   suspectId: string;
-  question: string;
-  answer: string;
+  question?: string;
+  answer?: string;
+  autoGrant?: boolean;
 }
 
 export const INTERROGATION_QUIZZES: Record<string, InterrogationQuiz> = {
+  f5r7t2: {
+    suspectId: "E",
+    autoGrant: true,
+  },
+  g1h6n8: {
+    suspectId: "C",
+    autoGrant: true,
+  },
+  m1d7k5: {
+    suspectId: "A",
+    autoGrant: true,
+  },
+  n4v8z3: {
+    suspectId: "D",
+    autoGrant: true,
+  },
   w3n5k7: {
     suspectId: "B",
     question: "부검표의 독성 반응을 일으킨 살해 방식 두 단어를 영어로 입력하세요.",

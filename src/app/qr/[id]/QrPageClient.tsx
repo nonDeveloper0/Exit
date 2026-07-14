@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { InterrogationQuiz } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 
@@ -25,8 +25,19 @@ export default function QrPageClient({ qrId, location, quiz, suspectName }: Prop
 
   const earned = quiz ? interrogationEarned.includes(quiz.suspectId) || success : false;
 
+  useEffect(() => {
+    if (!quiz?.autoGrant || earned || submitting) return;
+    setSubmitting(true);
+    void earnInterrogation(quiz.suspectId)
+      .then(() => {
+        navigator.vibrate?.(30);
+        setSuccess(true);
+      })
+      .finally(() => setSubmitting(false));
+  }, [earned, earnInterrogation, quiz?.autoGrant, quiz?.suspectId, submitting]);
+
   async function handleSubmit() {
-    if (!quiz || submitting) return;
+    if (!quiz || !quiz.answer || submitting) return;
 
     if (normalizeAnswer(answer) !== normalizeAnswer(quiz.answer)) {
       setWrong(true);
@@ -81,6 +92,10 @@ export default function QrPageClient({ qrId, location, quiz, suspectName }: Prop
           <p className="mt-2 text-sm text-emerald-100/70">
             이미 심문권을 획득했습니다. 용의자 파일에서 티켓을 확인하세요.
           </p>
+        </div>
+      ) : quiz.autoGrant ? (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-5 text-center">
+          <p className="text-sm font-semibold text-amber-100">심문권을 획득하는 중입니다...</p>
         </div>
       ) : (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-4">

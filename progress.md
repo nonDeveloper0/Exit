@@ -6,6 +6,29 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] 채소장(E15)을 제외한 E11~E14 QR은 문제 입력 없이 진입 즉시 심문권을 획득하도록 변경했다.
+  - 김사원(E11)·나팀장(E12)·나사장(E13)·이대리(E14) QR은 접속 즉시 해당 심문권을 저장·표시한다.
+  - 채소장(E15)은 기존 정답 입력 퀴즈를 그대로 유지한다.
+  - 검증: `npm run lint` 오류 0(기존 `useGameState` 경고 1개), `npm test` 6개 통과, `npm run build` 통과.
+  - 수정 파일: `src/lib/data.ts`, `src/app/qr/[id]/QrPageClient.tsx`, `progress.md`
+
+- [x] `Galaxy_Bells.mp3`를 수신 대기 벨소리로 교체하고, 전화를 받을 때까지 반복 재생되도록 변경했다.
+  - `public/audio/Galaxy_Bells.mp3`에 제공 파일을 배치하고 원본과 SHA-256 해시 일치를 확인했다.
+  - 기존 Web Audio 합성 벨소리를 MP3 재생으로 교체했다. 수신 화면이 표시된 동안 반복 재생되고, 받기·거절·화면 이탈 시 정지한다. 첫 사용자 제스처에서 오디오 재생 권한도 미리 해제한다.
+  - 검증: `npm run lint` 오류 0(기존 `useGameState` 경고 1개), `npm test` 6개 통과, `npm run build` 통과.
+  - 수정 파일: `public/audio/Galaxy_Bells.mp3`, `src/lib/ringtone.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
+- [x] 제공된 `탐정_전화.mp3`를 핸드폰 수신 및 CALL01 음성 증거 재생 파일로 교체했다.
+  - `public/audio/incoming-call.mp3`를 제공 파일로 교체했으며, 수신전화와 CALL01은 같은 `INCOMING_CALL_AUDIO_URL`을 사용하므로 코드 변경 없이 함께 적용된다.
+  - SHA-256 해시로 원본·배포 파일 일치를 확인했다.
+  - 수정 파일: `public/audio/incoming-call.mp3`, `progress.md`
+
+- [x] E11~E15 QR을 용의자별 심문권 획득 퀴즈로 연결했다.
+  - 심문권 배정: 김사원=E11, 나팀장=E12, 나사장=E13, 이대리=E14, 채소장=E15.
+  - 다섯 QR에 정답 입력형 심문권 퀴즈를 등록했다.
+  - 검증: `npm run lint` 오류 0(기존 `useGameState` 경고 1개), `npm test` 6개 통과.
+  - 수정 파일: `src/lib/data.ts`, `progress.md`
+
 - [x] 수사본부 사건 개요의 용의자 표기와 사건 설명을 최신 문구로 갱신한 사용자 수정분을 커밋·푸시한다.
   - 수정 파일: `src/app/home/page.tsx`, `progress.md`
 

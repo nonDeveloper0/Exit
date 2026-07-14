@@ -103,6 +103,8 @@ export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_I
 ```
 
 - 오디오를 교체할 때는 새 파일을 `public/audio/`에 넣고 `INCOMING_CALL_AUDIO_URL`만 변경
+
+수신 대기 벨소리는 `public/audio/Galaxy_Bells.mp3`를 사용하며, 수신 화면이 표시된 동안(받기·거절 전) 반복 재생됩니다.
 - 제목/설명은 `EVIDENCE` 배열의 `CALL01` 항목에서 수정
 - `CALL01`은 증거함에는 보이지만 랭킹 점수와 랭킹 total에서는 제외됨
 - 전화는 **수신 전용 기기(공기계)** 에만 온다(→ 1-5). 공기계의 로그인 여부와 무관하게 관리자가 전화 발행 시 입력한 조에 `CALL01`이 수집된다.
