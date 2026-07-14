@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { usePhotoEvidence } from "@/lib/usePhotoEvidence";
-import { useAllTeamsProgress } from "@/lib/useAllTeamsProgress";
-import { getTeamInfo } from "@/lib/store";
+// [비활성] 수사현황 실시간 순위 관련 import — 복원 시 함께 주석 해제
+// import { useEffect, useState } from "react";
+// import { useAllTeamsProgress } from "@/lib/useAllTeamsProgress";
+// import { getTeamInfo } from "@/lib/store";
 
 export default function MainPage() {
   const { photos } = usePhotoEvidence();
-  const { groups } = useAllTeamsProgress();
-  const [myTeamId, setMyTeamId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const team = getTeamInfo();
-    if (team) setMyTeamId(team.teamNumber);
-  }, []);
+  // [비활성] 수사현황 실시간 순위 — 아래 훅/상태와 하단 JSX 블록을 함께 주석 해제하면 복원됨
+  // const { groups } = useAllTeamsProgress();
+  // const [myTeamId, setMyTeamId] = useState<string | null>(null);
+  //
+  // useEffect(() => {
+  //   const team = getTeamInfo();
+  //   if (team) setMyTeamId(team.teamNumber);
+  // }, []);
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
@@ -81,6 +83,7 @@ export default function MainPage() {
         </ol>
       </div>
 
+      {/* [비활성] 수사현황 실시간 순위 — 복원하려면 이 블록과 상단 훅/import 주석을 함께 해제
       <div className="flex items-center justify-between pt-1">
         <h2 className="text-sm font-semibold text-zinc-300">수사 현황 · 증거수집 순위</h2>
         <span className="text-xs text-zinc-600">전체 조 실시간</span>
@@ -135,6 +138,7 @@ export default function MainPage() {
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
         <span className="text-xs text-zinc-600">실시간 업데이트 중</span>
       </div>
+      */}
     </div>
   );
 }

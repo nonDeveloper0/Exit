@@ -419,6 +419,12 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 홈 화면 "수사 현황 · 증거수집 순위" 비활성화(주석처리) (2026-07-14)
+  - `/home` 하단 전체 조 실시간 순위 블록을 JSX 주석으로 비활성화. 관련 훅/import(`useAllTeamsProgress`, `getTeamInfo`, `useEffect/useState`, `myTeamId`)도 함께 주석 처리해 미사용 변수 경고 없이 정리
+  - 삭제가 아니라 주석 보존 — 상단 훅/import 주석과 하단 JSX 주석 블록을 함께 해제하면 복원됨. `useAllTeamsProgress.ts`는 그대로 둠
+  - "팀 사진 증거"·"수사 방법" 등 나머지 홈 섹션은 유지
+  - 수정 파일: `src/app/home/page.tsx`
+
 - [x] 인앱 QR 스캐너 카메라 재시작 버그 수정 (2026-07-14)
   - `QrScannerModal`의 카메라 `useEffect`가 부모의 인라인 `onClose`(매 렌더 새 함수)에 의존 → evidence 페이지 실시간 갱신 리렌더마다 카메라가 껐다 켜짐(깜빡임·인식 지연)
   - `onClose`를 ref로 고정하고 effect 의존성을 `[open, router, stopStream]`으로 축소 → 카메라는 open 토글에만 반응
