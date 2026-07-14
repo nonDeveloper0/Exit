@@ -6,6 +6,7 @@ import {
   PHOTO_TAGS,
   photoLocationTagLabel,
   photoTagLabel,
+  photoTagTone,
 } from "@/lib/data";
 import { filterPhotoEvidence } from "@/lib/photoEvidenceFilter";
 import { PhotoItem, usePhotoEvidence } from "@/lib/usePhotoEvidence";
@@ -153,8 +154,8 @@ export default function EvidencePage() {
             key={tag.value}
             type="button"
             onClick={() => setActiveFilter(tag.value)}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
-              activeFilter === tag.value ? "bg-amber-400 text-zinc-950" : "bg-zinc-800 text-zinc-300"
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-shadow ${photoTagTone(tag.value)} ${
+              activeFilter === tag.value ? "ring-2 ring-white/70" : "opacity-75"
             }`}
           >
             {tag.label}
@@ -222,7 +223,7 @@ export default function EvidencePage() {
                   </p>
                   <div className="flex flex-wrap justify-center gap-1">
                     {suspectLabel && (
-                      <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-bold text-zinc-700">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${photoTagTone(photo.suspectTag)}`}>
                         {suspectLabel}
                       </span>
                     )}
@@ -293,7 +294,7 @@ export default function EvidencePage() {
               <p className="text-xs font-mono text-zinc-500">증거 설명</p>
               <p className="mt-1 text-sm">{lightboxPhoto.caption || "— 기록 없음 —"}</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {photoTagLabel(lightboxPhoto.suspectTag) && <span className="rounded-full bg-zinc-700 px-2 py-1 text-xs">{photoTagLabel(lightboxPhoto.suspectTag)}</span>}
+                {photoTagLabel(lightboxPhoto.suspectTag) && <span className={`rounded-full px-2 py-1 text-xs font-bold ${photoTagTone(lightboxPhoto.suspectTag)}`}>{photoTagLabel(lightboxPhoto.suspectTag)}</span>}
                 {photoLocationTagLabel(lightboxPhoto.locationTag) && <span className="rounded-full bg-amber-400/20 px-2 py-1 text-xs text-amber-200">{photoLocationTagLabel(lightboxPhoto.locationTag)}</span>}
               </div>
             </div>

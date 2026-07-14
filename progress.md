@@ -6,6 +6,12 @@
 
 ## 작업 시작 (2026-07-14)
 
+- [x] `/screen/phone2` 정적 화면의 브라우저 제목을 `채소장 폰`으로 변경했다. (대화·연락처의 동그리 인물명은 유지)
+  - 수정 파일: `public/screen/dongguri_phone_room.html`, `progress.md`
+- [x] 용의자 파일을 심문권·개인 메모 중심으로 단순화하고, 사진 인물 태그를 인물별 고정 파스텔 색상으로 통일했다.
+  - 태그 톤: A 앰버, B 민트, C 블루, D 라일락, E 로즈, PARK 중립 회색, 미지정 zinc 중립색. 증거함 필터·폴라로이드·라이트박스·관리자 사진 점검에 같은 `photoTagTone()`을 적용했다.
+  - 용의자 파일에서는 동기·설명·관련 사진을 제거하고 모든 인물의 심문권 상태와 개인 수사 노트만 표시한다.
+  - 수정 파일: `src/lib/data.ts`, `src/app/evidence/page.tsx`, `src/app/admin/page.tsx`, `src/app/suspects/page.tsx`, `tests/photoTagPresentation.test.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
 - [x] `/screen/phone2` URL은 유지하고 rewrite의 연결 대상을 `public/screen/dongguri_phone_room.html`로 교체했다.
   - 수정 파일: `next.config.ts`, `progress.md`
 - [ ] /home에 전체 조 사진 증거 실시간 현황을 통합하고, 하단 `현황` 탭과 /ranking 경로를 제거한다.

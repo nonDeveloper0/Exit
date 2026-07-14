@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
-import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, photoTagLabel } from "@/lib/data";
+import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, photoTagLabel, photoTagTone } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 
 const ADMIN_PASSWORD = "0000";
@@ -670,9 +670,14 @@ function AdminPanel() {
                       </span>
                     </div>
                     <p className="truncate text-xs text-zinc-400">{photo.caption || "기록 없음"}</p>
-                    <p className="text-[11px] text-zinc-600">
-                      {[tagLabel, new Date(photo.created_at).toLocaleString("ko-KR")].filter(Boolean).join(" · ")}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-zinc-600">
+                      {tagLabel && (
+                        <span className={`rounded-full px-2 py-0.5 font-bold ${photoTagTone(photo.suspect_tag)}`}>
+                          {tagLabel}
+                        </span>
+                      )}
+                      <span>{new Date(photo.created_at).toLocaleString("ko-KR")}</span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => void setPhotoStatus(photo.id, rejected ? "ok" : "rejected")}

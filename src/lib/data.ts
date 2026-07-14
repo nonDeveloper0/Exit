@@ -62,6 +62,26 @@ export function photoTagLabel(value: string | null | undefined): string | null {
   return PHOTO_TAGS.find((tag) => tag.value === value)?.label ?? null;
 }
 
+// 사진 보드·라이트박스·관리자 화면에서 재사용하는 인물 태그의 고정 파스텔 톤.
+export function photoTagTone(value: string | null | undefined): string {
+  switch (value) {
+    case "A":
+      return "bg-amber-200 text-amber-950";
+    case "B":
+      return "bg-emerald-200 text-emerald-950";
+    case "C":
+      return "bg-blue-200 text-blue-950";
+    case "D":
+      return "bg-violet-200 text-violet-950";
+    case "E":
+      return "bg-rose-200 text-rose-950";
+    case "PARK":
+      return "bg-zinc-200 text-zinc-700";
+    default:
+      return "bg-zinc-700 text-zinc-300";
+  }
+}
+
 // 업로드 시 "관련 장소" 태그 드롭다운. 미지정은 UI에서 빈 문자열("")로 처리하고 DB에는 null로 저장한다.
 export const PHOTO_LOCATION_TAGS: { value: string; label: string }[] = [
   { value: "", label: "미지정" },
