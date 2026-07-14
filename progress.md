@@ -419,6 +419,12 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   (수집 연동·보고서 스타일은 완료, 내용만 필요. 안내: `docs/01_md/EDIT_GUIDE.md` 12장)
 ## Latest update
 
+- [x] 인앱 QR 스캐너 "등록되지 않은 QR" 진단·보강 (2026-07-14)
+  - 증상: 기본 카메라로는 배포 URL(`.../qr/x4k9m2`)로 접속되는데 인앱 스캐너만 "등록되지 않은 QR" 표시
+  - 확인: `resolveQrPath`는 소문자 등록 id URL을 정상 변환함(node 재현 테스트). 실패 케이스는 대문자 id 또는 미등록 id뿐
+  - 보강: `resolveQrPath`를 대소문자 무시로 매칭하고 등록된 정규 id로 이동(인쇄 QR 대문자 대응). 에러 메시지에 디코드된 원문을 표시해 실패 원인(어떤 값이 왜 미등록인지)이 바로 보이게 함
+  - 수정 파일: `src/lib/qrScan.ts`, `src/components/QrScannerModal.tsx`
+
 - [x] phone2·phone3 첫 화면 뒤로가기 유출 보강 (갤럭시 One UI 예측형 뒤로가기) (2026-07-14)
   - 증상: 설치 PWA 첫 화면에서 제스처 뒤로가기 시 앱을 벗어남(갤럭시). 원인은 더미 히스토리를 1겹만 쌓아 히스토리가 얕을 때 One UI가 "앱 종료"로 판단
   - 조치: 더미 히스토리를 5겹 쌓고 popstate마다 2겹씩 재충전해 항상 여유분 유지. `dongguri_phone_room.html`·`flower_phone_call_log.html` 동일 적용

@@ -74,7 +74,7 @@ export default function QrScannerModal({ open, onClose }: QrScannerModalProps) {
               }
               if (lastInvalidRef.current !== code.data) {
                 lastInvalidRef.current = code.data;
-                setNotice("등록되지 않은 QR입니다. 다시 시도하세요.");
+                setNotice(`등록되지 않은 QR입니다: ${code.data}`);
               }
             }
           }
