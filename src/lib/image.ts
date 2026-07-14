@@ -2,8 +2,8 @@
 
 export async function compressImage(
   file: File,
-  maxSize = 1080,
-  quality = 0.72
+  maxSize = 2048,
+  quality = 0.9
 ): Promise<Blob> {
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   let { width, height } = bitmap;
