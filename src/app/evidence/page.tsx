@@ -22,6 +22,7 @@ export default function EvidencePage() {
   const [locationTag, setLocationTag] = useState("");
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [lightboxPhotoId, setLightboxPhotoId] = useState<string | null>(null);
   const [editingMetadata, setEditingMetadata] = useState(false);
   const [editedSuspectTag, setEditedSuspectTag] = useState("");
@@ -139,37 +140,66 @@ export default function EvidencePage() {
         <span className="text-base font-bold">현장 증거 촬영</span>
       </button>
 
-      <div className="flex gap-2 overflow-x-auto pb-1" aria-label="인물별 사진 필터">
+      <div className="relative">
         <button
           type="button"
-          onClick={() => setActiveFilter("all")}
-          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
-            activeFilter === "all" ? "bg-amber-400 text-zinc-950" : "bg-zinc-800 text-zinc-300"
+          onClick={() => setFilterMenuOpen((prev) => !prev)}
+          aria-label="인물별 사진 필터"
+          aria-expanded={filterMenuOpen}
+          className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
+            activeFilter === "all"
+              ? "border-zinc-700 bg-zinc-800 text-zinc-300"
+              : "border-amber-400/60 bg-amber-400/10 text-amber-300"
           }`}
         >
-          전체
+          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+            <path d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6l-4.8 6.4V16a1 1 0 01-1.45.89l-2-1A1 1 0 017 15v-4L2.2 4.6A1 1 0 013 4z" />
+          </svg>
         </button>
-        {PHOTO_TAGS.map((tag) => (
-          <button
-            key={tag.value}
-            type="button"
-            onClick={() => setActiveFilter(tag.value)}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-shadow ${photoTagTone(tag.value)} ${
-              activeFilter === tag.value ? "ring-2 ring-white/70" : "opacity-75"
-            }`}
-          >
-            {tag.label}
-          </button>
-        ))}
-        <button
-          type="button"
-          onClick={() => setActiveFilter("untagged")}
-          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
-            activeFilter === "untagged" ? "bg-amber-400 text-zinc-950" : "bg-zinc-800 text-zinc-300"
-          }`}
-        >
-          미지정
-        </button>
+
+        {filterMenuOpen && (
+          <div className="absolute left-0 top-11 z-10 w-44 space-y-1 rounded-lg border border-zinc-700 bg-zinc-900 p-2 shadow-xl">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveFilter("all");
+                setFilterMenuOpen(false);
+              }}
+              className={`w-full rounded px-2 py-1.5 text-left text-xs font-bold ${
+                activeFilter === "all" ? "bg-amber-400 text-zinc-950" : "text-zinc-300 hover:bg-zinc-800"
+              }`}
+            >
+              전체
+            </button>
+            {PHOTO_TAGS.map((tag) => (
+              <button
+                key={tag.value}
+                type="button"
+                onClick={() => {
+                  setActiveFilter(tag.value);
+                  setFilterMenuOpen(false);
+                }}
+                className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs font-bold transition-shadow ${
+                  activeFilter === tag.value ? "ring-2 ring-white/70" : ""
+                }`}
+              >
+                <span className={`rounded-full px-2 py-0.5 ${photoTagTone(tag.value)}`}>{tag.label}</span>
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveFilter("untagged");
+                setFilterMenuOpen(false);
+              }}
+              className={`w-full rounded px-2 py-1.5 text-left text-xs font-bold ${
+                activeFilter === "untagged" ? "bg-amber-400 text-zinc-950" : "text-zinc-300 hover:bg-zinc-800"
+              }`}
+            >
+              미지정
+            </button>
+          </div>
+        )}
       </div>
 
       {loading ? (

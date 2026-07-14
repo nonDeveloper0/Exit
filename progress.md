@@ -580,3 +580,10 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   - `laptop.html`/`ipad.html`에는 있지만 현재 phone2 대상(`dongguri_phone_room.html`)·신규 phone3에는 빠져 있던 뒤로가기 방지 스니펫(`history.pushState` + `popstate` 재작성 + `beforeunload`)을 두 파일에 동일하게 추가
   - `EDIT_GUIDE.md` 12절에 phone3 파일/URL·뒤로가기 방지 대상 화면 목록을 갱신(소유자 미확정 초안임을 표기)
   - 수정 파일: `next.config.ts`, `public/screen/dongguri_phone_room.html`, `public/screen/flower_phone_call_log.html`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
+- [x] 증거함 인물 필터를 아이콘 버튼으로 단순화 + 용의자 카드에서 머그샷/CASE FILE 제거 (2026-07-14)
+  - `/evidence`: 전체·인물별(색상)·미지정 버튼이 나열되던 필터 줄을 필터 아이콘 버튼 하나로 교체. 누르면 같은 옵션(전체/인물별 색상 태그/미지정)이 드롭다운으로 뜨고 선택 시 닫힘. 필터가 "전체"가 아니면 아이콘이 앰버로 강조 표시됨. 필터 로직(`activeFilter` 값, `filterPhotoEvidence`)은 변경 없음.
+  - `/suspects`: 카드에서 머그샷(이미지/실루엣)과 "CASE FILE" 배지를 제거하고 심문권·수사 노트만 표시. 접기/열기 아코디언도 함께 제거해 항상 펼친 상태로 표시(심문권 획득 여부를 탭 없이 바로 확인할 수 있도록 — 사용자가 필요성 여부를 위임해 이 방향으로 결정).
+  - `EDIT_GUIDE.md` "4. 용의자 정보 수정"의 `imageUrl`/머그샷 안내를 제거하고, 카드에는 코드명·이름·심문권·수사 노트만 렌더링됨을 명시.
+  - 검증: `npm run lint`(두 파일 오류 없음, 기존 무관 경고만), `npx tsc --noEmit`(두 파일 오류 없음), `npm test` 6개 통과. 로컬 dev 서버(`localhost:3000`) SSR 응답으로 "CASE FILE"/"파일 열기" 제거, "심문권"/"수사 노트" 유지, 필터 아이콘 aria-label 렌더링을 확인. Chrome 확장 미연결로 실제 클릭 상호작용은 눈으로 확인 못함.
+  - 수정 파일: `src/app/evidence/page.tsx`, `src/app/suspects/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
