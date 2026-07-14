@@ -316,6 +316,7 @@ export default function EvidencePage() {
                 onSuspectChange={setEditedSuspectTag}
                 onLocationChange={setEditedLocationTag}
                 idPrefix="edit"
+                disabled={isUpdatingSelectedPhoto}
               />
               {metadataError && <p className="text-xs text-red-400">{metadataError}</p>}
               <div className="flex gap-2">
@@ -338,6 +339,7 @@ interface MetadataSelectsProps {
   onSuspectChange: (value: string) => void;
   onLocationChange: (value: string) => void;
   idPrefix: string;
+  disabled?: boolean;
 }
 
 function MetadataSelects({ suspectTag, locationTag, onSuspectChange, onLocationChange, idPrefix, disabled = false }: MetadataSelectsProps) {
