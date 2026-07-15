@@ -47,7 +47,7 @@ export default function MainPage() {
         <div className="space-y-2 text-sm text-zinc-300">
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">피해자</span>
-            <span>현장 관리자 (신원 확인됨)</span>
+            <span>물류창고 관리자 (신원 확인됨)</span>
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">장소</span>
@@ -84,7 +84,6 @@ export default function MainPage() {
         <h2 className="text-sm font-semibold text-amber-400">수사 방법</h2>
         <ol className="text-sm text-zinc-400 space-y-1.5 list-decimal list-inside">
           <li>현장의 단서를 사진으로 촬영해 증거함에 올린다</li>
-          <li>사진마다 관련 인물을 태그한다</li>
           <li>QR을 찍어 문제를 풀면 용의자 심문권을 얻는다</li>
           <li>범인을 선택하고 최종 추리를 제출한다</li>
         </ol>

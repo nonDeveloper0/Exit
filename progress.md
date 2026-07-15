@@ -1,5 +1,16 @@
 # EXIT 2026 — 진행 현황
 
+## 작업 완료 (2026-07-16)
+
+- [x] 수사본부 피해자 직책 및 수사 방법 수정분을 커밋해 `origin/master`로 푸시한다.
+  - 수정 파일: `src/app/home/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
+## 작업 완료 (2026-07-15)
+
+- [x] 수사본부 피해자 직책을 물류창고 관리자로 수정하고, 수사 방법의 사진별 관련 인물 태그 단계를 제거했다.
+  - 검증: `npx eslint src/app/home/page.tsx` 통과, `git diff --check` 통과.
+  - 수정 파일: `src/app/home/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
 ## 작업 시작 (2026-07-15)
 
 - [x] 로컬 Git 저장소를 원격 `origin/master` 최신 상태로 확인·갱신했다.
