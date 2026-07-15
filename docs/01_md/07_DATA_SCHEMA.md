@@ -203,9 +203,30 @@ $$;
 
 GRANT EXECUTE ON FUNCTION allocate_photo_evidence_number(TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION reset_photo_evidence_number_counters() TO anon, authenticated;
+CREATE OR REPLACE FUNCTION enforce_photo_evidence_limit()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtext(NEW.pair_id));
+
+  IF (SELECT COUNT(*) FROM photo_evidence WHERE pair_id = NEW.pair_id) >= 30 THEN
+    RAISE EXCEPTION 'a team can upload at most 30 photos';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS photo_evidence_limit_before_insert ON photo_evidence;
+CREATE TRIGGER photo_evidence_limit_before_insert
+  BEFORE INSERT ON photo_evidence
+  FOR EACH ROW
+  EXECUTE FUNCTION enforce_photo_evidence_limit();
 ```
 
-- `pair_id`: 업로드한 조 번호. `game_state.pairings`에 짝 조가 있으면 두 조의 사진을 함께 조회한다.
+- `pair_id`: 업로드한 조 번호. `game_state.pairings`에 짝 조가 있으면 두 조의 사진을 함께 조회한다. 조당 사진은 최대 30장으로 DB 트리거가 제한한다.
 - `evidence_group_key`: 번호를 공유하는 수사 그룹 키. 페어 조면 사전순 조합(예: `1:4`), 비페어 조면 해당 조 번호다.
 - `evidence_number`: `evidence_group_key` 안에서만 단조 증가하는 영구 번호다. 다른 조·페어에는 영향을 주지 않으며, 보드 정렬·필터·사진 제외와 관계없이 변하지 않는다.
 - `image_url`: public 버킷 `evidence-photos`의 공개 URL.

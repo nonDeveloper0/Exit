@@ -6,6 +6,7 @@ import { filterPhotoEvidence } from "@/lib/photoEvidenceFilter";
 import { PhotoItem, usePhotoEvidence } from "@/lib/usePhotoEvidence";
 import QrScannerModal from "@/components/QrScannerModal";
 import { useRole } from "@/lib/useRole";
+import { MAX_PHOTOS_PER_TEAM } from "@/lib/photoUploadLimit";
 
 function locationTabClass(location: string, selected: boolean): string {
   const colors: Record<string, string> = {
@@ -24,7 +25,7 @@ function locationTabClass(location: string, selected: boolean): string {
 }
 
 export default function EvidencePage() {
-  const { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, ownTeamId } =
+  const { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, ownTeamId, ownPhotoCount, photoLimitReached } =
     usePhotoEvidence();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -96,8 +97,8 @@ export default function EvidencePage() {
     try {
       await uploadPhoto(selectedFile, caption, activeLocation);
       closeUploadSheet();
-    } catch {
-      setUploadError("업로드 실패. 네트워크 상태를 확인하고 다시 시도하세요.");
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "업로드 실패. 네트워크 상태를 확인하고 다시 시도하세요.");
     }
   }
 
@@ -121,7 +122,7 @@ export default function EvidencePage() {
         <div className="text-xs font-mono tracking-widest text-amber-400 uppercase">Evidence Vault</div>
         <h1 className="text-2xl font-bold text-zinc-100">증거 보관함</h1>
         <p className="text-sm text-zinc-500">
-          {ownTeamId ? `${ownTeamId}조 폴라로이드 ${photos.length}장` : "조 정보를 찾을 수 없습니다"}
+          {ownTeamId ? `${ownTeamId}조 사진 ${ownPhotoCount}/${MAX_PHOTOS_PER_TEAM}장` : "조 정보를 찾을 수 없습니다"}
         </p>
       </div>
 
@@ -138,14 +139,14 @@ export default function EvidencePage() {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={!ownTeamId || !roleLoaded || !isLeader}
+          disabled={!ownTeamId || !roleLoaded || !isLeader || photoLimitReached}
           className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-lg border border-amber-400/40 bg-amber-400/10 p-4 text-amber-200 transition-colors active:scale-[0.99] disabled:opacity-50"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
             <path d="M4 8a2 2 0 0 1 2-2h1.2a1 1 0 0 0 .86-.5l.9-1.5a1 1 0 0 1 .86-.5h4.36a1 1 0 0 1 .86.5l.9 1.5a1 1 0 0 0 .86.5H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
             <circle cx="12" cy="13" r="3.5" />
           </svg>
-          <span className="text-sm font-bold leading-tight text-center">현장 증거 촬영</span>
+          <span className="text-sm font-bold leading-tight text-center">{photoLimitReached ? "사진 한도 도달" : "현장 증거 촬영"}</span>
         </button>
 
         <button
@@ -166,6 +167,7 @@ export default function EvidencePage() {
       </div>
 
       {roleLoaded && !isLeader && <p className="-mt-2 text-center text-xs text-zinc-500">사진 업로드와 QR 스캔은 조장만 할 수 있습니다.</p>}
+      <p className="-mt-2 text-center text-xs text-zinc-500">{photoLimitReached ? `사진 등록 한도(${MAX_PHOTOS_PER_TEAM}장)에 도달했습니다.` : `사건과 관련된 단서 사진만 업로드하세요. 팀당 최대 ${MAX_PHOTOS_PER_TEAM}장까지 등록할 수 있습니다.`}</p>
 
       <div className="grid grid-cols-4 gap-1">
         {PHOTO_LOCATION_TAGS.map((location) => <button key={location.value} type="button" onClick={() => setActiveLocation(location.value)} className={`min-w-0 rounded-full border px-1 py-2 text-[10px] font-bold tracking-tight whitespace-nowrap transition-shadow ${locationTabClass(location.value, activeLocation === location.value)}`}>{location.label}</button>)}

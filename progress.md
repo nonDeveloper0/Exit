@@ -2,6 +2,15 @@
 
 ## 작업 시작 (2026-07-15)
 
+- [x] 팀당 사진 증거 업로드를 최대 30장으로 제한하고, 업로드 안내 문구를 추가했다. Supabase SQL Editor에서 DB 트리거 적용까지 완료했다.
+  - 증거함에서 내 조 사진 수를 `현재/30장`으로 표시하고, 한도 도달 시 촬영 버튼을 비활성화한다. QR 스캐너는 계속 사용할 수 있다.
+  - 안내 문구: `사건과 관련된 단서 사진만 업로드하세요. 팀당 최대 30장까지 등록할 수 있습니다.`
+  - 업로드 전 재확인과 DB 트리거 SQL을 함께 추가해 같은 조의 동시 업로드도 30장을 넘기지 않도록 했다. DB 트리거는 `docs/01_md/07_DATA_SCHEMA.md`의 SQL을 Supabase SQL Editor에서 실행해야 적용된다.
+  - 검증: 대상 린트 통과, `npm test` 10개 통과.
+  - 수정 파일: `src/lib/photoUploadLimit.ts`, `src/lib/usePhotoEvidence.ts`, `src/app/evidence/page.tsx`, `docs/01_md/07_DATA_SCHEMA.md`, `tests/photoUploadLimit.test.ts`, `progress.md`
+
+## 작업 시작 (2026-07-15)
+
 - [x] QR 심문권 E11~E15의 표시 장소를 현장 배치에 맞게 수정했다.
   - E11=자재 물류창고, E12=나팀장 사무실, E13=나사장 집무실, E14=자재 물류창고, E15=채소장 연구실.
   - QR 주소와 심문권 연결은 유지하고, QR 배치 문서와 회귀 테스트를 함께 갱신했다.

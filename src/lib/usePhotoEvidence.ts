@@ -6,6 +6,7 @@ import { compressImage } from "./image";
 import { getPhotoEvidenceGroupKey } from "./photoEvidenceNumbering";
 import { supabase } from "./supabase";
 import { getTeamInfo } from "./store";
+import { hasReachedPhotoLimit } from "./photoUploadLimit";
 
 export interface PhotoItem {
   id: string;
@@ -171,9 +172,19 @@ export function usePhotoEvidence() {
       if (!ownTeamId) return;
 
       setUploading(true);
+      let path: string | null = null;
       try {
+        const { count, error: countError } = await supabase
+          .from("photo_evidence")
+          .select("id", { count: "exact", head: true })
+          .eq("pair_id", ownTeamId);
+        if (countError) throw countError;
+        if (hasReachedPhotoLimit(count ?? 0)) {
+          throw new Error("팀당 사진은 최대 30장까지 업로드할 수 있습니다.");
+        }
+
         const blob = await compressImage(file);
-        const path = `${ownTeamId}/${crypto.randomUUID()}.jpg`;
+        path = `${ownTeamId}/${crypto.randomUUID()}.jpg`;
         const { error: uploadError } = await supabase.storage
           .from(PHOTO_BUCKET)
           .upload(path, blob, { contentType: "image/jpeg", upsert: false });
@@ -209,6 +220,9 @@ export function usePhotoEvidence() {
           const row = mapRow(inserted as Row);
           setPhotos((prev) => (prev.some((photo) => photo.id === row.id) ? prev : [row, ...prev]));
         }
+      } catch (error) {
+        if (path) await supabase.storage.from(PHOTO_BUCKET).remove([path]);
+        throw error;
       } finally {
         setUploading(false);
       }
@@ -236,5 +250,6 @@ export function usePhotoEvidence() {
     []
   );
 
-  return { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, ownTeamId };
+  const ownPhotoCount = ownTeamId ? photos.filter((photo) => photo.pairId === ownTeamId).length : 0;
+  return { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, ownTeamId, ownPhotoCount, photoLimitReached: hasReachedPhotoLimit(ownPhotoCount) };
 }
