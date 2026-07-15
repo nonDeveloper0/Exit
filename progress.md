@@ -2,6 +2,12 @@
 
 ## 작업 시작 (2026-07-15)
 
+- [x] 로컬 Git 저장소를 원격 `origin/master` 최신 상태로 확인·갱신했다.
+  - `git pull --ff-only origin master` 결과: 이미 최신 상태.
+  - 수정 파일: `progress.md`
+
+## 작업 시작 (2026-07-15)
+
 - [x] /phone에서 수락한 마지막 통화 내용을 다시 들을 수 있게 한다.
   - 통화 수락 시 기기별 녹음 보관 상태를 저장하고, /phone 대기 화면에 통화내용 다시 듣기 버튼을 표시한다.
   - 수정 파일: src/lib/store.ts, src/components/IncomingCallOverlay.tsx, src/app/phone/page.tsx, docs/01_md/EDIT_GUIDE.md, progress.md
@@ -847,3 +853,9 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   - `EDIT_GUIDE.md` "4. 용의자 정보 수정"의 `imageUrl`/머그샷 안내를 제거하고, 카드에는 코드명·이름·심문권·수사 노트만 렌더링됨을 명시.
   - 검증: `npm run lint`(두 파일 오류 없음, 기존 무관 경고만), `npx tsc --noEmit`(두 파일 오류 없음), `npm test` 6개 통과. 로컬 dev 서버(`localhost:3000`) SSR 응답으로 "CASE FILE"/"파일 열기" 제거, "심문권"/"수사 노트" 유지, 필터 아이콘 aria-label 렌더링을 확인. Chrome 확장 미연결로 실제 클릭 상호작용은 눈으로 확인 못함.
   - 수정 파일: `src/app/evidence/page.tsx`, `src/app/suspects/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+## 작업 완료 (2026-07-15)
+
+- [x] 사진 업로드 한도를 조별 30장으로 명확히 했다. 짝 조여도 한도를 공유하지 않아, 예를 들어 1조와 4조는 각각 30장씩 총 60장까지 등록할 수 있다.
+  - 증거함에 조별 한도와 짝 조 미공유 안내를 표시하고, 업로드 오류·상수·DB 트리거 메시지를 조 기준으로 갱신했다.
+  - 검증: `npm test` 10개 통과, `npm run build` 통과.
+  - 수정 파일: `src/lib/photoUploadLimit.ts`, `src/lib/usePhotoEvidence.ts`, `src/app/evidence/page.tsx`, `tests/photoUploadLimit.test.ts`, `docs/01_md/07_DATA_SCHEMA.md`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`

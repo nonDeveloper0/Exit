@@ -211,8 +211,10 @@ AS $$
 BEGIN
   PERFORM pg_advisory_xact_lock(hashtext(NEW.pair_id));
 
+  -- pair_id는 페어 팀이 아니라 업로드한 개별 조 번호다.
+  -- 따라서 1조와 4조가 짝 조여도 각각 30장까지 업로드할 수 있다.
   IF (SELECT COUNT(*) FROM photo_evidence WHERE pair_id = NEW.pair_id) >= 30 THEN
-    RAISE EXCEPTION 'a team can upload at most 30 photos';
+    RAISE EXCEPTION 'a group can upload at most 30 photos';
   END IF;
 
   RETURN NEW;

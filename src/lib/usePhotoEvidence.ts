@@ -180,7 +180,7 @@ export function usePhotoEvidence() {
           .eq("pair_id", ownTeamId);
         if (countError) throw countError;
         if (hasReachedPhotoLimit(count ?? 0)) {
-          throw new Error("팀당 사진은 최대 30장까지 업로드할 수 있습니다.");
+          throw new Error("조당 사진은 최대 30장까지 업로드할 수 있습니다.");
         }
 
         const blob = await compressImage(file);

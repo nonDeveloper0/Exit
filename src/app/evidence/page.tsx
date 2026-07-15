@@ -6,7 +6,7 @@ import { filterPhotoEvidence } from "@/lib/photoEvidenceFilter";
 import { PhotoItem, usePhotoEvidence } from "@/lib/usePhotoEvidence";
 import QrScannerModal from "@/components/QrScannerModal";
 import { useRole } from "@/lib/useRole";
-import { MAX_PHOTOS_PER_TEAM } from "@/lib/photoUploadLimit";
+import { MAX_PHOTOS_PER_GROUP } from "@/lib/photoUploadLimit";
 
 function locationTabClass(location: string, selected: boolean): string {
   const colors: Record<string, string> = {
@@ -122,7 +122,7 @@ export default function EvidencePage() {
         <div className="text-xs font-mono tracking-widest text-amber-400 uppercase">Evidence Vault</div>
         <h1 className="text-2xl font-bold text-zinc-100">증거 보관함</h1>
         <p className="text-sm text-zinc-500">
-          {ownTeamId ? `${ownTeamId}조 사진 ${ownPhotoCount}/${MAX_PHOTOS_PER_TEAM}장` : "조 정보를 찾을 수 없습니다"}
+          {ownTeamId ? `${ownTeamId}조 사진 ${ownPhotoCount}/${MAX_PHOTOS_PER_GROUP}장 · 조별 한도` : "조 정보를 찾을 수 없습니다"}
         </p>
       </div>
 
@@ -134,6 +134,12 @@ export default function EvidencePage() {
         hidden
         onChange={handleFileChange}
       />
+
+      {ownTeamId && (
+        <p className="-mt-2 text-center text-xs text-zinc-500">
+          사진은 조별 최대 {MAX_PHOTOS_PER_GROUP}장입니다. 짝 조와 한도를 공유하지 않습니다.
+        </p>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <button
@@ -168,11 +174,11 @@ export default function EvidencePage() {
 
       {roleLoaded && !isLeader && <p className="-mt-2 text-center text-xs text-zinc-500">사진 업로드와 QR 스캔은 조장만 할 수 있습니다.</p>}
       {photoLimitReached ? (
-        <p className="-mt-2 text-center text-xs text-zinc-500">사진 등록 한도({MAX_PHOTOS_PER_TEAM}장)에 도달했습니다.</p>
+        <p className="-mt-2 text-center text-xs text-zinc-500">이 조의 사진 등록 한도({MAX_PHOTOS_PER_GROUP}장)에 도달했습니다.</p>
       ) : (
         <p className="-mt-2 flex flex-col text-center text-xs text-zinc-500">
           <span>사건과 관련된 단서 사진만 업로드하세요.</span>
-          <span>팀당 최대 {MAX_PHOTOS_PER_TEAM}장만 등록할 수 있습니다.</span>
+          <span>사진은 조별 최대 {MAX_PHOTOS_PER_GROUP}장까지 등록할 수 있습니다.</span>
         </p>
       )}
 
