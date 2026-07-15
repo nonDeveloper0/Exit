@@ -2,6 +2,14 @@
 
 ## 작업 시작 (2026-07-15)
 
+- [x] QR 심문권 E11~E15의 표시 장소를 현장 배치에 맞게 수정했다.
+  - E11=자재 물류창고, E12=나팀장 사무실, E13=나사장 집무실, E14=자재 물류창고, E15=채소장 연구실.
+  - QR 주소와 심문권 연결은 유지하고, QR 배치 문서와 회귀 테스트를 함께 갱신했다.
+  - 검증: 대상 린트 통과, `npm test` 9개 통과.
+  - 수정 파일: `src/lib/data.ts`, `tests/qrLocation.test.ts`, `docs/01_md/04_EVIDENCE.md`, `docs/01_md/05_QR_MAP.md`, `progress.md`
+
+## 작업 시작 (2026-07-15)
+
 - [x] 김은비·김라멕·김민채·정므엘·김민석·신소라·이준혁·이호승·박준수에게 조와 무관한 고정 조장 권한을 부여했다.
   - 고정 명단의 이름으로 입장하면 기존 조장 지정 여부와 무관하게 조장 전용 기능을 사용할 수 있다.
   - 수정 파일: `src/lib/staffRole.ts`, `src/lib/useRole.ts`, `src/app/admin/page.tsx`, `tests/staffRole.test.ts`, `progress.md`

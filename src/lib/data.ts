@@ -278,8 +278,7 @@ export const SUSPECTS: Suspect[] = [
   },
 ];
 
-// QR 총 15개 = 자재 물류창고 6개 + 나사장 집무실/나팀장 사무실/채소장 연구실 각 3개
-// 증거 1개당 QR 1개. 방(용의자) = 그 용의자의 관련 단서 3개, 자재 물류창고 = 나머지(이대리·김사원) 6개.
+// QR 총 15개 = 자재 물류창고 6개 + 나사장 집무실 4개 + 나팀장 사무실 4개 + 채소장 연구실 1개
 // ※ 아래 slug 중 c8v3k1~w3n5k7(9개)는 새로 생성한 값 — 실제 인쇄 QR과 일치시키거나 원하는 값으로 교체하세요.
 export const QR_CODES: QrCode[] = [
   // 자재 물류창고 (사건 현장) — 6개
@@ -288,18 +287,18 @@ export const QR_CODES: QrCode[] = [
   { id: "c8v3k1", location: LOCATIONS.L1, evidenceIds: ["E09"] },
   { id: "d2m9x4", location: LOCATIONS.L1, evidenceIds: ["E10"] },
   { id: "f5r7t2", location: LOCATIONS.L1, evidenceIds: ["E11"] },
-  { id: "g1h6n8", location: LOCATIONS.L1, evidenceIds: ["E12"] },
-  // 나사장 집무실 (용의자 A) — 3개
+  { id: "n4v8z3", location: LOCATIONS.L1, evidenceIds: ["E14"] },
+  // 나사장 집무실 (용의자 A) — 4개
   { id: "h6t4c3", location: LOCATIONS.L2, evidenceIds: ["E01"] },
   { id: "j4w2b5", location: LOCATIONS.L2, evidenceIds: ["E02"] },
   { id: "k9p3z6", location: LOCATIONS.L2, evidenceIds: ["E03"] },
-  // 나팀장 사무실 (용의자 C) — 3개
+  { id: "m1d7k5", location: LOCATIONS.L2, evidenceIds: ["E13"] },
+  // 나팀장 사무실 (용의자 C) — 4개
   { id: "b2r5w1", location: LOCATIONS.L3, evidenceIds: ["E04"] },
   { id: "q7s1d3", location: LOCATIONS.L3, evidenceIds: ["E05"] },
   { id: "t6y8m2", location: LOCATIONS.L3, evidenceIds: ["E06"] },
-  // 채소장 연구실 (용의자 B) — 3개
-  { id: "m1d7k5", location: LOCATIONS.L4, evidenceIds: ["E13"] },
-  { id: "n4v8z3", location: LOCATIONS.L4, evidenceIds: ["E14"] },
+  { id: "g1h6n8", location: LOCATIONS.L3, evidenceIds: ["E12"] },
+  // 채소장 연구실 (용의자 B) — 1개
   { id: "w3n5k7", location: LOCATIONS.L4, evidenceIds: ["E15"] },
 ];
 
