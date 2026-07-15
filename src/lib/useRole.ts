@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getTeamInfo } from "./store";
 import { supabase } from "./supabase";
+import { isStaffLeaderName } from "./staffRole";
 
 let channelCounter = 0;
 
@@ -26,5 +27,5 @@ export function useRole() {
 
   const name = team?.name.trim() || null;
   const teamNumber = team?.teamNumber ?? null;
-  return { isLeader: !!(name && teamNumber && leaders[teamNumber]?.trim() === name), name, teamNumber, loaded };
+  return { isLeader: isStaffLeaderName(name) || !!(name && teamNumber && leaders[teamNumber]?.trim() === name), name, teamNumber, loaded };
 }

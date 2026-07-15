@@ -105,7 +105,7 @@ export default function LandingPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleEnter()}
-            placeholder="이름 입력"
+            placeholder="본명을 입력하세요"
             className="w-full rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400/50 focus:outline-none transition-colors"
           />
         </div>

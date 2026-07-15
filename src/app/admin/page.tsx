@@ -7,6 +7,7 @@ import { useGameState } from "@/lib/useGameState";
 import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE, photoLocationTagLabel } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 import { getPairTeamKey } from "@/lib/pairTeam";
+import { STAFF_LEADER_NAMES } from "@/lib/staffRole";
 
 const ADMIN_PASSWORD = "0000";
 
@@ -826,7 +827,7 @@ function AdminPanel() {
 
       <div className="space-y-3">
         <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">조장 지정</h2>
-        <p className="text-xs text-zinc-600">조 번호와 참가자 이름이 정확히 일치해야 조장 권한이 활성화됩니다.</p>
+        <p className="text-xs text-zinc-600">조 번호와 참가자 이름이 정확히 일치해야 조장 권한이 활성화됩니다. 고정 스탭 조장: {STAFF_LEADER_NAMES.join(" · ")}.</p>
         <div className="space-y-2">{Object.entries(leaders).sort(([a], [b]) => Number(a) - Number(b)).map(([team, name]) => <div key={team} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-3"><p className="text-sm text-zinc-200">{team}조 — {name}</p><button type="button" onClick={() => void removeLeader(team)} className="rounded border border-red-500/30 px-3 py-1 text-xs text-red-400">해제</button></div>)}</div>
         <div className="flex gap-2"><input value={leaderTeam} onChange={(event) => setLeaderTeam(event.target.value)} placeholder="조 번호" className="w-20 rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100" /><input value={leaderName} onChange={(event) => setLeaderName(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void setLeader()} placeholder="이름" className="min-w-0 flex-1 rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100" /><button type="button" onClick={() => void setLeader()} disabled={!leaderTeam.trim() || !leaderName.trim()} className="rounded bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 disabled:opacity-40">지정</button></div>
       </div>
