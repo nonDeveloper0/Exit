@@ -79,11 +79,59 @@ export default function MainPage() {
         </p>
       </div>
 
+      {/* Schedule */}
+      <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+        <div>
+          <h2 className="text-sm font-semibold text-zinc-200">수사 진행표</h2>
+          <p className="mt-1 text-xs text-zinc-500">시간대별 각 조 위치</p>
+        </div>
+        <div className="overflow-x-auto rounded-md border border-zinc-700">
+          <table className="min-w-[560px] w-full border-collapse text-center text-xs text-zinc-300">
+            <thead className="bg-zinc-800 text-zinc-200">
+              <tr>
+                <th scope="col" className="border border-zinc-700 px-2 py-2 font-semibold">장소</th>
+                <th scope="col" className="border border-zinc-700 px-2 py-2 font-semibold">나사장 집무실</th>
+                <th scope="col" className="border border-zinc-700 px-2 py-2 font-semibold">나팀장 사무실</th>
+                <th scope="col" className="border border-zinc-700 px-2 py-2 font-semibold">채소장 연구실</th>
+                <th scope="col" className="border border-zinc-700 px-2 py-2 font-semibold">자재 물류창고</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="rowgroup" rowSpan={10} className="border border-zinc-700 bg-zinc-800 px-2 py-2 font-semibold leading-relaxed text-zinc-200">
+                  타임별<br />각 조 위치
+                </th>
+                <td colSpan={4} className="border border-zinc-700 bg-zinc-800 px-2 py-2 font-medium text-amber-300">오프닝</td>
+              </tr>
+              <tr className="bg-zinc-900">
+                <td className="border border-zinc-700 px-2 py-2">1</td>
+                <td className="border border-zinc-700 px-2 py-2">2</td>
+                <td className="border border-zinc-700 px-2 py-2">3</td>
+                <td className="border border-zinc-700 px-2 py-2">4, 5, 6</td>
+              </tr>
+              <tr><td colSpan={4} className="border border-zinc-700 bg-zinc-800 px-2 py-2 font-medium text-amber-300">단서 공유 및 의논시간</td></tr>
+              <tr className="bg-zinc-900">
+                <td className="border border-zinc-700 px-2 py-2">4</td>
+                <td className="border border-zinc-700 px-2 py-2">5</td>
+                <td className="border border-zinc-700 px-2 py-2">6</td>
+                <td className="border border-zinc-700 px-2 py-2">1, 2, 3</td>
+              </tr>
+              <tr><td colSpan={4} className="border border-zinc-700 bg-zinc-800 px-2 py-2 font-medium text-amber-300">단서 공유 및 의논시간</td></tr>
+              <tr><td colSpan={4} className="border border-zinc-700 bg-zinc-800 px-2 py-2 font-medium text-amber-300">장소 자율 선택</td></tr>
+              <tr><td colSpan={4} className="border border-zinc-700 bg-zinc-800 px-2 py-2 font-medium text-amber-300">단서 공유 및 의논시간</td></tr>
+              <tr><td colSpan={4} className="border border-zinc-700 bg-zinc-800 px-2 py-2 font-medium text-amber-300">심문시간</td></tr>
+              <tr><td colSpan={4} className="border border-zinc-700 bg-zinc-800 px-2 py-2 font-medium text-amber-300">범인 확정시간</td></tr>
+              <tr><td colSpan={4} className="border border-zinc-700 bg-zinc-800 px-2 py-2 font-medium text-amber-300">결과 발표, 클로징</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       {/* Instructions */}
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 space-y-2">
         <h2 className="text-sm font-semibold text-amber-400">수사 방법</h2>
         <ol className="text-sm text-zinc-400 space-y-1.5 list-decimal list-inside">
-          <li>현장의 단서를 사진으로 촬영해 증거함에 올린다</li>
+          <li>현장의 단서를 사진으로 촬영하여 증거함에 기록한다</li>
           <li>QR을 찍어 문제를 풀면 용의자 심문권을 얻는다</li>
           <li>범인을 선택하고 최종 추리를 제출한다</li>
         </ol>

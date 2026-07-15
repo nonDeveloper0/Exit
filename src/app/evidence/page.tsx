@@ -49,6 +49,12 @@ export default function EvidencePage() {
   }, [previewUrl]);
 
   const filteredPhotos = filterPhotoEvidence(photos, activeLocation);
+  const locationPhotoCounts = Object.fromEntries(
+    PHOTO_LOCATION_TAGS.map((location) => [
+      location.value,
+      photos.filter((photo) => photo.locationTag === location.value).length,
+    ])
+  );
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -183,7 +189,11 @@ export default function EvidencePage() {
       )}
 
       <div className="grid grid-cols-4 gap-1">
-        {PHOTO_LOCATION_TAGS.map((location) => <button key={location.value} type="button" onClick={() => setActiveLocation(location.value)} className={`min-w-0 rounded-full border px-1 py-2 text-[10px] font-bold tracking-tight whitespace-nowrap transition-shadow ${locationTabClass(location.value, activeLocation === location.value)}`}>{location.label}</button>)}
+        {PHOTO_LOCATION_TAGS.map((location) => (
+          <button key={location.value} type="button" onClick={() => setActiveLocation(location.value)} className={`min-w-0 rounded-full border px-1 py-2 text-[10px] font-bold tracking-tight whitespace-nowrap transition-shadow ${locationTabClass(location.value, activeLocation === location.value)}`}>
+            {location.label} ({locationPhotoCounts[location.value]})
+          </button>
+        ))}
       </div>
       <p className="-mt-2 text-center text-xs text-zinc-500">현장 증거 촬영은 선택된 장소에 업로드됩니다.</p>
 

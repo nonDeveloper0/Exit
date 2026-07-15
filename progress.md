@@ -2,6 +2,31 @@
 
 ## 작업 완료 (2026-07-16)
 
+- [x] 수사본부 진행표·수사 방법 문구 및 증거함 장소별 사진 수 표시를 커밋해 `origin/master`로 푸시한다.
+  - 수정 파일: `src/app/home/page.tsx`, `src/app/evidence/page.tsx`, `progress.md`
+
+## 작업 완료 (2026-07-16)
+
+- [x] 수사본부 수사 방법 1번을 `현장의 단서를 사진으로 촬영하여 증거함에 기록한다`로 수정했다.
+  - 검증: `npx eslint src/app/home/page.tsx` 통과, `git diff --check` 통과.
+  - 수정 파일: `src/app/home/page.tsx`, `progress.md`
+
+## 작업 완료 (2026-07-16)
+
+- [x] 증거함의 장소 탭마다 해당 장소에 업로드된 사진 수를 `(1)` 형식으로 표시한다.
+  - 사진 업로드·장소 수정·실시간 동기화에 따라 각 탭의 수량도 자동 갱신된다.
+  - 검증: `npx eslint src/app/evidence/page.tsx` 통과, `npm test` 10개 통과, `git diff --check` 통과.
+  - 수정 파일: `src/app/evidence/page.tsx`, `progress.md`
+
+## 작업 완료 (2026-07-16)
+
+- [x] 수사본부에 장소별 조 배치와 진행 순서를 보여 주는 시간대별 위치표를 추가했다.
+  - 제공된 장소 순서와 1~6조 배치, 단서 공유·심문·클로징 순서를 유지하고 모바일 가로 스크롤을 지원한다.
+  - 검증: `npx eslint src/app/home/page.tsx` 통과, `git diff --check` 통과.
+  - 수정 파일: `src/app/home/page.tsx`, `progress.md`
+
+## 작업 완료 (2026-07-16)
+
 - [x] 수사본부 피해자 직책 및 수사 방법 수정분을 커밋해 `origin/master`로 푸시한다.
   - 수정 파일: `src/app/home/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
 
