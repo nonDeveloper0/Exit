@@ -51,7 +51,7 @@ export default function MainPage() {
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">장소</span>
-            <span>녹산건설 자재물류창고 B2 구역</span>
+            <span>녹산건설 자재물류창고 B-4 구역</span>
           </div>
           <div className="flex gap-3">
             <span className="text-zinc-500 shrink-0 w-16 font-mono text-xs pt-0.5">용의자</span>
@@ -69,13 +69,13 @@ export default function MainPage() {
       {/* Progress */}
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-zinc-300">팀 사진 증거</span>
+          <span className="text-sm font-medium text-zinc-300">팀 사진 증거수집 현황</span>
           <span className="text-sm font-mono text-amber-400 font-bold">
             {photos.length}장
           </span>
         </div>
         <p className="text-xs text-zinc-500">
-          현장의 물리 단서를 촬영해 증거함에 올리고, 관련 인물을 태그하세요.
+          현장의 단서를 촬영해 증거함에 올리세요.
         </p>
       </div>
 
@@ -83,7 +83,7 @@ export default function MainPage() {
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 space-y-2">
         <h2 className="text-sm font-semibold text-amber-400">수사 방법</h2>
         <ol className="text-sm text-zinc-400 space-y-1.5 list-decimal list-inside">
-          <li>현장의 물리 단서를 사진으로 촬영해 증거함에 올린다</li>
+          <li>현장의 단서를 사진으로 촬영해 증거함에 올린다</li>
           <li>사진마다 관련 인물을 태그한다</li>
           <li>QR을 찍어 문제를 풀면 용의자 심문권을 얻는다</li>
           <li>범인을 선택하고 최종 추리를 제출한다</li>

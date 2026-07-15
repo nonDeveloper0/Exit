@@ -167,7 +167,14 @@ export default function EvidencePage() {
       </div>
 
       {roleLoaded && !isLeader && <p className="-mt-2 text-center text-xs text-zinc-500">사진 업로드와 QR 스캔은 조장만 할 수 있습니다.</p>}
-      <p className="-mt-2 text-center text-xs text-zinc-500">{photoLimitReached ? `사진 등록 한도(${MAX_PHOTOS_PER_TEAM}장)에 도달했습니다.` : `사건과 관련된 단서 사진만 업로드하세요. 팀당 최대 ${MAX_PHOTOS_PER_TEAM}장까지 등록할 수 있습니다.`}</p>
+      {photoLimitReached ? (
+        <p className="-mt-2 text-center text-xs text-zinc-500">사진 등록 한도({MAX_PHOTOS_PER_TEAM}장)에 도달했습니다.</p>
+      ) : (
+        <p className="-mt-2 flex flex-col text-center text-xs text-zinc-500">
+          <span>사건과 관련된 단서 사진만 업로드하세요.</span>
+          <span>팀당 최대 {MAX_PHOTOS_PER_TEAM}장만 등록할 수 있습니다.</span>
+        </p>
+      )}
 
       <div className="grid grid-cols-4 gap-1">
         {PHOTO_LOCATION_TAGS.map((location) => <button key={location.value} type="button" onClick={() => setActiveLocation(location.value)} className={`min-w-0 rounded-full border px-1 py-2 text-[10px] font-bold tracking-tight whitespace-nowrap transition-shadow ${locationTabClass(location.value, activeLocation === location.value)}`}>{location.label}</button>)}
