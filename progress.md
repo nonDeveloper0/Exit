@@ -2,6 +2,12 @@
 
 ## 작업 완료 (2026-07-16)
 
+- [x] 수사본부의 수사 진행표를 제거하고 변경분을 커밋·푸시한다.
+  - 검증: `npx eslint src/app/home/page.tsx` 통과, `git diff --check` 통과.
+  - 수정 파일: `src/app/home/page.tsx`, `progress.md`
+
+## 작업 완료 (2026-07-16)
+
 - [x] 수사본부 진행표·수사 방법 문구 및 증거함 장소별 사진 수 표시를 커밋해 `origin/master`로 푸시한다.
   - 수정 파일: `src/app/home/page.tsx`, `src/app/evidence/page.tsx`, `progress.md`
 
