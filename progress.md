@@ -2,6 +2,11 @@
 
 ## 작업 시작 (2026-07-15)
 
+- [x] /phone에서 수락한 마지막 통화 내용을 다시 들을 수 있게 한다.
+  - 통화 수락 시 기기별 녹음 보관 상태를 저장하고, /phone 대기 화면에 통화내용 다시 듣기 버튼을 표시한다.
+  - 수정 파일: src/lib/store.ts, src/components/IncomingCallOverlay.tsx, src/app/phone/page.tsx, docs/01_md/EDIT_GUIDE.md, progress.md
+## 작업 시작 (2026-07-15)
+
 - [x] 수신전화 음성 M4A 적용 및 /phone PWA 구성을 커밋해 origin/master로 푸시한다.
   - 수정 파일: docs/03_src/02_Sound/탐정대사_소라.m4a, public/audio/탐정대사_소라.m4a, src/lib/data.ts, src/app/phone/layout.tsx, public/phone.webmanifest, public/phone-icon-192.png, public/phone-icon-512.png, docs/01_md/EDIT_GUIDE.md, progress.md
 

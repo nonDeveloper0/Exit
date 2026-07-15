@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { INCOMING_CALL_AUDIO_URL, INCOMING_CALL_EVIDENCE_ID } from "@/lib/data";
 import { markIncomingCallHandled, useIncomingCall } from "@/lib/useIncomingCall";
-import { getIsCallDevice } from "@/lib/store";
+import { getIsCallDevice, setHasLastCallRecording } from "@/lib/store";
 import { armAudioUnlock, startRingtone, stopRingtone } from "@/lib/ringtone";
 import { supabase } from "@/lib/supabase";
 
@@ -78,6 +78,7 @@ export default function IncomingCallOverlay() {
       );
     }
     setAudioError(false);
+    setHasLastCallRecording(true);
     setScreen("calling");
     setSeconds(0);
 

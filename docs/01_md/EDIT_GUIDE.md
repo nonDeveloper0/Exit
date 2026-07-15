@@ -111,6 +111,9 @@ export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_I
 
 ---
 
+### 통화내용 다시 듣기
+
+수신 전용 기기에서 전화를 **수락한 뒤** `/phone` 대기 화면으로 돌아오면 `통화내용 다시 듣기` 버튼이 표시된다. 버튼을 누르면 마지막 통화 음성 파일을 처음부터 다시 재생한다. 이 상태는 해당 기기 브라우저에만 저장된다.
 ## 1-4. 수신전화 벨소리 / 진동 조정
 
 **파일:** `src/lib/ringtone.ts`
