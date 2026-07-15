@@ -2,6 +2,24 @@
 
 ## 작업 시작 (2026-07-15)
 
+- [x] 수신전화 음성 M4A 적용 및 /phone PWA 구성을 커밋해 origin/master로 푸시한다.
+  - 수정 파일: docs/03_src/02_Sound/탐정대사_소라.m4a, public/audio/탐정대사_소라.m4a, src/lib/data.ts, src/app/phone/layout.tsx, public/phone.webmanifest, public/phone-icon-192.png, public/phone-icon-512.png, docs/01_md/EDIT_GUIDE.md, progress.md
+
+## 작업 시작 (2026-07-15)
+
+- [x] /phone을 홈 화면에 설치 가능한 PWA로 구성했다.
+  - /phone 전용 웹 매니페스트와 192·512px 홈 아이콘, iOS 독립 앱 메타데이터를 추가했다.
+  - 설치한 앱은 주소창 없는 독립 창으로 /phone에서 시작하며, 범위도 해당 경로로 제한된다.
+  - 수정 파일: src/app/phone/layout.tsx, public/phone.webmanifest, public/phone-icon-192.png, public/phone-icon-512.png, docs/01_md/EDIT_GUIDE.md, progress.md
+
+## 작업 시작 (2026-07-15)
+
+- [x] 탐정대사_소라.m4a를 수신전화 및 CALL01 음성 증거 재생 파일로 반영했다.
+  - 제공 M4A(AAC, 32초)를 public/audio/탐정대사_소라.m4a에 배치하고, 공통 음성 URL을 해당 파일로 변경했다.
+  - 수정 파일: public/audio/탐정대사_소라.m4a, src/lib/data.ts, progress.md
+
+## 작업 시작 (2026-07-15)
+
 - [x] 수사본부에서 현재 제공하지 않는 관련 인물 태그 안내를 제거했다.
   - 사진 증거 안내와 수사 방법 목록에서 태그 관련 문구를 삭제했다.
   - 수정 파일: `src/app/home/page.tsx`, `progress.md`

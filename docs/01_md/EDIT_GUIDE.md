@@ -125,6 +125,17 @@ export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_I
 
 ---
 
+## 1-4. `/phone` 홈 화면 설치(PWA)
+
+**파일:** `src/app/phone/layout.tsx`, `public/phone.webmanifest`, `public/phone-icon-192.png`, `public/phone-icon-512.png`
+
+수신 전용 공기계는 `/phone`을 열어 브라우저 메뉴에서 **앱 설치**(안드로이드 Chrome) 또는 **홈 화면에 추가**(iPhone Safari)를 선택하면 주소창 없는 독립 앱으로 실행된다.
+
+- 설치한 앱은 항상 `/phone`에서 시작하며, 범위도 `/phone`으로 제한된다.
+- 앱 이름·색상·시작 주소는 `public/phone.webmanifest`에서, 홈 아이콘은 `public/phone-icon-*.png`에서 수정한다.
+- Vercel 배포는 HTTPS를 제공하므로 추가 서버 설정 없이 설치 조건을 충족한다.
+
+---
 ## 1-5. 수신 전용 기기(공기계) 지정
 
 **파일:** `src/app/phone/page.tsx`, `src/components/IncomingCallOverlay.tsx`, `src/lib/store.ts`
