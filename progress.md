@@ -1113,3 +1113,14 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   - 검토 결과: 사진(삭제+카운터 리셋), 증거 수집·심문권 획득/사용(team_evidence_items 전체 삭제 → 참가자 새로고침 시 반영), 용의자 메모는 `handleResetAll`이 커버. 그러나 최종추리 제출 상태는 서버가 아니라 참가자 기기 localStorage(`exit2026_vote_final`)에 있고, `resetFinalVotes`처럼 VOTE_RESET 브로드캐스트를 insert 해야 각 기기가 지운다. `handleResetAll`은 전체 삭제로 마커만 지우고 새 브로드캐스트를 발행하지 않아, 이미 제출한 참가자는 초기화 후에도 "제출 완료"가 남았다.
   - 수정: `handleResetAll`에 VOTE_RESET 브로드캐스트 insert 추가(개별 "최종추리 제출 초기화"와 동일). 심문권/증거는 서버 삭제로 처리되며 참가자 새로고침 시 반영(개별 버튼과 동일한 기존 동작).
   - 수정 파일: `src/app/admin/page.tsx`, `progress.md`
+
+## 작업 완료 (2026-07-18) — 최종추리 제출 서버화
+
+- [x] 최종추리 제출 상태를 localStorage → 서버(`final_votes`)로 이전 (근거 텍스트 포함)
+  - 배경: 제출 상태가 localStorage 전역 키(`exit2026_vote_final`)에만 있어 ① 같은 기기 조 전환 시 이전 제출이 남고 ② 전체 초기화 시 참가자 기기에서 안 지워져 VOTE_RESET 브로드캐스트 꼼수가 필요했다. 이를 조 단위 서버 저장으로 구조적으로 해결.
+  - 신규 테이블 `final_votes`(pair_id PK, suspect_id, reasoning, name, created_at) + RLS anon rw + realtime. **라이브 Supabase에 07_DATA_SCHEMA.md의 SQL을 실행해야 반영됨.**
+  - 신규 훅 `src/lib/useFinalVote.ts`: 조 제출 조회 + Realtime 구독(초기화 즉시 반영) + `submit(suspectId, reasoning)` upsert.
+  - `vote/page.tsx`: 로컬 vote/브로드캐스트 제거, `useFinalVote` 사용. 제출 화면은 서버 값(vote)에서 렌더 → 새로고침·기기변경에도 선택 용의자·추리 근거가 유지됨.
+  - `store.ts`: `getVote/castVote/clearVote` 제거(레거시 `exit2026_vote_final` 키 정리는 resetAll에 유지). `app/page.tsx`: 조 전환 시 `clearVote` 호출 제거(서버 조 단위라 불필요). `admin/page.tsx`: `resetFinalVotes`·`handleResetAll`이 `final_votes` 삭제로 변경, VOTE_RESET 브로드캐스트 코드/임포트 제거. `data.ts`: `VOTE_RESET_EVENT_ID/TYPE` 제거.
+  - 검증: `npx tsc --noEmit`(src 오류 없음), `npm test` 10개 통과, 변경 파일 lint 클린.
+  - 수정 파일: `src/lib/useFinalVote.ts`(신규), `src/app/vote/page.tsx`, `src/lib/store.ts`, `src/app/page.tsx`, `src/app/admin/page.tsx`, `src/lib/data.ts`, `docs/01_md/07_DATA_SCHEMA.md`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`

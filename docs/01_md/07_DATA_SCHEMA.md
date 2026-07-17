@@ -295,3 +295,27 @@ end $$;
 alter table game_state add column if not exists leaders jsonb not null default '{}'::jsonb;
 alter table game_state add column if not exists pair_team_names jsonb not null default '{}'::jsonb;
 ```
+
+# 최종추리 제출 SQL (`final_votes`)
+
+최종추리 제출 상태를 서버에 저장한다. 조(`pair_id`)당 한 행. 선택 용의자와 추리 근거를 함께 저장하므로 기기를 바꾸거나 새로고침해도 유지되고, 관리자 초기화(행 삭제)는 Realtime으로 각 기기에 즉시 반영된다.
+
+```sql
+create table if not exists final_votes (
+  pair_id    text primary key,           -- 조 번호 (예: "1")
+  suspect_id text not null,              -- 선택한 용의자 ID ("A"~"E")
+  reasoning  text not null default '',   -- 추리 근거
+  name       text not null default '',   -- 제출자 이름
+  created_at timestamptz not null default now()
+);
+alter table final_votes enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'final_votes' and policyname = 'anon rw') then
+    create policy "anon rw" on final_votes for all using (true) with check (true);
+  end if;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table final_votes;
+exception when duplicate_object then null;
+end $$;
+```

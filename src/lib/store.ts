@@ -27,20 +27,6 @@ export function setHasLastCallRecording(on: boolean): void {
   window.dispatchEvent(new Event(CALL_RECORDING_AVAILABLE_EVENT));
 }
 
-export function getVote(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(VOTE_KEY);
-}
-
-export function castVote(suspectId: string): void {
-  localStorage.setItem(VOTE_KEY, suspectId);
-}
-
-export function clearVote(): void {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(VOTE_KEY);
-}
-
 export function getTeamInfo(): { teamNumber: string; name: string } | null {
   if (typeof window === "undefined") return null;
   try {

@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { SUSPECTS, VOTE_UNLOCK_COUNT } from "@/lib/data";
-import { clearVote, getVote, castVote, getTeamInfo } from "@/lib/store";
+import { getTeamInfo } from "@/lib/store";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 import { useGameState } from "@/lib/useGameState";
 import { useRole } from "@/lib/useRole";
-import { VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE } from "@/lib/data";
-import { useBroadcastEvent } from "@/lib/useBroadcastEvent";
+import { useFinalVote } from "@/lib/useFinalVote";
 
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSclsS9dAFGB2YgYNMNYd8NVQ5tBbdUBYwUF9tWosu5patyHXg/formResponse";
@@ -37,32 +36,21 @@ export default function VotePage() {
   const { collected } = useTeamEvidence();
   const { voteOpen, loaded: gameStateLoaded } = useGameState();
   const { isLeader, loaded: roleLoaded } = useRole();
-  const { active: voteResetActive, markHandled: markVoteResetHandled } = useBroadcastEvent(VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE);
+  const { vote, loaded: voteLoaded, submit } = useFinalVote();
   const [selected, setSelected] = useState<string | null>(null);
   const [reasoning, setReasoning] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [team, setTeam] = useState<{ teamNumber: string; name: string } | null>(null);
 
   useEffect(() => {
     setTeam(getTeamInfo());
-    const v = getVote();
-    if (v) { setSelected(v); setSubmitted(true); }
   }, []);
 
-  useEffect(() => {
-    if (!voteResetActive) return;
-    clearVote();
-    setSelected(null);
-    setReasoning("");
-    setSubmitted(false);
-    markVoteResetHandled();
-  }, [markVoteResetHandled, voteResetActive]);
-
+  const submitted = vote !== null;
   const collectedCount = collected.length;
   const voteLocked = VOTE_UNLOCK_COUNT > 0 && collectedCount < VOTE_UNLOCK_COUNT;
 
-  if (!gameStateLoaded || !roleLoaded) return null;
+  if (!gameStateLoaded || !roleLoaded || !voteLoaded) return null;
 
   if (!voteOpen) {
     return (
@@ -87,22 +75,26 @@ export default function VotePage() {
 
     setSubmitting(true);
     try {
-      await submitToGoogleForm(
-        team.teamNumber,
-        team.name,
-        `${selectedSuspect.id} ${selectedSuspect.name}`,
-        reasoning.trim(),
-      );
+      try {
+        await submitToGoogleForm(
+          team.teamNumber,
+          team.name,
+          `${selectedSuspect.id} ${selectedSuspect.name}`,
+          reasoning.trim(),
+        );
+      } catch {
+        // no-cors 응답은 읽을 수 없으나 제출은 정상 처리됨
+      }
+      await submit(selected, reasoning.trim());
     } catch {
-      // no-cors 응답은 읽을 수 없으나 제출은 정상 처리됨
+      alert("제출 저장에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setSubmitting(false);
     }
-    castVote(selected);
-    setSubmitted(true);
-    setSubmitting(false);
   }
 
-  if (submitted) {
-    const votedSuspect = SUSPECTS.find((s) => s.id === selected);
+  if (submitted && vote) {
+    const votedSuspect = SUSPECTS.find((s) => s.id === vote.suspectId);
     return (
       <div className="flex flex-col gap-4 p-4 pt-6">
         <div className="space-y-1">
@@ -114,15 +106,15 @@ export default function VotePage() {
 
         <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-8 text-center space-y-2">
           <p className="text-sm text-zinc-400">{team?.teamNumber}조의 최종 선택</p>
-          <p className="text-5xl font-black text-emerald-400">{selected}</p>
+          <p className="text-5xl font-black text-emerald-400">{vote.suspectId}</p>
           <p className="text-base font-semibold text-zinc-200">{votedSuspect?.name}</p>
           <p className="text-xs text-zinc-500 pt-1">제출자: {team?.name}</p>
         </div>
 
-        {reasoning.trim() && (
+        {vote.reasoning.trim() && (
           <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-1">
             <p className="text-xs font-mono text-zinc-500 tracking-widest uppercase">추리 근거</p>
-            <p className="text-sm text-zinc-300 whitespace-pre-wrap break-words">{reasoning.trim()}</p>
+            <p className="text-sm text-zinc-300 whitespace-pre-wrap break-words">{vote.reasoning.trim()}</p>
           </div>
         )}
 

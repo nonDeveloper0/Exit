@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
-import { CALL_RESET_EVENT_ID, CALL_RESET_EVENT_TYPE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE, photoLocationTagLabel } from "@/lib/data";
+import { CALL_RESET_EVENT_ID, CALL_RESET_EVENT_TYPE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, photoLocationTagLabel } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 import { getPairTeamKey } from "@/lib/pairTeam";
 import { STAFF_LEADER_NAMES } from "@/lib/staffRole";
@@ -356,13 +356,7 @@ function AdminPanel() {
   async function resetFinalVotes() {
     setResettingVotes(true);
     try {
-      await supabase.from("team_evidence_items").delete().eq("pair_id", GLOBAL_PAIR_ID).eq("evidence_id", VOTE_RESET_EVENT_ID).eq("type", VOTE_RESET_EVENT_TYPE);
-      await supabase.from("team_evidence_items").insert({
-        pair_id: GLOBAL_PAIR_ID,
-        evidence_id: VOTE_RESET_EVENT_ID,
-        type: VOTE_RESET_EVENT_TYPE,
-        created_at: new Date().toISOString(),
-      });
+      await supabase.from("final_votes").delete().neq("pair_id", "");
     } finally {
       setResettingVotes(false);
     }
@@ -509,16 +503,8 @@ function AdminPanel() {
       await supabase.from("team_evidence_items").delete().neq("pair_id", "");
       await deleteAllPhotos();
       await supabase.from("suspect_notes").delete().neq("pair_id", "");
+      await supabase.from("final_votes").delete().neq("pair_id", "");
       await resetAllPhotoNumberCounters();
-      // 최종추리 제출 상태는 서버가 아니라 각 참가자 기기 localStorage에 있다.
-      // 위 전체 삭제로 마커만 지우면 참가자 기기는 제출 상태를 그대로 유지하므로,
-      // VOTE_RESET 브로드캐스트를 새로 발행해 모든 기기가 제출 상태를 지우게 한다.
-      await supabase.from("team_evidence_items").insert({
-        pair_id: GLOBAL_PAIR_ID,
-        evidence_id: VOTE_RESET_EVENT_ID,
-        type: VOTE_RESET_EVENT_TYPE,
-        created_at: new Date().toISOString(),
-      });
       resetAll();
       await fetchTeams();
       await fetchPhotos();
