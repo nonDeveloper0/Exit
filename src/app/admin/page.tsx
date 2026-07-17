@@ -472,6 +472,8 @@ function AdminPanel() {
       setShowResetPhotosConfirm(false);
       setResetConfirmText("");
       await fetchPhotos();
+    } catch (err) {
+      alert(`사진 삭제/번호 초기화 실패: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setResettingAllPhotos(false);
     }
@@ -502,6 +504,8 @@ function AdminPanel() {
       resetAll();
       await fetchTeams();
       await fetchPhotos();
+    } catch (err) {
+      alert(`전체 조 초기화 실패: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLoadingId(null);
     }

@@ -1090,3 +1090,7 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
 - [x] admin `/admin` 하단 "전체 조 초기화"에 확인 모달 추가
   - 되돌릴 수 없는 전면 삭제인데 확인 절차가 없어, 버튼 클릭 시 바로 실행하던 것을 확인 모달을 거치도록 변경. 기존 진행 상태 초기화 모달(`pendingProgressReset`)과 동일한 스타일로, 삭제 대상(증거 기록·사진·용의자 메모·사진 번호 카운터)과 "되돌릴 수 없음"을 명시하고 [전체 초기화 실행]/[취소] 제공.
   - 수정 파일: `src/app/admin/page.tsx`, `progress.md`
+
+- [x] admin 전체 초기화/사진 삭제의 조용한 실패를 드러내도록 오류 알림 추가
+  - "전체 조 초기화"(`handleResetAll`)와 "사진 전체 삭제"(`resetAllPhotos`)가 `try/finally`만 있고 `catch`가 없어, 번호 카운터 리셋 RPC(`reset_photo_evidence_number_counters`) 같은 단계가 런타임에 실패해도 화면에 오류가 안 뜨고 묻혔다. 그 결과 초기화 후 첫 업로드가 이전 카운터(예: 9)를 이어받아 #10으로 채번되는 증상. 두 함수에 `catch`를 추가해 실패 원인을 alert로 표시.
+  - 수정 파일: `src/app/admin/page.tsx`, `progress.md`
