@@ -458,6 +458,15 @@ function AdminPanel() {
     await supabase.from("photo_evidence").delete().neq("pair_id", "");
   }
 
+  function formatError(err: unknown): string {
+    if (err instanceof Error) return err.message;
+    if (err && typeof err === "object") {
+      const e = err as { message?: string; details?: string; hint?: string; code?: string };
+      return [e.message, e.details, e.hint, e.code ? `(${e.code})` : ""].filter(Boolean).join(" ") || JSON.stringify(err);
+    }
+    return String(err);
+  }
+
   async function resetAllPhotoNumberCounters() {
     const { error } = await supabase.rpc("reset_photo_evidence_number_counters");
     if (error) throw error;
@@ -473,7 +482,7 @@ function AdminPanel() {
       setResetConfirmText("");
       await fetchPhotos();
     } catch (err) {
-      alert(`사진 삭제/번호 초기화 실패: ${err instanceof Error ? err.message : String(err)}`);
+      alert(`사진 삭제/번호 초기화 실패: ${formatError(err)}`);
     } finally {
       setResettingAllPhotos(false);
     }
@@ -505,7 +514,7 @@ function AdminPanel() {
       await fetchTeams();
       await fetchPhotos();
     } catch (err) {
-      alert(`전체 조 초기화 실패: ${err instanceof Error ? err.message : String(err)}`);
+      alert(`전체 조 초기화 실패: ${formatError(err)}`);
     } finally {
       setLoadingId(null);
     }

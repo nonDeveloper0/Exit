@@ -1094,3 +1094,7 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
 - [x] admin 전체 초기화/사진 삭제의 조용한 실패를 드러내도록 오류 알림 추가
   - "전체 조 초기화"(`handleResetAll`)와 "사진 전체 삭제"(`resetAllPhotos`)가 `try/finally`만 있고 `catch`가 없어, 번호 카운터 리셋 RPC(`reset_photo_evidence_number_counters`) 같은 단계가 런타임에 실패해도 화면에 오류가 안 뜨고 묻혔다. 그 결과 초기화 후 첫 업로드가 이전 카운터(예: 9)를 이어받아 #10으로 채번되는 증상. 두 함수에 `catch`를 추가해 실패 원인을 alert로 표시.
   - 수정 파일: `src/app/admin/page.tsx`, `progress.md`
+
+- [x] admin 초기화 실패 alert가 `[object Object]`로 뜨던 것 수정
+  - Supabase가 던지는 오류는 Error 인스턴스가 아니라 `{message, details, hint, code}` 객체여서 `String(err)`이 `[object Object]`가 됐다. `formatError()` 헬퍼로 객체에서 message/details/hint/code를 뽑아 표시하도록 변경. (사진 전체 삭제 시 카운터 리셋 RPC가 실제로 실패 중임이 확인됨 → 실제 원인 메시지 확보 목적.)
+  - 수정 파일: `src/app/admin/page.tsx`, `progress.md`
