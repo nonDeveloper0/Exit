@@ -2,6 +2,10 @@
 
 ## 작업 완료 (2026-07-17)
 
+- [x] 채소장(B, QR `w3n5k7`, POISON KILL 정답) 심문권 획득 화면에 "국립과학수사연구원" 문구 표시. `InterrogationQuiz`에 선택적 `earnedNote` 필드 추가 → 획득 성공 카드에 조건부 표시. 수정: `src/lib/data.ts`, `src/app/qr/[id]/QrPageClient.tsx`, `docs/01_md/EDIT_GUIDE.md`. 검증: `tsc`/`eslint` 통과.
+
+## 작업 완료 (2026-07-17)
+
 - [x] laptop 지문감식 결과 이미지가 안 보이던 문제 수정. 원인: `<img src>`가 상대경로(`fingerprint-report.png`)라 `/screen/laptop` 리라이트/끝 슬래시 접속 시 `/screen/laptop/fingerprint-report.png`로 잘못 해석돼 404. 절대경로 `/screen/fingerprint-report.png`로 변경(다른 screen 파일들의 자산 경로 관례와 일치). dev 서버로 이미지 200(image/png, 1.7MB) 및 laptop 페이지 200 확인. 수정 파일: `public/screen/laptop.html`, `progress.md`.
 
 - [x] laptop 잠금화면에 암호 힌트 텍스트 추가. 이름("나팀장") 아래에 `<div class="lock-sub">암호 힌트 — 사랑하는 동생</div>`(기존 `.lock-sub` 스타일 재사용). 수정 파일: `public/screen/laptop.html`, `progress.md`.

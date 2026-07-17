@@ -90,6 +90,9 @@ export default function QrPageClient({ qrId, location, quiz, suspectName }: Prop
           <h2 className="mt-2 text-xl font-black text-emerald-100">
             {suspectName ?? quiz.suspectId} 심문권 획득
           </h2>
+          {quiz.earnedNote && (
+            <p className="mt-2 text-sm font-semibold text-emerald-200">{quiz.earnedNote}</p>
+          )}
           <p className="mt-2 text-sm text-emerald-100/70">
             이미 심문권을 획득했습니다. 용의자 파일에서 티켓을 확인하세요.
           </p>
