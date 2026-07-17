@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
-import { GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE, photoLocationTagLabel } from "@/lib/data";
+import { CALL_RESET_EVENT_ID, CALL_RESET_EVENT_TYPE, GLOBAL_PAIR_ID, INCOMING_CALL_EVENT_ID, INCOMING_CALL_EVENT_TYPE, PHOTO_BUCKET, VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE, photoLocationTagLabel } from "@/lib/data";
 import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 import { getPairTeamKey } from "@/lib/pairTeam";
 import { STAFF_LEADER_NAMES } from "@/lib/staffRole";
@@ -115,6 +115,7 @@ function AdminPanel() {
   const [showIncomingCallConfirm, setShowIncomingCallConfirm] = useState(false);
   const [incomingCallTeamInput, setIncomingCallTeamInput] = useState("");
   const [togglingIncomingCall, setTogglingIncomingCall] = useState(false);
+  const [resettingCall, setResettingCall] = useState(false);
   const [resettingAllPhotos, setResettingAllPhotos] = useState(false);
   const [showResetPhotosConfirm, setShowResetPhotosConfirm] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState("");
@@ -412,6 +413,34 @@ function AdminPanel() {
     setTogglingIncomingCall(false);
   }
 
+  // 수신전화 마커를 지우고, /phone 기기에 통화 재생 상태 초기화 신호를 브로드캐스트한다.
+  async function resetCallDramatization() {
+    setResettingCall(true);
+    try {
+      await supabase
+        .from("team_evidence_items")
+        .delete()
+        .eq("evidence_id", INCOMING_CALL_EVENT_ID)
+        .eq("type", INCOMING_CALL_EVENT_TYPE);
+      await supabase
+        .from("team_evidence_items")
+        .delete()
+        .eq("pair_id", GLOBAL_PAIR_ID)
+        .eq("evidence_id", CALL_RESET_EVENT_ID)
+        .eq("type", CALL_RESET_EVENT_TYPE);
+      await supabase.from("team_evidence_items").insert({
+        pair_id: GLOBAL_PAIR_ID,
+        evidence_id: CALL_RESET_EVENT_ID,
+        type: CALL_RESET_EVENT_TYPE,
+        created_at: new Date().toISOString(),
+      });
+      setIncomingCallActive(false);
+      setIncomingCallTeamId(null);
+    } finally {
+      setResettingCall(false);
+    }
+  }
+
   async function deleteTeamPhotos(pairId: string) {
     const { data: files } = await supabase.storage.from(PHOTO_BUCKET).list(pairId, { limit: 1000 });
     if (files && files.length > 0) {
@@ -591,28 +620,41 @@ function AdminPanel() {
             )}
 
             {/* Incoming call */}
-            <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-              <div className="space-y-0.5">
-                <p className="text-sm font-bold text-zinc-200">수신전화 연출</p>
-                <p className={`text-xs font-mono ${incomingCallActive ? "text-red-400" : "text-zinc-500"}`}>
-                  {incomingCallActive
-                    ? `● ${incomingCallTeamId ?? "?"}조에 전화 거는 중`
-                    : "○ 대기 중"}
-                </p>
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold text-zinc-200">수신전화 연출</p>
+                  <p className={`text-xs font-mono ${incomingCallActive ? "text-red-400" : "text-zinc-500"}`}>
+                    {incomingCallActive
+                      ? `● ${incomingCallTeamId ?? "?"}조에 전화 거는 중`
+                      : "○ 대기 중"}
+                  </p>
+                </div>
+                <button
+                  onClick={() =>
+                    incomingCallActive ? void endIncomingCall() : setShowIncomingCallConfirm(true)
+                  }
+                  disabled={togglingIncomingCall || resettingCall}
+                  className={`rounded px-5 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                    incomingCallActive
+                      ? "border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                      : "bg-red-500 text-white hover:bg-red-400"
+                  }`}
+                >
+                  {togglingIncomingCall ? "..." : incomingCallActive ? "전화 종료" : "전화 걸기"}
+                </button>
               </div>
               <button
-                onClick={() =>
-                  incomingCallActive ? void endIncomingCall() : setShowIncomingCallConfirm(true)
-                }
-                disabled={togglingIncomingCall}
-                className={`rounded px-5 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                  incomingCallActive
-                    ? "border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                    : "bg-red-500 text-white hover:bg-red-400"
-                }`}
+                type="button"
+                onClick={() => void resetCallDramatization()}
+                disabled={togglingIncomingCall || resettingCall}
+                className="w-full rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs font-bold text-zinc-300 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
-                {togglingIncomingCall ? "..." : incomingCallActive ? "전화 종료" : "전화 걸기"}
+                {resettingCall ? "초기화 중..." : "전화 연출 초기화"}
               </button>
+              <p className="text-[10px] leading-relaxed text-zinc-600">
+                전화를 받은 뒤 나팀장 개인폰(공기계)에 남는 &ldquo;통화내용 다시 듣기&rdquo; 버튼을 지우고 대기 화면으로 되돌립니다.
+              </p>
             </div>
 
             {incomingCallActive && (

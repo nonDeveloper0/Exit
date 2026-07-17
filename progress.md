@@ -1,5 +1,130 @@
 # EXIT 2026 — 진행 현황
 
+## 작업 완료 (2026-07-17)
+
+- [x] admin에 "전화 연출 초기화" 기능 추가. `/phone` 기기가 탐정 전화를 받은 뒤 남는 "통화내용 다시 듣기" 상태(`hasLastCallRecording`, 폰 localStorage)를 원격으로 초기화. 투표 초기화(`vote_reset`)와 동일하게 Supabase `__global` 브로드캐스트(`call_reset`)로 신호 전달.
+  - `src/lib/data.ts`: `CALL_RESET_EVENT_ID`/`CALL_RESET_EVENT_TYPE` 상수 추가
+  - `src/app/phone/page.tsx`: `useBroadcastEvent(call_reset)` 구독 → 수신 시 재생 오디오 정지·`setHasLastCallRecording(false)`·`clearIncomingCallHandled()`·`markHandled`
+  - `src/app/admin/page.tsx`: 수신전화 연출 카드에 `전화 연출 초기화` 버튼 + `resetCallDramatization()`(수신전화 마커 삭제 후 `call_reset` 브로드캐스트)
+  - `docs/01_md/EDIT_GUIDE.md`: 통화내용 다시 듣기 섹션에 초기화 안내 추가
+  - 검증: `npx tsc --noEmit` 통과(수정 파일 무에러, 기존 tests/의 .ts import 설정 에러만 잔존)
+
+## 작업 완료 (2026-07-17)
+
+- [x] `public/screen/laptop.html` 잠금화면의 공통 암호를 `980721` → `19980721`(8자리)로 변경하고, 암호 입력칸 `maxlength`를 6→8로 맞췄다.
+- [x] 노트북 화면에서 **조 번호 선택 UI와 조별 증거 저장 로직을 제거**했다(사용자 요청: 심문권은 별도 획득, 노트북은 조별 증거 수집 불필요).
+  - 제거: `<select id="teamSelect">` 및 `.team-select` CSS, `teamNo`, `PDF_EVIDENCE_ID`, Supabase 상수(`SUPABASE_URL`/`SUPABASE_ANON_KEY`/`sb`)와 `supabase-js` CDN `<script>`, `saveToTeam()` 함수, `tryUnlock`의 조 선택 검증.
+  - `collect()`는 조 텍스트 없이 "열람 완료" 토스트만 표시, 세션 라벨은 "세션 활성"으로 변경.
+  - 수정 파일: `public/screen/laptop.html`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] Scene 21을 직접적인 연행 장면 대신 빗물 고인 아스팔트 위 수갑과 경광등 반사로 체포를 은유하는 `진실의 무게` 장면으로 재기획했다. `cutscenes.md`, `narration_subtitles.md`, `scripts/generate_images.py`를 맞추고, 생성 결과를 `output/scene-21.png`에 1536×864(16:9)로 반영했다. 이미지 생성 기능을 사용했으며, 문서 제목 일치와 생성 스크립트 문법을 검증했다.
+
+## 작업 완료 (2026-07-17)
+
+- [x] `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`의 Scene 13 행동 지시를 보강했다. 나팀장은 오른손으로 김사원의 팔꿈치만 부축하고, 왼손으로 택시 뒷문 위쪽 프레임을 잡으며, 양손을 김사원의 머리·얼굴·어깨 위에 올리지 않는다고 명시했다.
+
+## 작업 완료 (2026-07-17)
+
+- [x] `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\narration_subtitles.md`에 Scene 00~22별 단일 화자 내레이션과 간결한 자막을 작성했다. 각 항목이 한 장면씩 대응하며, 대화 없이 사건 흐름이 이어지도록 구성했다. 23개 Scene·내레이션·자막 항목과 UTF-8 BOM 없음도 검증했다.
+
+## 작업 완료 (2026-07-17)
+
+- [x] `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard`의 Scene 00~22 이미지를 중앙 크롭하여 모두 정확한 16:9(1536×864)로 보정했다. `scripts/generate_images.py`에도 API 결과를 저장 전 자동으로 16:9 중앙 크롭하는 처리와 기존 이미지 일괄 보정용 `--normalize-existing` 옵션을 추가했다. `py_compile`과 전체 출력 이미지 치수 검증을 통과했다.
+
+## 작업 완료 (2026-07-17)
+
+- [x] `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard`의 생성 설정과 출력 이미지 비율을 점검했다. `generate_images.py`의 API 크기 `1536x1024`는 3:2이며, output의 Scene 00~22 이미지도 모두 1536×1024로 생성되어 16:9 요구사항이 실제 파일에 반영되지 않았음을 확인했다.
+
+## 작업 완료 (2026-07-17)
+
+- [x] 새 Scene 17 `목격자의 메시지`를 추가했다. 이대리가 창고 폭행 상황을 목격한 뒤 서비스 복도에서 공황에 빠진 채 채소장에게 위험을 알리는 메시지를 보내는 장면이다.
+  - 기존 Scene 17~21은 Scene 18~22로 한 번호씩 이동했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] Scene 17 뒤에 새 Scene 18 `위험한 결심`을 추가했다. 채소장이 김사원을 지키겠다는 왜곡된 생각으로 독극물 살인을 결심하고, 위험물 보관함에서 밀봉 약품통과 보호장비 가방을 챙겨 연구실을 나서려는 장면이다.
+  - 기존 Scene 18~20은 Scene 19~21로 한 번호씩 이동했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] Scene 16 뒤에 새 Scene 17 `닿지 않는 전화`를 추가했다. 채소장이 야간 복도에서 김사원에게 연락이 닿지 않아 휴대전화를 보며 당황하고 안절부절못하는 장면이다.
+  - 기존 Scene 17~19는 Scene 18~20으로 한 번호씩 이동했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] 새 Scene 14 `창고의 비웃음`을 추가했다. 박실장이 야간 물류창고에서 장부 상자를 두드리며 나사장과 감사를 비웃듯 낄낄 웃는, 나팀장 도착 직전의 장면이다.
+  - 기존 Scene 14~18은 Scene 15~19로 한 번호씩 이동했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] 새 Scene 13 `택시를 타는 김사원`을 추가했다. 나팀장이 폭행당한 김사원의 팔꿈치를 받치고, 열린 택시 뒷문에 머리를 부딪히지 않게 도우며 귀가시키는 장면이다.
+  - 기존 Scene 13~17은 Scene 14~18로 한 번호씩 이동했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] Scene 10과 기존 복도 발견 장면 사이에 새 Scene 11 `창고로 향하는 지시`를 추가했다. 나팀장이 나사장의 전화 지시 직후 서류철을 들고 물류창고 방화문으로 빠르게 향하는 단일 장면이다.
+  - 기존 Scene 11~16은 Scene 12~17로 한 번호씩 이동했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] Scene 10을 나사장·박실장 대면 장면에서 휴대전화 협박 메시지 장면으로 교체했다. 나사장만 대표실에 홀로 등장하며, 박실장은 화면 밖에서 메시지를 보낸다. 메시지의 실제 글자는 생성하지 않도록 명시했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] 새 Scene 06 `처음 다시 만난 형제`를 추가했다. 나팀장과 김사원이 탐정 보고 직후 비상계단에서 친형제임을 확인하고, 두 팔로 부둥켜안은 채 함께 우는 첫 재회 장면이다.
+  - 기존 Scene 06~15는 Scene 07~16으로 한 번호씩 이동했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] Scene 04에서 나팀장이 한 손으로 휴대전화를 귀에 대고 통화하며, 김사원의 이력서를 향한 시선으로 놀라는 모습으로 변경했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] Scene 00을 이별 전의 행복한 보육원 일상으로 되돌리고, 동생의 눈물과 형의 우울한 표정은 입양 이별 장면인 Scene 02에만 적용했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] Scene 00의 감정을 이별 직전으로 조정했다. 김사원은 축구공을 안고 울며, 나팀장은 동생을 감싸면서도 우울하고 걱정스러운 표정으로 먼 곳을 바라본다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] Scene 00 `함께 웃던 오후`를 추가했다. 2003년 보육원에서 나팀장(10세)·김사원(5세)이 이별 전 행복하게 지내는 프롤로그 컷이며, `01_새빛고아원.jpeg`의 정면 구도·밝은 흑연선·벽돌 현관과 앞마당 분위기를 참조한다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] 컷씬 Scene 02의 나사장을 2003년 당시 40대 초반으로 명시했다. 마스터시트의 얼굴형·헤어·체형은 유지하되 깊은 주름·백발·노쇠한 인상 없이 더 젊고 단정하게 표현하도록 지시했다.
+  - 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\cutscenes.md`, `progress.md`
+
+## 작업 완료 (2026-07-17)
+
+- [x] 이미지 전용 컷씬에 새빛고아원·박실장 사건현장 배경 레퍼런스를 지정하고, 생성 스크립트가 해당 배경 이미지를 함께 참조하도록 보완했다.
+  - Scene 01~02는 `references/01_새빛고아원.jpeg`의 밝은 아이보리 종이, 가는 연필선, 벽돌 현관·캐노피·앞마당 분위기를 따른다.
+  - 박실장 사건현장과 이어지는 Scene 11~13은 `references/박실장_사건현장.png`의 낮은 시점, 높은 랙, 콘크리트 바닥, 출입구, 차가운 어두운 명암을 따른다.
+  - `generate_images.py`는 컷씬의 `배경 레퍼런스` 이미지도 등장인물 마스터시트와 함께 API에 전달한다.
+  - 검증: Python 3.13으로 15개 컷 파싱 및 Scene 01·02·11·12·13의 캐릭터/배경 레퍼런스 선택을 확인했다. API 호출 없음, `git diff --check` 통과.
+
+## 작업 완료 (2026-07-16)
+
+- [x] 외부 스토리보드 이미지 생성 자료를 전체 서사(`storyboard.md`)와 이미지 전용 컷씬(`cutscenes.md`)으로 분리하고, 생성 스크립트가 컷씬만 사용하도록 개편했다.
+  - `cutscenes.md`에 이미지 한 장당 한 시점만 갖는 15개 컷을 만들고, 각 컷에 등장인물·시간·배경·인물 상태·상황·행동·구도·감정을 명시했다. 사건의 밤은 복도 발견·격돌 직전·현장 위장·채소장의 오해로 분리했다.
+  - `generate_images.py`는 `cutscenes.md`만 파싱하며, `등장인물`에 적힌 이름과 일치하는 마스터시트만 각 컷에 전달한다. 상처·찢어진 의상도 해당 컷의 `인물 상태` 지시가 있을 때만 생성 프롬프트에 반영하도록 변경했다. 기존 12개 결과를 새 컷 정의로 다시 만들 수 있도록 명시적 `--force` 옵션도 추가했다.
+  - 외부 수정 파일: `F:\01_Personal\04_NS\05_EXIT\06_exit_storyboard\scripts\generate_images.py`, `storyboard.md`, `cutscenes.md`, `agents.md`
+  - 검증: `C:\Users\PJS\AppData\Local\Programs\Python\Python313\python.exe`(Python 3.13.5)로 도움말·컷씬 파서 실행을 확인했다. 15개 컷을 파싱하고 Scene 01·11의 등장인물별 마스터시트를 정확히 선택했으며, API 호출은 하지 않았다. `py` 런처는 설치된 Python을 찾지 못하는 상태다. `git diff --check` 통과.
+
 ## 작업 완료 (2026-07-16)
 
 - [x] 수사본부의 수사 진행표를 제거하고 변경분을 커밋·푸시한다.

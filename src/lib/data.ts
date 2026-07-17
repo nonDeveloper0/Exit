@@ -103,6 +103,9 @@ export const INCOMING_CALL_AUDIO_URL = "/audio/탐정대사_소라.m4a";
 export const INCOMING_CALL_EVIDENCE_ID = "CALL01";
 export const VOTE_RESET_EVENT_ID = "_vote_reset";
 export const VOTE_RESET_EVENT_TYPE = "vote_reset";
+// 전화 연출 초기화 브로드캐스트. 수신 전용 기기(/phone)의 통화 재생 상태를 원격으로 리셋한다.
+export const CALL_RESET_EVENT_ID = "_call_reset";
+export const CALL_RESET_EVENT_TYPE = "call_reset";
 export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_ID];
 
 // 장소 이름 — 수정 시 여기서만 변경

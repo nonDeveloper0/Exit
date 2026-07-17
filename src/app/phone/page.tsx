@@ -1,12 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { INCOMING_CALL_AUDIO_URL } from "@/lib/data";
+import {
+  CALL_RESET_EVENT_ID,
+  CALL_RESET_EVENT_TYPE,
+  INCOMING_CALL_AUDIO_URL,
+} from "@/lib/data";
 import {
   CALL_RECORDING_AVAILABLE_EVENT,
   getHasLastCallRecording,
   setCallDevice,
+  setHasLastCallRecording,
 } from "@/lib/store";
+import { useBroadcastEvent } from "@/lib/useBroadcastEvent";
+import { clearIncomingCallHandled } from "@/lib/useIncomingCall";
 
 // 나팀장의 개인폰을 수신 전용 기기로 지정하는 대기 화면.
 export default function PhoneDevicePage() {
@@ -15,6 +22,10 @@ export default function PhoneDevicePage() {
   const [isReplaying, setIsReplaying] = useState(false);
   const [replayError, setReplayError] = useState(false);
   const replayAudioRef = useRef<HTMLAudioElement | null>(null);
+  const { active: callResetActive, markHandled: markCallResetHandled } = useBroadcastEvent(
+    CALL_RESET_EVENT_ID,
+    CALL_RESET_EVENT_TYPE
+  );
 
   useEffect(() => {
     setCallDevice(true);
@@ -23,6 +34,17 @@ export default function PhoneDevicePage() {
     window.addEventListener(CALL_RECORDING_AVAILABLE_EVENT, updateRecordingState);
     return () => window.removeEventListener(CALL_RECORDING_AVAILABLE_EVENT, updateRecordingState);
   }, []);
+
+  // 관리자가 "전화 연출 초기화"를 누르면 통화 재생 상태와 수신 처리 마커를 지워 대기 화면으로 되돌린다.
+  useEffect(() => {
+    if (!callResetActive) return;
+    replayAudioRef.current?.pause();
+    setIsReplaying(false);
+    setReplayError(false);
+    setHasLastCallRecording(false);
+    clearIncomingCallHandled();
+    markCallResetHandled();
+  }, [callResetActive, markCallResetHandled]);
 
   useEffect(() => {
     const tick = () =>
