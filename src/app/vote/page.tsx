@@ -81,7 +81,7 @@ export default function VotePage() {
   }
 
   async function handleSubmit() {
-    if (!selected || !team) return;
+    if (!selected || !team || !reasoning.trim()) return;
     setSubmitting(true);
     try {
       await submitToGoogleForm(team.teamNumber, team.name, selected, reasoning.trim());
@@ -172,7 +172,7 @@ export default function VotePage() {
 
       <div className="space-y-1.5">
         <label htmlFor="reasoning" className="text-sm font-semibold text-zinc-300">
-          추리 근거 <span className="text-xs font-normal text-zinc-500">(선택)</span>
+          추리 근거 <span className="text-xs font-normal text-amber-400">(필수)</span>
         </label>
         <textarea
           id="reasoning"
@@ -181,7 +181,7 @@ export default function VotePage() {
           maxLength={REASONING_MAX_LENGTH}
           disabled={!isLeader}
           rows={4}
-          placeholder={"예) A는 협박의 대상이어서 범인으로 보기 어렵습니다.\nC는 사건 시각 현장에 있었고, 지문과 출입기록이 일치해 범인으로 추리합니다."}
+          placeholder={"예) A는 ~~이어서 범인으로 보기 어렵습니다.\nC는 ~~이므로 범인으로 추리합니다."}
           className="w-full resize-none rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
         />
         <p className="text-right text-xs text-zinc-600 font-mono">
@@ -197,9 +197,9 @@ export default function VotePage() {
 
       <button
         onClick={handleSubmit}
-        disabled={!selected || submitting || voteLocked || !isLeader}
+        disabled={!selected || !reasoning.trim() || submitting || voteLocked || !isLeader}
         className={`w-full rounded-lg py-4 text-base font-bold transition-all active:scale-[0.98] ${
-          selected && !submitting && !voteLocked && isLeader
+          selected && reasoning.trim() && !submitting && !voteLocked && isLeader
             ? "bg-amber-400 text-zinc-900 hover:bg-amber-300"
             : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
         }`}
@@ -210,6 +210,8 @@ export default function VotePage() {
           ? "조장만 최종 추리를 제출할 수 있습니다"
           : voteLocked
           ? `증거 ${VOTE_UNLOCK_COUNT - collectedCount}개 추가 수집 시 제출 가능`
+          : !reasoning.trim()
+          ? "추리 근거를 작성하세요"
           : selected
           ? `용의자 ${selected} — 최종 추리 제출`
           : "용의자를 선택하세요"}
