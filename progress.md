@@ -2,6 +2,22 @@
 
 ## 작업 완료 (2026-07-18)
 
+- [x] 증거 보관함 상단의 `조별 한도` 꼬리말과 짝 조 한도 안내를 제거했다. 사진 업로드 안내를 `사건과 관련된 단서사진만 업로드 하세요. 조별 최대 30장까지 등록 가능.`으로 교체하고, 선택 장소 업로드 안내와 함께 강조 색상·굵기로 표시했다.
+  - 변경: `src/app/evidence/page.tsx`, `progress.md`
+
+## 작업 완료 (2026-07-18)
+
+- [x] `final_votes`의 실제 서버 저장·조회·삭제와 Realtime INSERT·DELETE 구독을 전용 테스트 행으로 검증했다. 저장값 재조회가 일치했고 삭제 후 0건임을 확인했으며, Realtime 이벤트도 INSERT·DELETE 모두 수신했다. 테스트 행은 즉시 삭제해 실제 참가 조·Google Form 응답에는 영향이 없다.
+  - 변경: `progress.md`
+
+## 작업 완료 (2026-07-18)
+
+- [x] `19_FINAL_VOTE_SERVER_HANDOFF.md` 기준으로 `final_votes` 서버 저장 마이그레이션의 적용과 정적 구현을 검증했다. Supabase REST 읽기 요청이 200으로 응답했고 테이블은 현재 0건이며, 서버 저장·Realtime 구독·초기화 구현의 lint/test/build도 통과했다.
+  - 검증: 변경 파일 eslint, `npm.cmd test`(10개), `npm.cmd run build`, `git diff --check` 통과.
+  - 실제 제출·새 기기 동기화·관리자 초기화의 동작 검증은 테스트 답안 생성 및 삭제가 필요하므로 아직 수행하지 않았다.
+
+## 작업 완료 (2026-07-18)
+
 - [x] 최종 추리 Google Form 전송값을 용의자 코드만(`A`) 보내던 방식에서 폼 선택지와 같은 전체 텍스트(`A 나사장`)로 변경했다. `SUSPECTS` 데이터의 ID와 이름을 조합하므로 A~E 모두 일치한다.
   - 변경: `src/app/vote/page.tsx`, `progress.md`
 
