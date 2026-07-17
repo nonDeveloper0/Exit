@@ -61,6 +61,7 @@ export function usePhotoEvidence() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [updatingPhotoId, setUpdatingPhotoId] = useState<string | null>(null);
+  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ownTeamId) return;
@@ -250,6 +251,24 @@ export function usePhotoEvidence() {
     []
   );
 
+  const deletePhoto = useCallback(async (photo: PhotoItem) => {
+    setDeletingPhotoId(photo.id);
+    try {
+      // image_url(공개 URL)에서 Storage 경로(`{pairId}/{파일명}`)를 추출해 파일 먼저 제거
+      const marker = `/${PHOTO_BUCKET}/`;
+      const markerIndex = photo.imageUrl.indexOf(marker);
+      if (markerIndex !== -1) {
+        const path = decodeURIComponent(photo.imageUrl.slice(markerIndex + marker.length).split("?")[0]);
+        await supabase.storage.from(PHOTO_BUCKET).remove([path]);
+      }
+      const { error } = await supabase.from("photo_evidence").delete().eq("id", photo.id);
+      if (error) throw error;
+      setPhotos((prev) => prev.filter((item) => item.id !== photo.id));
+    } finally {
+      setDeletingPhotoId(null);
+    }
+  }, []);
+
   const ownPhotoCount = ownTeamId ? photos.filter((photo) => photo.pairId === ownTeamId).length : 0;
-  return { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, ownTeamId, ownPhotoCount, photoLimitReached: hasReachedPhotoLimit(ownPhotoCount) };
+  return { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, deletePhoto, deletingPhotoId, ownTeamId, ownPhotoCount, photoLimitReached: hasReachedPhotoLimit(ownPhotoCount) };
 }
