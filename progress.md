@@ -1124,3 +1124,7 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   - `store.ts`: `getVote/castVote/clearVote` 제거(레거시 `exit2026_vote_final` 키 정리는 resetAll에 유지). `app/page.tsx`: 조 전환 시 `clearVote` 호출 제거(서버 조 단위라 불필요). `admin/page.tsx`: `resetFinalVotes`·`handleResetAll`이 `final_votes` 삭제로 변경, VOTE_RESET 브로드캐스트 코드/임포트 제거. `data.ts`: `VOTE_RESET_EVENT_ID/TYPE` 제거.
   - 검증: `npx tsc --noEmit`(src 오류 없음), `npm test` 10개 통과, 변경 파일 lint 클린.
   - 수정 파일: `src/lib/useFinalVote.ts`(신규), `src/app/vote/page.tsx`, `src/lib/store.ts`, `src/app/page.tsx`, `src/app/admin/page.tsx`, `src/lib/data.ts`, `docs/01_md/07_DATA_SCHEMA.md`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
+- [x] Codex 인수인계 지시서 작성 (최종추리 서버화 이후 검증/후속)
+  - `docs/01_md/19_FINAL_VOTE_SERVER_HANDOFF.md` 신규. 사람은 Supabase SQL만 실행, 이후 검증(제출/영속성/조전환/초기화 즉시반영)과 보류된 후속 결정(관리자 제출현황 표시, 증거·심문권 DELETE 구독, 문서 정합성)은 Codex가 사용자 확인 후 진행하도록 정리.
+  - 수정 파일: `docs/01_md/19_FINAL_VOTE_SERVER_HANDOFF.md`(신규), `progress.md`
