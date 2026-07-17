@@ -2,6 +2,8 @@
 
 ## 작업 완료 (2026-07-17)
 
+- [x] admin "진행 상태 초기화"에 `심문권 획득 초기화` 버튼 추가. `interrogation_earned`+`interrogation_used`를 함께 삭제(획득 사라지면 사용 기록도 무의미)해 각 조가 QR 문제를 다시 풀어야 재획득하도록 함. 기존 `심문권 사용 초기화`(used만)와 별개. 확인 다이얼로그 3분기 처리, 비활성 조건에 신규 상태 반영. 참가자 기기는 새로고침 후 반영(기존 구조상 실시간 구독이 INSERT만 처리 — 사용 초기화와 동일). 수정: `src/app/admin/page.tsx`, `docs/01_md/EDIT_GUIDE.md`. 검증: `tsc`/`eslint` 통과.
+
 - [x] 채소장(B, QR `w3n5k7`, POISON KILL 정답) 심문권 획득 화면에 "국립과학수사연구원" 문구 표시. `InterrogationQuiz`에 선택적 `earnedNote` 필드 추가 → 획득 성공 카드에 조건부 표시. 수정: `src/lib/data.ts`, `src/app/qr/[id]/QrPageClient.tsx`, `docs/01_md/EDIT_GUIDE.md`. 검증: `tsc`/`eslint` 통과.
 
 ## 작업 완료 (2026-07-17)

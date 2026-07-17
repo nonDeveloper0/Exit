@@ -338,6 +338,9 @@ export const INTERROGATION_QUIZZES = {
 - **사용(1회 소모)**: 배우가 `심문 사용` → 확인 → `사용 완료`로 바뀌고 버튼 비활성. **짝지은 조도 함께 사용완료**로 전환된다. 사용완료에는 **사용 시각·사용한 조**가 표시된다 (예: `11:04 1조 사용완료`) — 오해 방지용
 - `SUSPECTS.interrogationTriggerId` 필드는 구버전 데이터 호환을 위해 보존하지만, 현재 UI의 심문권 노출 여부는 `INTERROGATION_QUIZZES` 기준입니다.
 - 사용 상태는 Supabase `team_evidence_items`의 `type='interrogation_used'` 행으로 저장되며, 조 초기화(`/admin`) 시 함께 삭제된다
+- **초기화(`/admin` → 진행 상태 초기화):** 두 종류가 있다.
+  - `심문권 사용 초기화` — `interrogation_used`만 삭제. 획득한 심문권은 유지되고 **다시 사용**할 수 있게 됨.
+  - `심문권 획득 초기화` — `interrogation_earned` + `interrogation_used`를 모두 삭제. 심문권이 사라져 각 조가 **QR 문제를 다시 풀어야** 재획득함. (참가자 기기는 새로고침 후 반영 — 실시간 구독은 INSERT만 처리)
 
 ---
 

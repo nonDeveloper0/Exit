@@ -127,8 +127,9 @@ function AdminPanel() {
   const [leaderTeam, setLeaderTeam] = useState("");
   const [leaderName, setLeaderName] = useState("");
   const [resettingInterrogationUses, setResettingInterrogationUses] = useState(false);
+  const [resettingInterrogationEarned, setResettingInterrogationEarned] = useState(false);
   const [resettingVotes, setResettingVotes] = useState(false);
-  const [pendingProgressReset, setPendingProgressReset] = useState<"interrogation" | "vote" | null>(null);
+  const [pendingProgressReset, setPendingProgressReset] = useState<"interrogation" | "interrogation_earned" | "vote" | null>(null);
 
   useEffect(() => {
     const team = getTeamInfo();
@@ -341,6 +342,16 @@ function AdminPanel() {
     }
   }
 
+  // 심문권 획득 기록을 삭제한다. 획득이 사라지면 사용 기록도 의미가 없으므로 함께 지운다.
+  async function resetInterrogationEarned() {
+    setResettingInterrogationEarned(true);
+    try {
+      await supabase.from("team_evidence_items").delete().in("type", ["interrogation_earned", "interrogation_used"]);
+    } finally {
+      setResettingInterrogationEarned(false);
+    }
+  }
+
   async function resetFinalVotes() {
     setResettingVotes(true);
     try {
@@ -358,6 +369,7 @@ function AdminPanel() {
 
   function confirmProgressReset() {
     if (pendingProgressReset === "interrogation") void resetInterrogationUses();
+    if (pendingProgressReset === "interrogation_earned") void resetInterrogationEarned();
     if (pendingProgressReset === "vote") void resetFinalVotes();
     setPendingProgressReset(null);
   }
@@ -544,20 +556,28 @@ function AdminPanel() {
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
               <div className="space-y-0.5">
                 <p className="text-sm font-bold text-zinc-200">진행 상태 초기화</p>
-                <p className="text-xs text-zinc-500">심문권의 사용 완료 기록과 각 기기의 최종추리 제출 상태를 별도로 초기화합니다.</p>
+                <p className="text-xs text-zinc-500">심문권의 획득·사용 기록과 각 기기의 최종추리 제출 상태를 각각 초기화합니다.</p>
               </div>
               <button
                 type="button"
                 onClick={() => setPendingProgressReset("interrogation")}
-                disabled={resettingInterrogationUses || resettingVotes}
+                disabled={resettingInterrogationUses || resettingInterrogationEarned || resettingVotes}
                 className="w-full rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-300 disabled:opacity-40"
               >
                 {resettingInterrogationUses ? "초기화 중..." : "심문권 사용 초기화"}
               </button>
               <button
                 type="button"
+                onClick={() => setPendingProgressReset("interrogation_earned")}
+                disabled={resettingInterrogationUses || resettingInterrogationEarned || resettingVotes}
+                className="w-full rounded border border-red-500/40 bg-red-500/15 px-3 py-2 text-sm font-bold text-red-300 disabled:opacity-40"
+              >
+                {resettingInterrogationEarned ? "초기화 중..." : "심문권 획득 초기화"}
+              </button>
+              <button
+                type="button"
                 onClick={() => setPendingProgressReset("vote")}
-                disabled={resettingInterrogationUses || resettingVotes}
+                disabled={resettingInterrogationUses || resettingInterrogationEarned || resettingVotes}
                 className="w-full rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm font-bold text-amber-200 disabled:opacity-40"
               >
                 {resettingVotes ? "초기화 중..." : "최종추리 제출 초기화"}
@@ -571,6 +591,8 @@ function AdminPanel() {
                 <p className="mt-2 text-sm text-zinc-400">
                   {pendingProgressReset === "interrogation"
                     ? "모든 조의 심문권 사용 완료 기록이 삭제됩니다. 이미 획득한 심문권은 다시 사용할 수 있습니다."
+                    : pendingProgressReset === "interrogation_earned"
+                    ? "모든 조의 심문권 획득 기록이 삭제됩니다(사용 기록 포함). 각 조는 QR 문제를 다시 풀어야 심문권을 재획득하며, 참가자 기기는 새로고침 후 반영됩니다."
                     : "모든 참가자 기기의 최종추리 제출 상태가 초기화됩니다. 이미 Google Form에 전송된 응답은 삭제되지 않습니다."}
                 </p>
                 <div className="mt-5 flex gap-2">
