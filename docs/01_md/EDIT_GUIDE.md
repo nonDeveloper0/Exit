@@ -94,7 +94,7 @@ const CALLER_INITIALS = "미리";
 
 **파일:** `src/lib/data.ts` + `public/audio/` 폴더
 
-수신전화를 걸 때 관리자가 입력한 조에 자동 수집되는 증거는 `CALL01`입니다.
+수신전화에서 재생되는 통화 음성(및 `통화내용 다시 듣기`)은 `INCOMING_CALL_AUDIO_URL` 파일입니다. **전화는 연출 전용이라, 받아도 증거는 자동 수집되지 않습니다.** (`CALL01` 증거 정의는 남아 있지만 어디에서도 자동 수집하지 않음.)
 
 ```ts
 export const INCOMING_CALL_AUDIO_URL = "/audio/incoming-call.mp3";
@@ -105,9 +105,7 @@ export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_I
 - 오디오를 교체할 때는 새 파일을 `public/audio/`에 넣고 `INCOMING_CALL_AUDIO_URL`만 변경
 
 수신 대기 벨소리는 `public/audio/Galaxy_Bells.mp3`를 사용하며, 수신 화면이 표시된 동안(받기·거절 전) 반복 재생됩니다.
-- 제목/설명은 `EVIDENCE` 배열의 `CALL01` 항목에서 수정
-- `CALL01`은 증거함에는 보이지만 랭킹 점수와 랭킹 total에서는 제외됨
-- 전화는 **수신 전용 기기(공기계)** 에만 온다(→ 1-5). 공기계의 로그인 여부와 무관하게 관리자가 전화 발행 시 입력한 조에 `CALL01`이 수집된다.
+- 전화는 **수신 전용 기기(공기계)** 에만 온다(→ 1-5). 관리자가 `전화 걸기` → `확인`만 누르면 발행되며, 조 번호 입력은 없다.
 
 ---
 
@@ -151,8 +149,8 @@ export const RANKING_EXCLUDED_EVIDENCE_IDS: string[] = [INCOMING_CALL_EVIDENCE_I
 - **동작:** 이후 관리자 화면에서 `전화 걸기`를 누르면 이 기기 화면 위로 수신 화면(밀어서 받기)이 뜬다. 다른 참가자 기기에는 아무것도 뜨지 않는다.
 - **해제:** `/phone` 화면 하단 `수신 해제` 버튼을 누르면 그 기기는 더 이상 전화를 받지 않는다. (다른 기기를 공기계로 쓰려면 그 기기에서 `/phone`을 열면 됨 — 여러 대 지정도 가능)
 - **저장 위치:** 기기별 `localStorage` 플래그 `exit2026_call_device`. 조 로그인과 무관하며, 참가자 초기화(reset)에 영향받지 않는다.
-- 관리자에서 `전화 걸기`를 누른 뒤 전화를 찾은 조 번호를 입력하고 `확인`한다.
-- 공기계에서 전화를 받으면 관리자가 지정한 조에 `CALL01`이 수집된다. 공기계에 조 로그인을 할 필요는 없다.
+- 관리자에서 `전화 걸기`를 누르면 확인창이 뜨고, `확인`을 누르면 바로 발행된다. (조 번호 입력 없음.)
+- 공기계에서 전화를 받아도 증거는 수집되지 않는다(연출 전용). 공기계에 조 로그인을 할 필요도 없다.
 - `전화 종료`를 누르면 현재 수신전화 이벤트가 종료된다.
 
 ---
@@ -538,9 +536,9 @@ https://(배포주소)/screen/phone3
 
 - **공통 암호 변경:** `<script>` 안의 `const UNLOCK_PASSWORD = "19980721";` 값을 수정.
   입력칸은 8자리까지 받도록 돼 있음(`<input id="pwInput" ... maxlength="8">`). 자릿수를 바꾸면 `maxlength`도 맞추기.
-- **보고서 내용 작성(⚠️ 현재 비어있음):** `winPdf` 안의 `<article class="pdf-page">`는 제목만 있고 본문은
-  비워둔 상태(`내용 준비 중`). **단서팀 확정본으로 채워야 함.** `.pdf-doc-head`/`.pdf-meta`/`.pdf-section`/
-  `.pdf-table`/`.pdf-opinion`/`.pdf-sign` 스타일이 이미 준비돼 있어 그대로 마크업만 넣으면 됨.
+- **보고서 이미지 교체:** PDF를 열면 `winPdf` 안의 `<img class="pdf-image" src="fingerprint-report.png">`가
+  `public/screen/fingerprint-report.png`를 그대로 보여줍니다. **보고서를 바꾸려면 이 PNG 파일만 교체**하면 됨(경로·파일명 유지).
+  이미지가 창보다 크면 뷰어(`.pdf-body`, `overflow:auto`)에서 세로 스크롤로 내려볼 수 있음. 표시 폭은 `.pdf-image`의 `width: min(820px, 100%)`에서 조정.
 - **화면 상단 데모 배너는 제거됨.** 암호/데모 안내가 다시 필요하면 운영 화면이 아닌 별도 목업에서만 노출하세요.
 - 잠금 해제 퀴즈 영역은 HTML 주석(`<!-- ... -->`)으로 남겨둠 — 되살리려면 주석만 해제.
 

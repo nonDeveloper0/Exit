@@ -369,6 +369,14 @@
     font-size: 13px;
     line-height: 1.6;
   }
+  .pdf-image {
+    width: min(820px, 100%);
+    height: auto;
+    align-self: flex-start;
+    display: block;
+    background: #fff;
+    box-shadow: 0 6px 22px rgba(0,0,0,.45);
+  }
   .pdf-doc-head {
     display: flex;
     justify-content: space-between;
@@ -485,13 +493,9 @@
       </div>
     </div>
     <div class="pdf-body">
-      <!-- 지문감식 결과보고서 본문: 내용 비워둠. 단서팀 확정본으로 채우세요.
-           .pdf-doc-head / .pdf-meta / .pdf-section / .pdf-table / .pdf-opinion / .pdf-sign 스타일 준비돼 있음.
-           작성 안내: docs/01_md/EDIT_GUIDE.md 12장, progress.md 참고. -->
-      <article class="pdf-page">
-        <h1 class="pdf-title">지문감식 결과보고서</h1>
-        <div class="pdf-sub">내용 준비 중</div>
-      </article>
+      <!-- 지문감식 결과보고서 이미지. 교체 시 public/screen/fingerprint-report.png 파일만 바꾸면 됨.
+           너무 크면 .pdf-body(overflow:auto)에서 세로 스크롤로 내려볼 수 있음. -->
+      <img class="pdf-image" src="fingerprint-report.png" alt="지문감식 결과보고서" />
     </div>
   </section>
 </div>

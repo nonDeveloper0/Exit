@@ -2,6 +2,15 @@
 
 ## 작업 완료 (2026-07-17)
 
+- [x] laptop 노트북 PDF 뷰어에 실제 지문감정 결과서 이미지 표시. 바탕화면 `지문감정결과서.png`(1054×1492)를 `public/screen/fingerprint-report.png`로 복사하고, `winPdf`의 placeholder(`pdf-page` 텍스트)를 `<img class="pdf-image" src="fingerprint-report.png">`로 교체. `.pdf-image` CSS 추가(`width:min(820px,100%)`, `align-self:flex-start`). 이미지가 창보다 크면 기존 `.pdf-body`(`overflow:auto`)에서 세로 스크롤됨.
+  - 수정 파일: `public/screen/laptop.html`, `public/screen/fingerprint-report.png`(신규), `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
+- [x] admin `전화 걸기`에서 조 번호 입력 제거. 이제 `전화 걸기` → 확인창 → `확인`만으로 발행. 전화는 연출 전용이 되어 수락해도 CALL01 자동수집을 하지 않음(사용자 결정: 자동수집 제거).
+  - `src/app/admin/page.tsx`: 조 입력 관련 state(`incomingCallTeamId`, `incomingCallTeamInput`) 및 다이얼로그 입력 UI 제거, 확인 다이얼로그로 대체. `startIncomingCall`은 `pair_id: GLOBAL_PAIR_ID`로 마커 발행. 상태 표시 "● 전화 거는 중"으로 변경.
+  - `src/components/IncomingCallOverlay.tsx`: `accept()`의 CALL01 수집(upsert) 제거, 그로 인해 안 쓰이게 된 `targetTeamId`·`INCOMING_CALL_EVIDENCE_ID`·`supabase` import 정리.
+  - `docs/01_md/EDIT_GUIDE.md`: 1-3, 1-5 섹션을 연출 전용/조 입력 없음으로 갱신.
+  - 검증: `npx tsc --noEmit`(수정 파일 무에러), `eslint` 통과.
+
 - [x] admin에 "전화 연출 초기화" 기능 추가. `/phone` 기기가 탐정 전화를 받은 뒤 남는 "통화내용 다시 듣기" 상태(`hasLastCallRecording`, 폰 localStorage)를 원격으로 초기화. 투표 초기화(`vote_reset`)와 동일하게 Supabase `__global` 브로드캐스트(`call_reset`)로 신호 전달.
   - `src/lib/data.ts`: `CALL_RESET_EVENT_ID`/`CALL_RESET_EVENT_TYPE` 상수 추가
   - `src/app/phone/page.tsx`: `useBroadcastEvent(call_reset)` 구독 → 수신 시 재생 오디오 정지·`setHasLastCallRecording(false)`·`clearIncomingCallHandled()`·`markHandled`

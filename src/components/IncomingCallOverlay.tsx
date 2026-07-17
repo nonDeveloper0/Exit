@@ -2,11 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { INCOMING_CALL_AUDIO_URL, INCOMING_CALL_EVIDENCE_ID } from "@/lib/data";
+import { INCOMING_CALL_AUDIO_URL } from "@/lib/data";
 import { markIncomingCallHandled, useIncomingCall } from "@/lib/useIncomingCall";
 import { getIsCallDevice, setHasLastCallRecording } from "@/lib/store";
 import { armAudioUnlock, startRingtone, stopRingtone } from "@/lib/ringtone";
-import { supabase } from "@/lib/supabase";
 
 type CallScreen = "incoming" | "calling" | "ended";
 
@@ -15,7 +14,7 @@ const CALLER_NUMBER = "010-9876-2345";
 const CALLER_INITIALS = "미리";
 
 export default function IncomingCallOverlay() {
-  const { active, eventId, targetTeamId, loaded } = useIncomingCall();
+  const { active, eventId, loaded } = useIncomingCall();
   const pathname = usePathname();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -67,16 +66,6 @@ export default function IncomingCallOverlay() {
   async function accept() {
     stopRingtone();
     markHandled();
-    if (targetTeamId) {
-      void supabase.from("team_evidence_items").upsert(
-        {
-          pair_id: targetTeamId,
-          evidence_id: INCOMING_CALL_EVIDENCE_ID,
-          type: "collected",
-        },
-        { onConflict: "pair_id,evidence_id,type", ignoreDuplicates: true }
-      );
-    }
     setAudioError(false);
     setHasLastCallRecording(true);
     setScreen("calling");

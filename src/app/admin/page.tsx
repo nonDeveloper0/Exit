@@ -111,9 +111,7 @@ function AdminPanel() {
   const [settingVoteRound, setSettingVoteRound] = useState(false);
   const [togglingEnding, setTogglingEnding] = useState(false);
   const [incomingCallActive, setIncomingCallActive] = useState(false);
-  const [incomingCallTeamId, setIncomingCallTeamId] = useState<string | null>(null);
   const [showIncomingCallConfirm, setShowIncomingCallConfirm] = useState(false);
-  const [incomingCallTeamInput, setIncomingCallTeamInput] = useState("");
   const [togglingIncomingCall, setTogglingIncomingCall] = useState(false);
   const [resettingCall, setResettingCall] = useState(false);
   const [resettingAllPhotos, setResettingAllPhotos] = useState(false);
@@ -153,7 +151,7 @@ function AdminPanel() {
   useEffect(() => {
     supabase
       .from("team_evidence_items")
-      .select("pair_id, created_at")
+      .select("created_at")
       .eq("evidence_id", INCOMING_CALL_EVENT_ID)
       .eq("type", INCOMING_CALL_EVENT_TYPE)
       .order("created_at", { ascending: false })
@@ -161,7 +159,6 @@ function AdminPanel() {
       .maybeSingle()
       .then(({ data }) => {
         setIncomingCallActive(!!data);
-        setIncomingCallTeamId(data?.pair_id ?? null);
       });
 
     const channel = supabase
@@ -178,15 +175,13 @@ function AdminPanel() {
             const oldRow = payload.old as { evidence_id?: string; type?: string };
             if (oldRow.evidence_id === INCOMING_CALL_EVENT_ID && oldRow.type === INCOMING_CALL_EVENT_TYPE) {
               setIncomingCallActive(false);
-              setIncomingCallTeamId(null);
             }
             return;
           }
 
-          const newRow = payload.new as { pair_id?: string; evidence_id?: string; type?: string };
+          const newRow = payload.new as { evidence_id?: string; type?: string };
           if (newRow.evidence_id === INCOMING_CALL_EVENT_ID && newRow.type === INCOMING_CALL_EVENT_TYPE) {
             setIncomingCallActive(true);
-            setIncomingCallTeamId(newRow.pair_id ?? null);
           }
         }
       )
@@ -384,14 +379,10 @@ function AdminPanel() {
       .eq("evidence_id", INCOMING_CALL_EVENT_ID)
       .eq("type", INCOMING_CALL_EVENT_TYPE);
     setIncomingCallActive(false);
-    setIncomingCallTeamId(null);
     setTogglingIncomingCall(false);
   }
 
   async function startIncomingCall() {
-    const targetTeamId = incomingCallTeamInput.trim();
-    if (!/^\d+$/.test(targetTeamId)) return;
-
     setTogglingIncomingCall(true);
     const createdAt = new Date().toISOString();
     clearIncomingCallHandled();
@@ -401,15 +392,13 @@ function AdminPanel() {
       .eq("evidence_id", INCOMING_CALL_EVENT_ID)
       .eq("type", INCOMING_CALL_EVENT_TYPE);
     await supabase.from("team_evidence_items").insert({
-      pair_id: targetTeamId,
+      pair_id: GLOBAL_PAIR_ID,
       evidence_id: INCOMING_CALL_EVENT_ID,
       type: INCOMING_CALL_EVENT_TYPE,
       created_at: createdAt,
     });
     setIncomingCallActive(true);
-    setIncomingCallTeamId(targetTeamId);
     setShowIncomingCallConfirm(false);
-    setIncomingCallTeamInput("");
     setTogglingIncomingCall(false);
   }
 
@@ -435,7 +424,6 @@ function AdminPanel() {
         created_at: new Date().toISOString(),
       });
       setIncomingCallActive(false);
-      setIncomingCallTeamId(null);
     } finally {
       setResettingCall(false);
     }
@@ -625,9 +613,7 @@ function AdminPanel() {
                 <div className="space-y-0.5">
                   <p className="text-sm font-bold text-zinc-200">수신전화 연출</p>
                   <p className={`text-xs font-mono ${incomingCallActive ? "text-red-400" : "text-zinc-500"}`}>
-                    {incomingCallActive
-                      ? `● ${incomingCallTeamId ?? "?"}조에 전화 거는 중`
-                      : "○ 대기 중"}
+                    {incomingCallActive ? "● 전화 거는 중" : "○ 대기 중"}
                   </p>
                 </div>
                 <button
@@ -659,7 +645,7 @@ function AdminPanel() {
 
             {incomingCallActive && (
               <p className="text-xs text-red-300/70 px-1">
-                공기계에 수신전화 화면이 표시됩니다. 받으면 {incomingCallTeamId}조에 CALL01이 수집됩니다.
+                공기계에 수신전화 화면이 표시됩니다. (연출 전용 — 증거는 수집되지 않습니다.)
               </p>
             )}
             {showIncomingCallConfirm && (
@@ -674,34 +660,12 @@ function AdminPanel() {
                     전화 걸기
                   </h3>
                   <p className="mt-1 text-sm text-zinc-400">
-                    전화를 찾은 조 번호를 입력하세요. 통화 수락 시 해당 조에 CALL01이 수집됩니다.
+                    나팀장 개인폰(공기계)에 수신전화 화면을 띄웁니다. 진행할까요?
                   </p>
-                  <label className="mt-5 block text-xs font-bold text-zinc-400" htmlFor="incoming-call-team">
-                    조 번호
-                  </label>
-                  <input
-                    id="incoming-call-team"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    autoFocus
-                    value={incomingCallTeamInput}
-                    onChange={(event) =>
-                      setIncomingCallTeamInput(event.target.value.replace(/\D/g, ""))
-                    }
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && incomingCallTeamInput) void startIncomingCall();
-                    }}
-                    className="mt-2 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-3 text-lg text-zinc-100 outline-none focus:border-red-400"
-                    placeholder="예: 3"
-                  />
                   <div className="mt-5 flex gap-2">
                     <button
                       type="button"
-                      onClick={() => {
-                        setShowIncomingCallConfirm(false);
-                        setIncomingCallTeamInput("");
-                      }}
+                      onClick={() => setShowIncomingCallConfirm(false)}
                       disabled={togglingIncomingCall}
                       className="flex-1 rounded border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm font-bold text-zinc-300 disabled:opacity-40"
                     >
@@ -710,7 +674,7 @@ function AdminPanel() {
                     <button
                       type="button"
                       onClick={() => void startIncomingCall()}
-                      disabled={togglingIncomingCall || !incomingCallTeamInput}
+                      disabled={togglingIncomingCall}
                       className="flex-1 rounded bg-red-500 px-4 py-3 text-sm font-bold text-white disabled:opacity-40"
                     >
                       {togglingIncomingCall ? "전화 거는 중..." : "확인"}
