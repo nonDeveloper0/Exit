@@ -1103,3 +1103,8 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   - 실제 오류: `DELETE requires a WHERE clause (21000)`. `reset_photo_evidence_number_counters()` 본문의 `DELETE FROM photo_evidence_number_counters;`에 WHERE 절이 없어 sql_safe_updates류 안전장치에 매번 막혔고, 그 탓에 초기화 후에도 카운터가 남아 재업로드가 #10부터 매겨졌다.
   - 함수의 DELETE에 `WHERE group_key IS NOT NULL`(PK라 전체 행 일치)을 추가하도록 `07_DATA_SCHEMA.md` 갱신. 앱 코드는 RPC를 올바르게 호출하므로 변경 없음 — 라이브 Supabase에서 함수 CREATE OR REPLACE 및 기존 카운터 DELETE를 SQL Editor로 적용해야 실제 반영됨.
   - 수정 파일: `docs/01_md/07_DATA_SCHEMA.md`, `progress.md`
+
+- [x] 다른 조로 재입장 시 이전 조 최종추리 제출 상태가 남던 버그 수정
+  - 증상: 같은 기기에서 1조로 제출 후 다른 조로 입장하면 "이미 제출됨"으로 표시. 원인: 제출 상태가 서버가 아닌 localStorage 전역 키 `exit2026_vote_final` 하나에만 저장되고 조별로 구분되지 않으며, 등록(`handleEnter`) 시 지워지지 않았다.
+  - 수정: 등록 시 이전 조 번호와 다르면 `clearVote()` 호출. 같은 조 재입장은 제출 유지.
+  - 수정 파일: `src/app/page.tsx`, `progress.md`

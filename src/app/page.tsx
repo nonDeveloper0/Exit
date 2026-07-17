@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getTeamInfo, saveTeamInfo } from "@/lib/store";
+import { getTeamInfo, saveTeamInfo, clearVote } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 
 export default function LandingPage() {
@@ -22,6 +22,10 @@ export default function LandingPage() {
     const num = parseInt(teamNumber);
     if (!num || num < 1 || !name.trim()) return;
     const pairId = String(num);
+    // 다른 조로 입장하면 이전 조의 최종추리 제출 기록(전역 localStorage 키)을 지운다.
+    // 같은 기기를 다른 조가 쓸 때 "이미 제출됨"으로 잘못 표시되는 것을 방지.
+    const prev = getTeamInfo();
+    if (prev?.teamNumber !== pairId) clearVote();
     saveTeamInfo(pairId, name.trim());
     await supabase
       .from("team_evidence_items")
