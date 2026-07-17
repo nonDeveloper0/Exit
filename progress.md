@@ -2,6 +2,8 @@
 
 ## 작업 완료 (2026-07-17)
 
+- [x] 채소장 심문권 문구 확장·강조. `earnedNote`를 `국립과학수사연구원..?`로 변경(QR 획득 화면 자동 반영). 용의자 파일(`/suspects`) 획득 티켓의 "용의자에게 이 화면을 제시하세요" 위에도 `quiz.earnedNote` 표시. 두 곳 모두 초록 카드 대비 강조 위해 앰버색+볼드(`text-amber-300 font-black`)로 통일. 수정: `src/lib/data.ts`, `src/app/qr/[id]/QrPageClient.tsx`, `src/app/suspects/page.tsx`, `docs/01_md/EDIT_GUIDE.md`. 검증: `tsc`/`eslint` 통과.
+
 - [x] admin "진행 상태 초기화"에 `심문권 획득 초기화` 버튼 추가. `interrogation_earned`+`interrogation_used`를 함께 삭제(획득 사라지면 사용 기록도 무의미)해 각 조가 QR 문제를 다시 풀어야 재획득하도록 함. 기존 `심문권 사용 초기화`(used만)와 별개. 확인 다이얼로그 3분기 처리, 비활성 조건에 신규 상태 반영. 참가자 기기는 새로고침 후 반영(기존 구조상 실시간 구독이 INSERT만 처리 — 사용 초기화와 동일). 수정: `src/app/admin/page.tsx`, `docs/01_md/EDIT_GUIDE.md`. 검증: `tsc`/`eslint` 통과.
 
 - [x] 채소장(B, QR `w3n5k7`, POISON KILL 정답) 심문권 획득 화면에 "국립과학수사연구원" 문구 표시. `InterrogationQuiz`에 선택적 `earnedNote` 필드 추가 → 획득 성공 카드에 조건부 표시. 수정: `src/lib/data.ts`, `src/app/qr/[id]/QrPageClient.tsx`, `docs/01_md/EDIT_GUIDE.md`. 검증: `tsc`/`eslint` 통과.

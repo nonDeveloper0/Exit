@@ -64,7 +64,7 @@ export default function SuspectsPage() {
             {!hasQuiz ? <div className="rounded bg-zinc-800/60 px-3 py-3 text-xs text-zinc-500">🔒 QR 문제 연결 대기 중</div>
             : !earned ? <div className="rounded bg-zinc-800/60 px-3 py-3 text-xs text-zinc-600">🔒 {quiz.autoGrant ? "심문권을 찾아 용의자를 심문하세요." : "해당 QR 문제를 풀면 이 용의자의 심문권을 얻습니다."}</div>
             : interrogationUse ? <div className="rounded-lg border border-zinc-700 bg-zinc-800/60 px-3 py-3 text-zinc-500"><p className="text-sm font-bold text-zinc-400">✅ {formatUsedTime(interrogationUse.usedAt)} {interrogationUse.teamId}조 사용완료</p><p className="text-xs">사용 완료된 심문권입니다.</p></div>
-            : <div className="space-y-3 rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-4"><p className="text-lg font-black text-emerald-200">🎫 심문권 획득 · {suspect.name}</p><p className="text-xs text-emerald-200/70">용의자에게 이 화면을 제시하세요.</p>
+            : <div className="space-y-3 rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-4"><p className="text-lg font-black text-emerald-200">🎫 심문권 획득 · {suspect.name}</p>{quiz.earnedNote && <p className="text-base font-black tracking-wide text-amber-300">{quiz.earnedNote}</p>}<p className="text-xs text-emerald-200/70">용의자에게 이 화면을 제시하세요.</p>
               {!roleLoaded ? <p className="text-xs text-zinc-500">권한 확인 중...</p> : !isLeader ? <p className="rounded bg-zinc-900/60 px-3 py-2 text-xs text-zinc-400">심문권 사용은 조장만 할 수 있습니다.</p> : <button type="button" onClick={() => setConfirmUseId(suspect.id)} className="w-full rounded bg-emerald-500 py-2.5 text-sm font-bold text-white">심문 사용</button>}
             </div>}
           </div>

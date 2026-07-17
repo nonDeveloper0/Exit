@@ -336,6 +336,6 @@ export const INTERROGATION_QUIZZES: Record<string, InterrogationQuiz> = {
     suspectId: "B",
     question: "부검표의 독성 반응을 일으킨 살해 방식 두 단어를 영어로 입력하세요.",
     answer: "poison kill",
-    earnedNote: "국립과학수사연구원",
+    earnedNote: "국립과학수사연구원..?",
   },
 };
