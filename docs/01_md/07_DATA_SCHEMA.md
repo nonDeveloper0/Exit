@@ -197,7 +197,9 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  DELETE FROM photo_evidence_number_counters;
+  -- WHERE 절 없는 DELETE는 sql_safe_updates 등 안전장치에 막힘("DELETE requires a WHERE clause").
+  -- group_key는 PK라 NOT NULL이므로 아래 조건은 전체 행과 일치한다.
+  DELETE FROM photo_evidence_number_counters WHERE group_key IS NOT NULL;
 END;
 $$;
 

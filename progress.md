@@ -1098,3 +1098,8 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
 - [x] admin 초기화 실패 alert가 `[object Object]`로 뜨던 것 수정
   - Supabase가 던지는 오류는 Error 인스턴스가 아니라 `{message, details, hint, code}` 객체여서 `String(err)`이 `[object Object]`가 됐다. `formatError()` 헬퍼로 객체에서 message/details/hint/code를 뽑아 표시하도록 변경. (사진 전체 삭제 시 카운터 리셋 RPC가 실제로 실패 중임이 확인됨 → 실제 원인 메시지 확보 목적.)
   - 수정 파일: `src/app/admin/page.tsx`, `progress.md`
+
+- [x] 사진 번호 카운터 리셋 실패 근본 원인 확인 및 함수 수정 (근본: DB 함수)
+  - 실제 오류: `DELETE requires a WHERE clause (21000)`. `reset_photo_evidence_number_counters()` 본문의 `DELETE FROM photo_evidence_number_counters;`에 WHERE 절이 없어 sql_safe_updates류 안전장치에 매번 막혔고, 그 탓에 초기화 후에도 카운터가 남아 재업로드가 #10부터 매겨졌다.
+  - 함수의 DELETE에 `WHERE group_key IS NOT NULL`(PK라 전체 행 일치)을 추가하도록 `07_DATA_SCHEMA.md` 갱신. 앱 코드는 RPC를 올바르게 호출하므로 변경 없음 — 라이브 Supabase에서 함수 CREATE OR REPLACE 및 기존 카운터 DELETE를 SQL Editor로 적용해야 실제 반영됨.
+  - 수정 파일: `docs/01_md/07_DATA_SCHEMA.md`, `progress.md`
