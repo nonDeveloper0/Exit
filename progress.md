@@ -1108,3 +1108,8 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   - 증상: 같은 기기에서 1조로 제출 후 다른 조로 입장하면 "이미 제출됨"으로 표시. 원인: 제출 상태가 서버가 아닌 localStorage 전역 키 `exit2026_vote_final` 하나에만 저장되고 조별로 구분되지 않으며, 등록(`handleEnter`) 시 지워지지 않았다.
   - 수정: 등록 시 이전 조 번호와 다르면 `clearVote()` 호출. 같은 조 재입장은 제출 유지.
   - 수정 파일: `src/app/page.tsx`, `progress.md`
+
+- [x] "전체 조 초기화"가 최종추리 제출 상태를 초기화하지 못하던 누락 수정
+  - 검토 결과: 사진(삭제+카운터 리셋), 증거 수집·심문권 획득/사용(team_evidence_items 전체 삭제 → 참가자 새로고침 시 반영), 용의자 메모는 `handleResetAll`이 커버. 그러나 최종추리 제출 상태는 서버가 아니라 참가자 기기 localStorage(`exit2026_vote_final`)에 있고, `resetFinalVotes`처럼 VOTE_RESET 브로드캐스트를 insert 해야 각 기기가 지운다. `handleResetAll`은 전체 삭제로 마커만 지우고 새 브로드캐스트를 발행하지 않아, 이미 제출한 참가자는 초기화 후에도 "제출 완료"가 남았다.
+  - 수정: `handleResetAll`에 VOTE_RESET 브로드캐스트 insert 추가(개별 "최종추리 제출 초기화"와 동일). 심문권/증거는 서버 삭제로 처리되며 참가자 새로고침 시 반영(개별 버튼과 동일한 기존 동작).
+  - 수정 파일: `src/app/admin/page.tsx`, `progress.md`

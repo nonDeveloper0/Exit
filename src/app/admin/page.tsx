@@ -510,6 +510,15 @@ function AdminPanel() {
       await deleteAllPhotos();
       await supabase.from("suspect_notes").delete().neq("pair_id", "");
       await resetAllPhotoNumberCounters();
+      // 최종추리 제출 상태는 서버가 아니라 각 참가자 기기 localStorage에 있다.
+      // 위 전체 삭제로 마커만 지우면 참가자 기기는 제출 상태를 그대로 유지하므로,
+      // VOTE_RESET 브로드캐스트를 새로 발행해 모든 기기가 제출 상태를 지우게 한다.
+      await supabase.from("team_evidence_items").insert({
+        pair_id: GLOBAL_PAIR_ID,
+        evidence_id: VOTE_RESET_EVENT_ID,
+        type: VOTE_RESET_EVENT_TYPE,
+        created_at: new Date().toISOString(),
+      });
       resetAll();
       await fetchTeams();
       await fetchPhotos();
