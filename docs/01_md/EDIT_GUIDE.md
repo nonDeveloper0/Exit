@@ -470,6 +470,20 @@ export const VOTE_UNLOCK_COUNT = 0; // ← 이 숫자를 바꾼다
 현재 최종 투표는 **기기별 1회 제출**로 고정되어 있습니다.
 제출 기록은 localStorage의 `exit2026_vote_final` 키에 저장됩니다.
 
+제출 시 **구글폼**으로도 전송됩니다(범인 선택 + 서술형 근거).
+
+**파일:** `src/app/vote/page.tsx` → 상단 `submitToGoogleForm`
+
+```ts
+"entry.197462467":  teamNumber,   // 조 번호
+"entry.1747885092": name,         // 제출자 이름
+"entry.795452093":  suspect,      // 선택한 범인
+"entry.1668977082": reasoning,    // 서술형 추리 근거
+```
+
+- 구글폼 질문을 새로 만들거나 순서를 바꾸면 `entry.숫자` ID가 달라집니다. "양식 미리 채우기"로 새 ID를 확보해 위 매핑을 갱신하세요.
+- **서술형 근거**: 최종 추리 화면 하단의 textarea. 조장만 입력 가능, **선택 입력**(비워도 제출됨), **최대 300자**. 글자수 제한은 같은 파일 상단 `REASONING_MAX_LENGTH` 상수로 조정합니다.
+
 ---
 
 ## 11. 페이지 타이틀 / 공유 미리보기 수정

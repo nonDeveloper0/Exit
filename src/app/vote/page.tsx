@@ -12,7 +12,14 @@ import { useBroadcastEvent } from "@/lib/useBroadcastEvent";
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSclsS9dAFGB2YgYNMNYd8NVQ5tBbdUBYwUF9tWosu5patyHXg/formResponse";
 
-async function submitToGoogleForm(teamNumber: string, name: string, suspect: string) {
+const REASONING_MAX_LENGTH = 300;
+
+async function submitToGoogleForm(
+  teamNumber: string,
+  name: string,
+  suspect: string,
+  reasoning: string,
+) {
   await fetch(FORM_URL, {
     method: "POST",
     mode: "no-cors",
@@ -21,6 +28,7 @@ async function submitToGoogleForm(teamNumber: string, name: string, suspect: str
       "entry.197462467": teamNumber,
       "entry.1747885092": name,
       "entry.795452093": suspect,
+      "entry.1668977082": reasoning,
     }).toString(),
   });
 }
@@ -31,6 +39,7 @@ export default function VotePage() {
   const { isLeader, loaded: roleLoaded } = useRole();
   const { active: voteResetActive, markHandled: markVoteResetHandled } = useBroadcastEvent(VOTE_RESET_EVENT_ID, VOTE_RESET_EVENT_TYPE);
   const [selected, setSelected] = useState<string | null>(null);
+  const [reasoning, setReasoning] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [team, setTeam] = useState<{ teamNumber: string; name: string } | null>(null);
@@ -45,6 +54,7 @@ export default function VotePage() {
     if (!voteResetActive) return;
     clearVote();
     setSelected(null);
+    setReasoning("");
     setSubmitted(false);
     markVoteResetHandled();
   }, [markVoteResetHandled, voteResetActive]);
@@ -74,7 +84,7 @@ export default function VotePage() {
     if (!selected || !team) return;
     setSubmitting(true);
     try {
-      await submitToGoogleForm(team.teamNumber, team.name, selected);
+      await submitToGoogleForm(team.teamNumber, team.name, selected, reasoning.trim());
     } catch {
       // no-cors 응답은 읽을 수 없으나 제출은 정상 처리됨
     }
@@ -100,6 +110,13 @@ export default function VotePage() {
           <p className="text-base font-semibold text-zinc-200">{votedSuspect?.name}</p>
           <p className="text-xs text-zinc-500 pt-1">제출자: {team?.name}</p>
         </div>
+
+        {reasoning.trim() && (
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-1">
+            <p className="text-xs font-mono text-zinc-500 tracking-widest uppercase">추리 근거</p>
+            <p className="text-sm text-zinc-300 whitespace-pre-wrap break-words">{reasoning.trim()}</p>
+          </div>
+        )}
 
         <p className="text-sm text-zinc-500 text-center">
           모든 조의 추리가 끝나면 진실이 공개됩니다.
@@ -147,11 +164,29 @@ export default function VotePage() {
               <div className="space-y-0.5">
                 <p className="text-xs font-mono text-zinc-500">{s.codename}</p>
                 <p className="text-base font-bold text-zinc-100">{s.name}</p>
-                <p className="text-xs text-zinc-500">{s.motive}</p>
               </div>
             </div>
           </button>
         ))}
+      </div>
+
+      <div className="space-y-1.5">
+        <label htmlFor="reasoning" className="text-sm font-semibold text-zinc-300">
+          추리 근거 <span className="text-xs font-normal text-zinc-500">(선택)</span>
+        </label>
+        <textarea
+          id="reasoning"
+          value={reasoning}
+          onChange={(e) => setReasoning(e.target.value.slice(0, REASONING_MAX_LENGTH))}
+          maxLength={REASONING_MAX_LENGTH}
+          disabled={!isLeader}
+          rows={4}
+          placeholder={"예) A는 협박의 대상이어서 범인으로 보기 어렵습니다.\nC는 사건 시각 현장에 있었고, 지문과 출입기록이 일치해 범인으로 추리합니다."}
+          className="w-full resize-none rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+        />
+        <p className="text-right text-xs text-zinc-600 font-mono">
+          {reasoning.length}/{REASONING_MAX_LENGTH}
+        </p>
       </div>
 
       {voteLocked && (

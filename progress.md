@@ -1,5 +1,24 @@
 # EXIT 2026 — 진행 현황
 
+## 작업 완료 (2026-07-18)
+
+- [x] 최종 추리 근거 입력칸에 범인 배제·지목 근거를 함께 안내하는 예시를 추가했다. 예시는 "A는 협박의 대상이어서 범인으로 보기 어렵습니다"와 "C는 사건 시각 현장에 있었고, 지문과 출입기록이 일치해 범인으로 추리합니다"로 구성했다.
+  - 변경: `src/app/vote/page.tsx`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/vote/page.tsx`, `npm.cmd test`(10개), `npm.cmd run build` 통과.
+
+## 작업 완료 (2026-07-18)
+
+- [x] 최종 추리 화면의 용의자 카드에서 동기 보조 문구(예: "협박 차단과 회사 보호")를 제거했다. 범인 선택 아래에는 조장 전용 추리 근거 입력칸(선택 입력, 최대 300자)이 표시되며, Google Form의 서술형 항목으로 함께 전송된다.
+  - 변경: `src/app/vote/page.tsx`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/vote/page.tsx` 통과. 전체 `tsc`는 기존 테스트 파일의 `.ts` 확장자 import 설정 오류 6건으로 실패.
+
+## 작업 완료 (2026-07-18)
+
+- [x] **최종 추리 서술형 근거 제출** — 범인 선택과 함께 조의 추리 근거를 장문으로 제출. 구글폼 장문 질문 추가 완료(entry ID `1668977082`, 질문 "누가 범인이지?"). 코드 작업 완료.
+  - `src/app/vote/page.tsx`: `submitToGoogleForm`에 `reasoning` 인자+`entry.1668977082` 추가, 최종 추리 화면에 textarea(선택 입력·300자 제한 `REASONING_MAX_LENGTH`·카운터, 조장만 입력), 제출 시 `reasoning.trim()` 전송, 완료 화면에 근거 요약 표시, `vote_reset` 시 초기화.
+  - 확정 동작: 선택 입력 · 300자 제한 · 구글폼으로만 전송(Supabase 병행 안 함).
+  - 수정: `src/app/vote/page.tsx`, `docs/01_md/18_FINAL_DEDUCTION_REASONING.md`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`. 검증: `tsc`/`eslint` 통과.
+
 ## 작업 완료 (2026-07-17)
 
 - [x] 채소장 심문권 문구 확장·강조. `earnedNote`를 `국립과학수사연구원..?`로 변경(QR 획득 화면 자동 반영). 용의자 파일(`/suspects`) 획득 티켓의 "용의자에게 이 화면을 제시하세요" 위에도 `quiz.earnedNote` 표시. 두 곳 모두 초록 카드 대비 강조 위해 앰버색+볼드(`text-amber-300 font-black`)로 통일. 수정: `src/lib/data.ts`, `src/app/qr/[id]/QrPageClient.tsx`, `src/app/suspects/page.tsx`, `docs/01_md/EDIT_GUIDE.md`. 검증: `tsc`/`eslint` 통과.
@@ -1055,3 +1074,9 @@ create policy "anon read" on storage.objects for select to anon using (bucket_id
   - 증거함에 조별 한도와 짝 조 미공유 안내를 표시하고, 업로드 오류·상수·DB 트리거 메시지를 조 기준으로 갱신했다.
   - 검증: `npm test` 10개 통과, `npm run build` 통과.
   - 수정 파일: `src/lib/photoUploadLimit.ts`, `src/lib/usePhotoEvidence.ts`, `src/app/evidence/page.tsx`, `tests/photoUploadLimit.test.ts`, `docs/01_md/07_DATA_SCHEMA.md`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
+## 작업 완료 (2026-07-18)
+
+- [x] admin `/admin` 하단 "전체 조 초기화"에 확인 모달 추가
+  - 되돌릴 수 없는 전면 삭제인데 확인 절차가 없어, 버튼 클릭 시 바로 실행하던 것을 확인 모달을 거치도록 변경. 기존 진행 상태 초기화 모달(`pendingProgressReset`)과 동일한 스타일로, 삭제 대상(증거 기록·사진·용의자 메모·사진 번호 카운터)과 "되돌릴 수 없음"을 명시하고 [전체 초기화 실행]/[취소] 제공.
+  - 수정 파일: `src/app/admin/page.tsx`, `progress.md`

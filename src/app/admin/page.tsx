@@ -130,6 +130,7 @@ function AdminPanel() {
   const [resettingInterrogationEarned, setResettingInterrogationEarned] = useState(false);
   const [resettingVotes, setResettingVotes] = useState(false);
   const [pendingProgressReset, setPendingProgressReset] = useState<"interrogation" | "interrogation_earned" | "vote" | null>(null);
+  const [showResetAllConfirm, setShowResetAllConfirm] = useState(false);
 
   useEffect(() => {
     const team = getTeamInfo();
@@ -491,6 +492,7 @@ function AdminPanel() {
   }
 
   async function handleResetAll() {
+    setShowResetAllConfirm(false);
     setLoadingId("ALL");
     try {
       await supabase.from("team_evidence_items").delete().neq("pair_id", "");
@@ -972,12 +974,25 @@ function AdminPanel() {
         </div>
 
         <button
-          onClick={handleResetAll}
+          onClick={() => setShowResetAllConfirm(true)}
           disabled={!!loadingId || teams.length === 0}
           className="w-full rounded-lg border border-red-500/40 bg-red-500/10 py-4 text-base font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
         >
           {loadingId === "ALL" ? "전체 삭제 중..." : "전체 조 초기화"}
         </button>
+
+        {showResetAllConfirm && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 px-4" role="dialog" aria-modal="true" aria-labelledby="reset-all-confirm-title">
+          <div className="w-full max-w-sm rounded-lg border border-red-500/30 bg-zinc-900 p-5 shadow-2xl">
+            <h2 id="reset-all-confirm-title" className="text-lg font-bold text-zinc-100">전체 조를 초기화하시겠습니까?</h2>
+            <p className="mt-2 text-sm text-zinc-400">
+              모든 조의 증거 수집 기록, 촬영한 사진(Storage 파일 포함), 용의자 메모, 사진 번호 카운터가 영구 삭제됩니다. 되돌릴 수 없습니다.
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button type="button" onClick={handleResetAll} className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white">전체 초기화 실행</button>
+              <button type="button" onClick={() => setShowResetAllConfirm(false)} className="rounded border border-zinc-600 px-4 py-2.5 text-sm font-bold text-zinc-300">취소</button>
+            </div>
+          </div>
+        </div>}
       </div>
     </div>
   );
