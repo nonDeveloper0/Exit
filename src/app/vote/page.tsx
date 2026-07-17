@@ -82,9 +82,17 @@ export default function VotePage() {
 
   async function handleSubmit() {
     if (!selected || !team || !reasoning.trim()) return;
+    const selectedSuspect = SUSPECTS.find((suspect) => suspect.id === selected);
+    if (!selectedSuspect) return;
+
     setSubmitting(true);
     try {
-      await submitToGoogleForm(team.teamNumber, team.name, selected, reasoning.trim());
+      await submitToGoogleForm(
+        team.teamNumber,
+        team.name,
+        `${selectedSuspect.id} ${selectedSuspect.name}`,
+        reasoning.trim(),
+      );
     } catch {
       // no-cors 응답은 읽을 수 없으나 제출은 정상 처리됨
     }
