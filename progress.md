@@ -2,6 +2,8 @@
 
 ## 작업 완료 (2026-07-17)
 
+- [x] laptop 잠금화면에 암호 힌트 텍스트 추가. 이름("나팀장") 아래에 `<div class="lock-sub">암호 힌트 — 사랑하는 동생</div>`(기존 `.lock-sub` 스타일 재사용). 수정 파일: `public/screen/laptop.html`, `progress.md`.
+
 - [x] evidence(증거 보관함) 페이지에 참가자용 사진 삭제 기능 추가. 라이트박스에 삭제 버튼(조장 전용·자기 조 사진만·확인 단계). 삭제 시 Storage 파일 + `photo_evidence` row 제거.
   - `src/lib/usePhotoEvidence.ts`: `deletePhoto(photo)` 액션 + `deletingPhotoId`. image_url에서 Storage 경로 추출해 파일 remove 후 row delete, 로컬 state 갱신.
   - `src/app/evidence/page.tsx`: 라이트박스에 `사진 삭제` → 확인(`삭제 확정`/`취소`) UI. `lightboxPhoto.pairId === ownTeamId`일 때만 노출.
