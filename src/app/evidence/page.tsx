@@ -324,21 +324,19 @@ export default function EvidencePage() {
             {roleLoaded && isLeader && (
               <div className="space-y-2">
                 <button type="button" onClick={openMetadataEditor} className="w-full rounded border border-amber-400/60 py-2.5 text-sm font-bold text-amber-200">정보 수정</button>
-                {lightboxPhoto.pairId === ownTeamId && (
-                  confirmingDelete ? (
-                    <div className="space-y-2 rounded-lg border border-red-500/40 bg-red-500/10 p-3">
-                      <p className="text-xs leading-relaxed text-red-200/90">이 사진을 삭제하면 되돌릴 수 없습니다. 삭제할까요?</p>
-                      {deleteError && <p className="text-xs text-red-400">{deleteError}</p>}
-                      <div className="flex gap-2">
-                        <button type="button" onClick={handleDeletePhoto} disabled={deletingPhotoId === lightboxPhoto.id} className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white disabled:opacity-50">
-                          {deletingPhotoId === lightboxPhoto.id ? "삭제 중..." : "삭제 확정"}
-                        </button>
-                        <button type="button" onClick={() => setConfirmingDelete(false)} disabled={deletingPhotoId === lightboxPhoto.id} className="rounded border border-zinc-700 bg-zinc-900 px-5 py-2.5 text-sm font-bold text-zinc-300 disabled:opacity-50">취소</button>
-                      </div>
+                {confirmingDelete ? (
+                  <div className="space-y-2 rounded-lg border border-red-500/40 bg-red-500/10 p-3">
+                    <p className="text-xs leading-relaxed text-red-200/90">이 사진을 삭제하면 되돌릴 수 없습니다. 삭제할까요?</p>
+                    {deleteError && <p className="text-xs text-red-400">{deleteError}</p>}
+                    <div className="flex gap-2">
+                      <button type="button" onClick={handleDeletePhoto} disabled={deletingPhotoId === lightboxPhoto.id} className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white disabled:opacity-50">
+                        {deletingPhotoId === lightboxPhoto.id ? "삭제 중..." : "삭제 확정"}
+                      </button>
+                      <button type="button" onClick={() => setConfirmingDelete(false)} disabled={deletingPhotoId === lightboxPhoto.id} className="rounded border border-zinc-700 bg-zinc-900 px-5 py-2.5 text-sm font-bold text-zinc-300 disabled:opacity-50">취소</button>
                     </div>
-                  ) : (
-                    <button type="button" onClick={() => { setConfirmingDelete(true); setDeleteError(null); }} className="w-full rounded border border-red-500/40 py-2.5 text-sm font-bold text-red-400">사진 삭제</button>
-                  )
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => { setConfirmingDelete(true); setDeleteError(null); }} className="w-full rounded border border-red-500/40 py-2.5 text-sm font-bold text-red-400">사진 삭제</button>
                 )}
               </div>
             )}
