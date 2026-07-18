@@ -88,10 +88,11 @@ export default function LandingPage() {
         <div className="space-y-2">
           <p className="text-xs font-mono text-zinc-500 tracking-wider uppercase">조 번호</p>
           <input
-            type="number"
-            min="1"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={teamNumber}
-            onChange={(e) => setTeamNumber(e.target.value)}
+            onChange={(e) => setTeamNumber(e.target.value.replace(/[^0-9]/g, ""))}
             onKeyDown={(e) => e.key === "Enter" && handleEnter()}
             placeholder="조 번호 입력 (예: 1)"
             className="w-full rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400/50 focus:outline-none transition-colors"

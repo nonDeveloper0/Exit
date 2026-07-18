@@ -2,6 +2,12 @@
 
 ## 작업 완료 (2026-07-18)
 
+- [x] 첫 입장 화면의 조 번호 입력을 정수만 받도록 수정했다. `type="number"`를 `type="text" inputMode="numeric" pattern="[0-9]*"`로 바꾸고 onChange에서 `replace(/[^0-9]/g, "")`로 숫자 외(한글·문자·기호) 입력을 제거한다. 모바일에서는 숫자 키패드가 뜬다.
+  - 변경: `src/app/page.tsx`, `progress.md`
+  - 검증: `src/app/page.tsx` eslint 통과, `tsc`(앱 소스 무에러).
+
+## 작업 완료 (2026-07-18)
+
 - [x] 수사본부 사건 개요의 피해자 표기를 `물류창고 관리자 (신원 확인됨)` → `박실장 (신원 확인됨)`으로 변경했다.
   - 변경: `src/app/home/page.tsx`, `progress.md`
 
