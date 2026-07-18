@@ -2,6 +2,12 @@
 
 ## 작업 완료 (2026-07-18)
 
+- [x] 수사본부 탭 최하단에 `진행 시간표` 이미지 카드를 추가했다. `public/타임테이블.jpg`를 표시하며, 운영자는 같은 이름으로 파일을 덮어써 교체할 수 있다.
+  - 변경: `src/app/home/page.tsx`(수사 방법 블록 다음에 Timetable 카드 추가), `public/타임테이블.jpg`(신규), `docs/01_md/EDIT_GUIDE.md`(7-2 추가), `progress.md`
+  - 검증: `src/app/home/page.tsx` eslint 통과, `tsc`(앱 소스 무에러).
+
+## 작업 완료 (2026-07-18)
+
 - [x] 짝 조 팀 이름 배지에 순번을 자동으로 붙였다. 조 번호가 작은 쪽이 `분홍1`, 큰 쪽이 `분홍2`로 표시된다(예: 3·6조 → 3조=분홍1, 6조=분홍2). 관리자는 팀 이름만 입력하면 되고 숫자는 자동 부여된다.
   - `src/lib/pairTeam.ts`: `pairTeamIndex(teamId, partnerId)` 추가(숫자 조 번호 비교, 비숫자면 사전순), `formatPairTeamName(name, index?)`로 확장(index 있으면 `분홍1`, 없으면 기존 `분홍 팀`).
   - `src/lib/usePairTeamName.ts`: 반환 타입을 `{ name, index } | null`로 변경.

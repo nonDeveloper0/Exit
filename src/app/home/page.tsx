@@ -89,6 +89,17 @@ export default function MainPage() {
         </ol>
       </div>
 
+      {/* Timetable */}
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-2">
+        <h2 className="text-sm font-semibold text-zinc-300">진행 시간표</h2>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/타임테이블.jpg"
+          alt="진행 시간표"
+          className="w-full rounded-lg border border-zinc-800"
+        />
+      </div>
+
       {/* [비활성] 수사현황 실시간 순위 — 복원하려면 이 블록과 상단 훅/import 주석을 함께 해제
       <div className="flex items-center justify-between pt-1">
         <h2 className="text-sm font-semibold text-zinc-300">수사 현황 · 증거수집 순위</h2>
