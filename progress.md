@@ -2,6 +2,22 @@
 
 ## 작업 완료 (2026-07-18)
 
+- [x] 짝 조 팀 이름 배지에 순번을 자동으로 붙였다. 조 번호가 작은 쪽이 `분홍1`, 큰 쪽이 `분홍2`로 표시된다(예: 3·6조 → 3조=분홍1, 6조=분홍2). 관리자는 팀 이름만 입력하면 되고 숫자는 자동 부여된다.
+  - `src/lib/pairTeam.ts`: `pairTeamIndex(teamId, partnerId)` 추가(숫자 조 번호 비교, 비숫자면 사전순), `formatPairTeamName(name, index?)`로 확장(index 있으면 `분홍1`, 없으면 기존 `분홍 팀`).
+  - `src/lib/usePairTeamName.ts`: 반환 타입을 `{ name, index } | null`로 변경.
+  - `src/app/home/page.tsx`: 배지에서 `pairTeam.name`(색상)과 `pairTeam.index`(순번)를 사용.
+  - 변경: `src/lib/pairTeam.ts`, `src/lib/usePairTeamName.ts`, `src/app/home/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 검증: `tsc`(앱 소스 무에러), 변경 파일 `eslint` 통과.
+
+## 전체 검토 (2026-07-18)
+
+- [x] 오류·예외 우려에 대한 전체 점검을 수행했다. 코드 변경은 없음(검토만).
+  - 정적 검사: `tsc`(앱 소스 무에러, tests/의 `.ts` import 설정 에러 6건만 잔존), `eslint`(에러 0·기존 `useGameState` deps 경고 1), `npm test`(10개 통과), `next build`(성공) 모두 통과.
+  - Realtime DELETE 핸들러는 `team_evidence_items`의 복합 PK`(pair_id,evidence_id,type)`와 `final_votes`의 PK`(pair_id)` 덕분에 REPLICA IDENTITY FULL 없이도 `payload.old`에서 필요한 키를 읽을 수 있어 정상 동작함을 확인했다.
+  - 남은 관찰(코드 버그 아님, 운영/개선 후보): ①Vercel 배포 시 `NEXT_PUBLIC_SUPABASE_*` env·Supabase 프로덕션 SQL(final_votes/RPC/트리거) 반영 필요, ②80인 동시접속 시 Supabase Realtime 동시연결/초당 메시지 한도, ③admin 조별 초기화(`handleReset`)가 해당 조 `final_votes`는 지우지 않음(전체 초기화·최종추리 초기화만 삭제), ④Google Form entry ID 하드코딩(폼 변경 시 no-cors라 실패가 조용히 묻힘).
+
+## 작업 완료 (2026-07-18)
+
 - [x] 증거함의 사진 업로드 안내를 일반 색상으로 되돌리고, `사건과 관련된 단서사진만 업로드 하세요.`와 `조별 최대 30장까지 등록가능.`의 두 줄로 나눴다. 선택 장소 업로드 안내의 강조는 유지했다.
   - 변경: `src/app/evidence/page.tsx`, `progress.md`
 
