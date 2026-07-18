@@ -2,6 +2,12 @@
 
 ## 작업 완료 (2026-07-18)
 
+- [x] 수사본부 사건 개요의 "형사는 이 다섯 사람을 용의자로 특정한다." 문단 아래에 `사망추정시간 20:40-20:50` 한 줄을 앰버색 강조로 추가했다.
+  - 변경: `src/app/home/page.tsx`, `progress.md`
+  - 검증: `src/app/home/page.tsx` eslint 통과.
+
+## 작업 완료 (2026-07-18)
+
 - [x] 증거함 사진 삭제 권한을 정보 수정·가시성과 일치시켰다. 기존에는 삭제가 `pairId === ownTeamId`(자기 조)로 제한돼 짝 조 사진을 못 지웠으나, 조장에게 보이는 사진은 본인 조+짝 조뿐이므로 삭제도 `isLeader`만으로 게이팅하도록 조건을 제거했다. 이제 페어(예: 3·6조) 조장은 서로의 사진을 정보 수정·삭제 모두 할 수 있고, 무관한 조 사진은 여전히 조회되지 않는다.
   - 변경: `src/app/evidence/page.tsx`(삭제 버튼의 `pairId === ownTeamId` 조건 제거), `docs/01_md/EDIT_GUIDE.md`(1-6 삭제 안내 갱신), `progress.md`
   - 검증: `src/app/evidence/page.tsx` eslint 통과, `tsc`(앱 소스 무에러).

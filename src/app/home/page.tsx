@@ -64,6 +64,7 @@ export default function MainPage() {
           현장에는 외부인 침입 흔적은 없었고, 사건발생 당시 회사에 있던 사람은 단 다섯 명.
           형사는 이 다섯 사람을 용의자로 특정한다.
         </p>
+        <p className="text-xs font-mono font-bold text-amber-400">사망추정시간 20:40-20:50</p>
       </div>
 
       {/* Progress */}
