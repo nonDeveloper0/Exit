@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePhotoEvidence } from "@/lib/usePhotoEvidence";
 import { formatPairTeamName, getPairTeamTone } from "@/lib/pairTeam";
 import { usePairTeamName } from "@/lib/usePairTeamName";
@@ -11,6 +12,7 @@ import { usePairTeamName } from "@/lib/usePairTeamName";
 export default function MainPage() {
   const { photos } = usePhotoEvidence();
   const pairTeam = usePairTeamName();
+  const [isTimetableOpen, setIsTimetableOpen] = useState(false);
   // [비활성] 수사현황 실시간 순위 — 아래 훅/상태와 하단 JSX 블록을 함께 주석 해제하면 복원됨
   // const { groups } = useAllTeamsProgress();
   // const [myTeamId, setMyTeamId] = useState<string | null>(null);
@@ -70,12 +72,11 @@ export default function MainPage() {
       {/* Timetable */}
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-2">
         <h2 className="text-sm font-semibold text-zinc-300">진행 시간표</h2>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/타임테이블.jpg"
-          alt="진행 시간표"
-          className="w-full rounded-lg border border-zinc-800"
-        />
+        <button type="button" onClick={() => setIsTimetableOpen(true)} className="block w-full cursor-zoom-in rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400/70" aria-label="진행 시간표 크게 보기">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/타임테이블.jpg" alt="진행 시간표" className="w-full rounded-lg border border-zinc-800" />
+        </button>
+        <p className="text-xs text-zinc-500">이미지를 누르면 크게 볼 수 있습니다.</p>
       </div>
 
       {/* Progress */}
@@ -157,6 +158,10 @@ export default function MainPage() {
         <span className="text-xs text-zinc-600">실시간 업데이트 중</span>
       </div>
       */}
+      {isTimetableOpen && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/85 p-4" role="dialog" aria-modal="true" aria-label="진행 시간표 크게 보기" onClick={() => setIsTimetableOpen(false)}><div className="relative max-h-full max-w-full" onClick={(event) => event.stopPropagation()}><button type="button" onClick={() => setIsTimetableOpen(false)} className="absolute -right-2 -top-2 z-10 rounded-full border border-zinc-600 bg-zinc-900 px-3 py-1.5 text-sm font-bold text-zinc-100 shadow-lg" aria-label="시간표 크게 보기 닫기">닫기</button>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/타임테이블.jpg" alt="진행 시간표 확대" className="max-h-[90vh] max-w-full rounded-lg border border-zinc-700 object-contain shadow-2xl" />
+      </div></div>}
     </div>
   );
 }

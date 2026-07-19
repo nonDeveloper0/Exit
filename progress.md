@@ -1,5 +1,17 @@
 # EXIT 2026 — 진행 현황
 
+## 작업 완료 (2026-07-20)
+
+- [x] 용의자 수사 노트의 조원 작성·페어조 공유 안내를 토글 버튼 아래로 옮겨 항상 보이게 했다. 수사본부 진행 시간표는 이미지를 누르면 확대 모달로 표시되며, 배경 또는 닫기 버튼으로 닫을 수 있다.
+  - 변경: `src/app/suspects/page.tsx`, `src/app/home/page.tsx`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/suspects/page.tsx src/app/home/page.tsx`, `git diff --check` 통과.
+
+## 작업 완료 (2026-07-20)
+
+- [x] 용의자 탭의 수사 노트가 열릴 때 `조원 누구나 작성할 수 있으며, 페어조와 공유됩니다.` 안내를 표시하고, 기존 중복 공유 문구를 정리했다.
+  - 변경: `src/app/suspects/page.tsx`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/suspects/page.tsx`, `git diff --check` 통과.
+
 ## 작업 완료 (2026-07-19)
 
 - [x] 수사본부에서 진행 시간표를 팀 사진 증거수집 현황 위로 이동했다. 카드 순서는 사건 개요 → 진행 시간표 → 팀 사진 증거수집 현황 → 수사 방법이다.
