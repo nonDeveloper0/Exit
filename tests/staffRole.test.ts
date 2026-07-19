@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { STAFF_LEADER_NAMES, isStaffLeaderName } from "../src/lib/staffRole.ts";
 
-test("grants fixed leader access to the nine staff names", () => {
-  assert.equal(STAFF_LEADER_NAMES.length, 9);
+test("grants fixed leader access to the fourteen staff names", () => {
+  assert.equal(STAFF_LEADER_NAMES.length, 14);
   for (const name of STAFF_LEADER_NAMES) assert.equal(isStaffLeaderName(name), true);
 });
 

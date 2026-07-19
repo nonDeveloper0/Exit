@@ -8,6 +8,11 @@ export const STAFF_LEADER_NAMES = [
   "이준혁",
   "이호승",
   "박준수",
+  "천성훈",
+  "김수현",
+  "강성중",
+  "홍민화",
+  "이하진",
 ] as const;
 
 const staffLeaderNameSet = new Set<string>(STAFF_LEADER_NAMES);
