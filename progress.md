@@ -2,6 +2,12 @@
 
 ## 작업 완료 (2026-07-19)
 
+- [x] 고정 스탭 조장 명단에 정재덕을 추가했다. 해당 이름으로 입장하면 조 지정과 무관하게 조장 권한을 가진다.
+  - 변경: `src/lib/staffRole.ts`, `tests/staffRole.test.ts`, `progress.md`
+  - 검증: `npm.cmd test -- --test-name-pattern="staff"`(10개 통과), `git diff --check` 통과.
+
+## 작업 완료 (2026-07-19)
+
 - [x] 고정 스탭 조장 명단에 천성훈, 김수현, 강성중, 홍민화, 이하진을 추가했다. 해당 이름으로 입장하면 조 지정과 무관하게 조장 권한을 가진다.
   - 변경: `src/lib/staffRole.ts`, `tests/staffRole.test.ts`, `progress.md`
   - 검증: `npm.cmd test -- --test-name-pattern="staff"`(10개 통과), `git diff --check` 통과.

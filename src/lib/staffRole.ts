@@ -13,6 +13,7 @@ export const STAFF_LEADER_NAMES = [
   "강성중",
   "홍민화",
   "이하진",
+  "정재덕",
 ] as const;
 
 const staffLeaderNameSet = new Set<string>(STAFF_LEADER_NAMES);
