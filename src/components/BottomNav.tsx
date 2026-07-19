@@ -35,7 +35,8 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
-  {
+  // 최종투표 재개 시 이 항목의 주석을 해제하면 됩니다. `/vote` 페이지와 제출 기능은 유지합니다.
+  /* {
     href: "/vote",
     label: "최종추리",
     icon: (
@@ -47,7 +48,7 @@ const NAV_ITEMS = [
         />
       </svg>
     ),
-  },
+  }, */
 ];
 
 export default function BottomNav() {

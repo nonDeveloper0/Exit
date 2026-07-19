@@ -1,5 +1,15 @@
 # EXIT 2026 — 진행 현황
 
+## 작업 완료 (2026-07-19)
+
+- [x] 최종투표 탭 숨김 변경을 커밋하고 `master` 브랜치 원격 저장소로 푸시했다.
+
+## 작업 완료 (2026-07-19)
+
+- [x] 하단 네비게이션에서 최종추리(최종투표) 탭을 화면에만 숨겼다. `BottomNav`의 `/vote` 항목을 주석 처리했으며, `/vote` 페이지와 제출 기능은 유지한다. 재개하려면 해당 항목의 주석만 해제하면 된다.
+  - 변경: `src/components/BottomNav.tsx`, `progress.md`
+  - 검증: `npx.cmd eslint src/components/BottomNav.tsx`, `git diff --check` 통과.
+
 ## 작업 완료 (2026-07-18)
 
 - [x] 첫 입장 화면의 조 번호 입력을 정수만 받도록 수정했다. `type="number"`를 `type="text" inputMode="numeric" pattern="[0-9]*"`로 바꾸고 onChange에서 `replace(/[^0-9]/g, "")`로 숫자 외(한글·문자·기호) 입력을 제거한다. 모바일에서는 숫자 키패드가 뜬다.
