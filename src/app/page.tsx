@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { getTeamInfo, saveTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 
+// 참가 조 목록. 조 개수가 바뀌면 이 배열만 수정한다.
+const TEAM_NUMBERS = ["1", "2", "3", "4", "5", "6"];
+
 export default function LandingPage() {
   const router = useRouter();
   const [teamNumber, setTeamNumber] = useState("");
@@ -13,15 +16,14 @@ export default function LandingPage() {
   useEffect(() => {
     const team = getTeamInfo();
     if (team) {
-      setTeamNumber(team.teamNumber);
+      if (TEAM_NUMBERS.includes(team.teamNumber)) setTeamNumber(team.teamNumber);
       setName(team.name);
     }
   }, []);
 
   async function handleEnter() {
-    const num = parseInt(teamNumber);
-    if (!num || num < 1 || !name.trim()) return;
-    const pairId = String(num);
+    if (!TEAM_NUMBERS.includes(teamNumber) || !name.trim()) return;
+    const pairId = teamNumber;
     saveTeamInfo(pairId, name.trim());
     await supabase
       .from("team_evidence_items")
@@ -32,7 +34,7 @@ export default function LandingPage() {
     router.push("/home");
   }
 
-  const canEnter = parseInt(teamNumber) >= 1 && name.trim().length > 0;
+  const canEnter = TEAM_NUMBERS.includes(teamNumber) && name.trim().length > 0;
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-zinc-950">
@@ -87,16 +89,22 @@ export default function LandingPage() {
       <div className="relative z-10 flex flex-1 flex-col justify-center gap-3 overflow-y-auto px-6 py-3">
         <div className="space-y-2">
           <p className="text-xs font-mono text-zinc-500 tracking-wider uppercase">조 번호</p>
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
+          <select
             value={teamNumber}
-            onChange={(e) => setTeamNumber(e.target.value.replace(/[^0-9]/g, ""))}
-            onKeyDown={(e) => e.key === "Enter" && handleEnter()}
-            placeholder="조 번호 입력 (예: 1)"
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-400/50 focus:outline-none transition-colors"
-          />
+            onChange={(e) => setTeamNumber(e.target.value)}
+            className={`w-full rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm focus:border-amber-400/50 focus:outline-none transition-colors ${
+              teamNumber ? "text-zinc-100" : "text-zinc-600"
+            }`}
+          >
+            <option value="" disabled>
+              조 번호를 선택하세요
+            </option>
+            {TEAM_NUMBERS.map((n) => (
+              <option key={n} value={n} className="text-zinc-100">
+                {n}조
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">
