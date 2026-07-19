@@ -67,6 +67,17 @@ export default function MainPage() {
         <p className="text-xs font-mono font-bold text-amber-400">사망추정시간 20:40-20:50</p>
       </div>
 
+      {/* Timetable */}
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-2">
+        <h2 className="text-sm font-semibold text-zinc-300">진행 시간표</h2>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/타임테이블.jpg"
+          alt="진행 시간표"
+          className="w-full rounded-lg border border-zinc-800"
+        />
+      </div>
+
       {/* Progress */}
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
         <div className="flex items-center justify-between">
@@ -88,17 +99,6 @@ export default function MainPage() {
           <li>QR을 찍어 문제를 풀면 용의자 심문권을 얻는다</li>
           <li>범인을 선택하고 최종 추리를 제출한다</li>
         </ol>
-      </div>
-
-      {/* Timetable */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-2">
-        <h2 className="text-sm font-semibold text-zinc-300">진행 시간표</h2>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/타임테이블.jpg"
-          alt="진행 시간표"
-          className="w-full rounded-lg border border-zinc-800"
-        />
       </div>
 
       {/* [비활성] 수사현황 실시간 순위 — 복원하려면 이 블록과 상단 훅/import 주석을 함께 해제
