@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { resetAll, getTeamInfo } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { useGameState } from "@/lib/useGameState";
@@ -25,6 +25,26 @@ interface AdminPhotoRow {
   location_tag: string | null;
   status: string | null;
   created_at: string;
+}
+
+type LeaderSettings = Record<string, string | string[]>;
+
+function getAdditionalStaffNames(settings: LeaderSettings): string[] {
+  const value = settings.__staff__;
+  return Array.isArray(value) ? value.filter((name): name is string => typeof name === "string") : [];
+}
+
+function ToggleSection({ title, description, children, defaultOpen = false }: { title: string; description?: string; children: ReactNode; defaultOpen?: boolean }) {
+  return (
+    <details className="group rounded-lg border border-zinc-800 bg-zinc-950/50" open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 marker:content-none">
+        <span><span className="block text-sm font-bold text-zinc-200">{title}</span>{description && <span className="mt-0.5 block text-xs text-zinc-600">{description}</span>}</span>
+        <span className="rounded border border-zinc-700 px-2 py-1 text-xs font-bold text-zinc-400 group-open:hidden">열기</span>
+        <span className="hidden rounded border border-zinc-700 px-2 py-1 text-xs font-bold text-zinc-400 group-open:inline">접기</span>
+      </summary>
+      <div className="border-t border-zinc-800 p-4">{children}</div>
+    </details>
+  );
 }
 
 function PinGate({ onSuccess }: { onSuccess: () => void }) {
@@ -123,9 +143,10 @@ function AdminPanel() {
   const [pairB, setPairB] = useState("");
   const [pairTeamName, setPairTeamName] = useState("");
   const [savingPair, setSavingPair] = useState(false);
-  const [leaders, setLeaders] = useState<Record<string, string>>({});
+  const [leaders, setLeaders] = useState<LeaderSettings>({});
   const [leaderTeam, setLeaderTeam] = useState("");
   const [leaderName, setLeaderName] = useState("");
+  const [staffName, setStaffName] = useState("");
   const [resettingInterrogationUses, setResettingInterrogationUses] = useState(false);
   const [resettingInterrogationEarned, setResettingInterrogationEarned] = useState(false);
   const [resettingVotes, setResettingVotes] = useState(false);
@@ -146,7 +167,7 @@ function AdminPanel() {
       .then(({ data }) => {
         if (data?.pairings) setPairings(data.pairings as Record<string, string>);
         if (data?.pair_team_names) setPairTeamNames(data.pair_team_names as Record<string, string>);
-        if (data?.leaders) setLeaders(data.leaders as Record<string, string>);
+        if (data?.leaders) setLeaders(data.leaders as LeaderSettings);
       });
   }, []);
 
@@ -321,6 +342,26 @@ function AdminPanel() {
 
   async function removeLeader(team: string) {
     const next = { ...leaders }; delete next[team];
+    await supabase.from("game_state").update({ leaders: next }).eq("id", "singleton");
+    setLeaders(next);
+  }
+
+  async function addStaffName() {
+    const name = staffName.trim();
+    if (!name) return;
+    const currentStaff = getAdditionalStaffNames(leaders);
+    if (STAFF_LEADER_NAMES.includes(name as typeof STAFF_LEADER_NAMES[number]) || currentStaff.includes(name)) {
+      setStaffName("");
+      return;
+    }
+    const next = { ...leaders, __staff__: [...currentStaff, name] };
+    await supabase.from("game_state").update({ leaders: next }).eq("id", "singleton");
+    setLeaders(next);
+    setStaffName("");
+  }
+
+  async function removeStaffName(name: string) {
+    const next = { ...leaders, __staff__: getAdditionalStaffNames(leaders).filter((staffName) => staffName !== name) };
     await supabase.from("game_state").update({ leaders: next }).eq("id", "singleton");
     setLeaders(next);
   }
@@ -529,7 +570,7 @@ function AdminPanel() {
 
       {/* Game controls */}
       <div className="space-y-3">
-        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">게임 진행 제어</h2>
+        <ToggleSection title="게임 진행 · 초기화" description="투표, 엔딩, 전화 연출과 진행 기록 초기화" defaultOpen>
 
         {!loaded ? (
           <p className="text-sm text-zinc-600 py-2">상태 불러오는 중...</p>
@@ -766,11 +807,13 @@ function AdminPanel() {
             </div>
           </>
         )}
+        </ToggleSection>
       </div>
 
       {/* Divider */}
       <div className="border-t border-zinc-800" />
 
+      <ToggleSection title="사진 점검" description="조별 사진 확인 및 랭킹 제외 처리">
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">사진 점검</h2>
@@ -849,6 +892,7 @@ function AdminPanel() {
           </div>
         )}
       </div>
+      </ToggleSection>
 
       {photoLightbox && (
         <div
@@ -863,10 +907,16 @@ function AdminPanel() {
       {/* Divider */}
       <div className="border-t border-zinc-800" />
 
+      <ToggleSection title="권한 · 조 구성" description="스탭 권한, 조장 지정, 짝 조 매핑">
       <div className="space-y-3">
-        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">조장 지정</h2>
-        <p className="text-xs text-zinc-600">조 번호와 참가자 이름이 정확히 일치해야 조장 권한이 활성화됩니다. 고정 스탭 조장: {STAFF_LEADER_NAMES.join(" · ")}.</p>
-        <div className="space-y-2">{Object.entries(leaders).sort(([a], [b]) => Number(a) - Number(b)).map(([team, name]) => <div key={team} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-3"><p className="text-sm text-zinc-200">{team}조 — {name}</p><button type="button" onClick={() => void removeLeader(team)} className="rounded border border-red-500/30 px-3 py-1 text-xs text-red-400">해제</button></div>)}</div>
+        <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">스탭 권한</h2>
+        <p className="text-xs text-zinc-600">스탭으로 추가한 이름은 조 번호와 관계없이 조장 권한을 가집니다. 기본 스탭: {STAFF_LEADER_NAMES.join(" · ")}.</p>
+        <div className="flex gap-2"><input value={staffName} onChange={(event) => setStaffName(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void addStaffName()} placeholder="추가할 스탭 이름" className="min-w-0 flex-1 rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100" /><button type="button" onClick={() => void addStaffName()} disabled={!staffName.trim()} className="rounded bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 disabled:opacity-40">추가</button></div>
+        {getAdditionalStaffNames(leaders).length > 0 && <div className="space-y-2">{getAdditionalStaffNames(leaders).map((name) => <div key={name} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-3"><p className="text-sm text-zinc-200">{name}</p><button type="button" onClick={() => void removeStaffName(name)} className="rounded border border-red-500/30 px-3 py-1 text-xs text-red-400">제거</button></div>)}</div>}
+
+        <h2 className="pt-2 text-xs font-mono text-zinc-500 uppercase tracking-widest">조장 지정</h2>
+        <p className="text-xs text-zinc-600">조 번호와 참가자 이름이 정확히 일치해야 조장 권한이 활성화됩니다.</p>
+        <div className="space-y-2">{Object.entries(leaders).filter(([team, name]) => team !== "__staff__" && typeof name === "string").sort(([a], [b]) => Number(a) - Number(b)).map(([team, name]) => <div key={team} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-3"><p className="text-sm text-zinc-200">{team}조 — {name}</p><button type="button" onClick={() => void removeLeader(team)} className="rounded border border-red-500/30 px-3 py-1 text-xs text-red-400">해제</button></div>)}</div>
         <div className="flex gap-2"><input value={leaderTeam} onChange={(event) => setLeaderTeam(event.target.value)} placeholder="조 번호" className="w-20 rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100" /><input value={leaderName} onChange={(event) => setLeaderName(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void setLeader()} placeholder="이름" className="min-w-0 flex-1 rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100" /><button type="button" onClick={() => void setLeader()} disabled={!leaderTeam.trim() || !leaderName.trim()} className="rounded bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 disabled:opacity-40">지정</button></div>
       </div>
 
@@ -936,11 +986,13 @@ function AdminPanel() {
           </div>
         </div>
       </div>
+      </ToggleSection>
 
       {/* Divider */}
       <div className="border-t border-zinc-800" />
 
       {/* Team reset */}
+      <ToggleSection title="조별 초기화 · 전체 삭제" description="증거·사진·메모 등 되돌릴 수 없는 작업">
       <div className="space-y-3">
         <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">조별 초기화</h2>
         <p className="text-xs text-zinc-600">
@@ -1002,6 +1054,7 @@ function AdminPanel() {
           </div>
         </div>}
       </div>
+      </ToggleSection>
     </div>
   );
 }

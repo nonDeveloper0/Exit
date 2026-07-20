@@ -18,6 +18,8 @@ export const STAFF_LEADER_NAMES = [
 
 const staffLeaderNameSet = new Set<string>(STAFF_LEADER_NAMES);
 
-export function isStaffLeaderName(name: string | null | undefined) {
-  return !!name && staffLeaderNameSet.has(name.trim());
+export function isStaffLeaderName(name: string | null | undefined, additionalNames: string[] = []) {
+  if (!name) return false;
+  const normalizedName = name.trim();
+  return staffLeaderNameSet.has(normalizedName) || additionalNames.some((staffName) => staffName.trim() === normalizedName);
 }

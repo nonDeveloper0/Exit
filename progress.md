@@ -1,8 +1,10 @@
 # EXIT 2026 — 진행 현황
 
-## 작업 중 (2026-07-20)
+## 작업 완료 (2026-07-20)
 
-- [ ] 관리자에서 스탭 권한 이름을 추가·삭제할 수 있게 하고, 관리자 기능을 카테고리별 접기/펼치기 형태로 정리한다.
+- [x] 관리자에서 추가 스탭 이름을 등록·제거할 수 있게 했다. 추가 명단은 기존 `game_state.leaders` JSON에 함께 저장되고 모든 기기가 Realtime으로 받아 조 번호와 무관한 조장 권한을 준다. 기존 코드 고정 스탭 명단은 그대로 유지된다. 관리자 기능은 `게임 진행 · 초기화`, `권한 · 조 구성`, `사진 점검`, `조별 초기화 · 전체 삭제`의 접기/펼치기 섹션으로 정리했다.
+  - 변경: `src/app/admin/page.tsx`, `src/lib/staffRole.ts`, `src/lib/useRole.ts`, `tests/staffRole.test.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 검증: 관리자·권한 관련 eslint, `npm.cmd test -- --test-name-pattern="staff"`, `npm.cmd run build`, `git diff --check`.
 
 ## 작업 완료 (2026-07-20)
 

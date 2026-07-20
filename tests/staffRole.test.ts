@@ -11,3 +11,9 @@ test("does not grant fixed leader access to other names", () => {
   assert.equal(isStaffLeaderName("참가자"), false);
   assert.equal(isStaffLeaderName(" 김은비 "), true);
 });
+
+test("grants leader access to staff names added by an administrator", () => {
+  assert.equal(isStaffLeaderName("추가스탭", ["추가스탭"]), true);
+  assert.equal(isStaffLeaderName(" 추가스탭 ", ["추가스탭"]), true);
+  assert.equal(isStaffLeaderName("참가자", ["추가스탭"]), false);
+});
