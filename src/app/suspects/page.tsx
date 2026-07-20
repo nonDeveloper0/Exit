@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { INTERROGATION_QUIZZES, SUSPECTS } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 import { useRole } from "@/lib/useRole";
@@ -77,6 +76,5 @@ export default function SuspectsPage() {
     })}</div>
     {confirmingSuspect && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 px-4" role="dialog" aria-modal="true" aria-labelledby="interrogation-confirm-title"><div className="w-full max-w-sm rounded-lg border border-red-500/30 bg-zinc-900 p-5 shadow-2xl"><h2 id="interrogation-confirm-title" className="text-lg font-bold text-zinc-100">심문권을 사용하시겠습니까?</h2><p className="mt-2 text-sm text-zinc-400">{confirmingSuspect.name} 심문권은 사용 처리 후 되돌릴 수 없습니다.</p><div className="mt-5 flex gap-2"><button type="button" onClick={confirmInterrogationUse} className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white">사용 처리</button><button type="button" onClick={() => setConfirmUseId(null)} className="rounded border border-zinc-600 px-4 py-2.5 text-sm font-bold text-zinc-300">취소</button></div></div></div>}
     {noteError && <p className="rounded border border-red-500/30 bg-red-500/10 p-3 text-center text-xs text-red-300">{noteError}</p>}
-    <div className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-center"><p className="text-xs text-zinc-500">증거를 충분히 검토한 뒤 범인을 지목하세요.</p><Link href="/vote" className="inline-block text-sm font-medium text-amber-400">범인 지목하기 →</Link></div>
   </div>;
 }
