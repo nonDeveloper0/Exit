@@ -109,7 +109,6 @@ export default function LandingPage() {
           <div className="rounded-lg border border-amber-400/30 bg-amber-400/10 p-4">
             <p className="text-xs font-mono tracking-wider text-amber-300">현재 입장 정보</p>
             <p className="mt-1 text-lg font-bold text-zinc-100">{savedTeam.teamNumber}조 · {savedTeam.name || "이름 미입력"}</p>
-            <p className="mt-2 text-xs leading-5 text-zinc-400">다른 조로 잘못 입장하는 것을 막기 위해 조 정보가 잠겨 있습니다.</p>
           </div>
         )}
         <div className="space-y-2">
@@ -151,7 +150,7 @@ export default function LandingPage() {
         <div className="relative z-10 px-6 pb-3">
           <details className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-3">
             <summary className="cursor-pointer text-sm font-medium text-zinc-300">조 또는 이름을 변경해야 하나요?</summary>
-            <p className="mt-2 text-xs leading-5 text-zinc-500">운영자 확인 후 PIN을 입력하면 입장 정보를 변경할 수 있습니다.</p>
+            <p className="mt-2 text-xs leading-5 text-zinc-500">Staff 확인 후 PIN을 입력하면 입장 정보를 변경할 수 있습니다.</p>
             <div className="mt-3 flex gap-2">
               <input
                 type="password"

@@ -2,6 +2,18 @@
 
 ## 작업 완료 (2026-07-20)
 
+- [x] 관리자 `전체 조 초기화`를 증거 수집 여부와 무관하게 항상 실행할 수 있게 했다. 심문권·최종추리·사진 삭제·조별/전체 초기화를 `초기화 · 전체 삭제` 카테고리로 모았고, 수신전화의 `전화 연출 초기화`는 해당 연출 카드에 유지했다.
+  - 변경: `src/app/admin/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 검증: 관리자 eslint, `npm.cmd run build`, `git diff --check` 통과.
+
+## 작업 완료 (2026-07-20)
+
+- [x] 첫 입장 화면의 잠긴 입장 정보 카드에서 조 잠금 설명을 제거했다. 변경 안내는 `Staff 확인 후 PIN을 입력하면 입장 정보를 변경할 수 있습니다.`로 정리했다.
+  - 변경: `src/app/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/page.tsx`, `git diff --check` 통과.
+
+## 작업 완료 (2026-07-20)
+
 - [x] 관리자에서 추가 스탭 이름을 등록·제거할 수 있게 했다. 추가 명단은 기존 `game_state.leaders` JSON에 함께 저장되고 모든 기기가 Realtime으로 받아 조 번호와 무관한 조장 권한을 준다. 기존 코드 고정 스탭 명단은 그대로 유지된다. 관리자 기능은 `게임 진행 · 초기화`, `권한 · 조 구성`, `사진 점검`, `조별 초기화 · 전체 삭제`의 접기/펼치기 섹션으로 정리했다.
   - 변경: `src/app/admin/page.tsx`, `src/lib/staffRole.ts`, `src/lib/useRole.ts`, `tests/staffRole.test.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
   - 검증: 관리자·권한 관련 eslint, `npm.cmd test -- --test-name-pattern="staff"`, `npm.cmd run build`, `git diff --check`.

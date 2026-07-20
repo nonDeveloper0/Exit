@@ -570,7 +570,7 @@ function AdminPanel() {
 
       {/* Game controls */}
       <div className="space-y-3">
-        <ToggleSection title="게임 진행 · 초기화" description="투표, 엔딩, 전화 연출과 진행 기록 초기화" defaultOpen>
+        <ToggleSection title="게임 진행" description="최종 투표, 엔딩, 수신전화 연출" defaultOpen>
 
         {!loaded ? (
           <p className="text-sm text-zinc-600 py-2">상태 불러오는 중...</p>
@@ -602,56 +602,16 @@ function AdminPanel() {
                   {settingVoteRound ? "..." : "닫기"}
                 </button>
               </div>
+              <button
+                type="button"
+                onClick={() => void resetCallDramatization()}
+                disabled={togglingIncomingCall || resettingCall}
+                className="w-full rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs font-bold text-zinc-300 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              >
+                {resettingCall ? "초기화 중..." : "전화 연출 초기화"}
+              </button>
+              <p className="text-[10px] leading-relaxed text-zinc-600">전화를 받은 뒤 공기계에 남는 통화 재생 상태를 지우고 대기 화면으로 되돌립니다.</p>
             </div>
-
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
-              <div className="space-y-0.5">
-                <p className="text-sm font-bold text-zinc-200">진행 상태 초기화</p>
-                <p className="text-xs text-zinc-500">심문권의 획득·사용 기록과 각 기기의 최종추리 제출 상태를 각각 초기화합니다.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPendingProgressReset("interrogation")}
-                disabled={resettingInterrogationUses || resettingInterrogationEarned || resettingVotes}
-                className="w-full rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-300 disabled:opacity-40"
-              >
-                {resettingInterrogationUses ? "초기화 중..." : "심문권 사용 초기화"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPendingProgressReset("interrogation_earned")}
-                disabled={resettingInterrogationUses || resettingInterrogationEarned || resettingVotes}
-                className="w-full rounded border border-red-500/40 bg-red-500/15 px-3 py-2 text-sm font-bold text-red-300 disabled:opacity-40"
-              >
-                {resettingInterrogationEarned ? "초기화 중..." : "심문권 획득 초기화"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPendingProgressReset("vote")}
-                disabled={resettingInterrogationUses || resettingInterrogationEarned || resettingVotes}
-                className="w-full rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm font-bold text-amber-200 disabled:opacity-40"
-              >
-                {resettingVotes ? "초기화 중..." : "최종추리 제출 초기화"}
-              </button>
-              <p className="text-[10px] leading-relaxed text-zinc-600">최종추리 초기화는 참가자 기기의 제출 상태를 되돌립니다. 이미 Google Form에 전송된 응답은 삭제되지 않습니다.</p>
-            </div>
-
-            {pendingProgressReset && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 px-4" role="dialog" aria-modal="true" aria-labelledby="progress-reset-confirm-title">
-              <div className="w-full max-w-sm rounded-lg border border-red-500/30 bg-zinc-900 p-5 shadow-2xl">
-                <h2 id="progress-reset-confirm-title" className="text-lg font-bold text-zinc-100">초기화하시겠습니까?</h2>
-                <p className="mt-2 text-sm text-zinc-400">
-                  {pendingProgressReset === "interrogation"
-                    ? "모든 조의 심문권 사용 완료 기록이 삭제됩니다. 이미 획득한 심문권은 다시 사용할 수 있습니다."
-                    : pendingProgressReset === "interrogation_earned"
-                    ? "모든 조의 심문권 획득 기록이 삭제됩니다(사용 기록 포함). 각 조는 QR 문제를 다시 풀어야 심문권을 재획득하며, 참가자 기기는 새로고침 후 반영됩니다."
-                    : "모든 참가자 기기의 최종추리 제출 상태가 초기화됩니다. 이미 Google Form에 전송된 응답은 삭제되지 않습니다."}
-                </p>
-                <div className="mt-5 flex gap-2">
-                  <button type="button" onClick={confirmProgressReset} className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white">초기화 실행</button>
-                  <button type="button" onClick={() => setPendingProgressReset(null)} className="rounded border border-zinc-600 px-4 py-2.5 text-sm font-bold text-zinc-300">취소</button>
-                </div>
-              </div>
-            </div>}
 
             {/* Ending toggle */}
             <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-4">
@@ -703,17 +663,6 @@ function AdminPanel() {
                   {togglingIncomingCall ? "..." : incomingCallActive ? "전화 종료" : "전화 걸기"}
                 </button>
               </div>
-              <button
-                type="button"
-                onClick={() => void resetCallDramatization()}
-                disabled={togglingIncomingCall || resettingCall}
-                className="w-full rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs font-bold text-zinc-300 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              >
-                {resettingCall ? "초기화 중..." : "전화 연출 초기화"}
-              </button>
-              <p className="text-[10px] leading-relaxed text-zinc-600">
-                전화를 받은 뒤 나팀장 개인폰(공기계)에 남는 &ldquo;통화내용 다시 듣기&rdquo; 버튼을 지우고 대기 화면으로 되돌립니다.
-              </p>
             </div>
 
             {incomingCallActive && (
@@ -756,55 +705,6 @@ function AdminPanel() {
                 </div>
               </div>
             )}
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
-              <div className="space-y-0.5">
-                <p className="text-sm font-bold text-zinc-200">사진 전체 삭제</p>
-                <p className="text-xs text-zinc-500">
-                  모든 조가 촬영한 사진 증거를 Storage 파일까지 완전히 삭제합니다. 되돌릴 수 없습니다.
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setShowResetPhotosConfirm(true);
-                  setResetConfirmText("");
-                }}
-                disabled={resettingAllPhotos}
-                className="w-full rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              >
-                {resettingAllPhotos ? "삭제 중..." : "사진 전체 삭제"}
-              </button>
-              {showResetPhotosConfirm && (
-                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 space-y-2">
-                  <p className="text-xs leading-relaxed text-red-200/80">
-                    모든 조의 사진(Storage 파일 포함)을 영구 삭제합니다. 실행하려면 아래에 초기화를 입력하세요.
-                  </p>
-                  <input
-                    value={resetConfirmText}
-                    onChange={(e) => setResetConfirmText(e.target.value)}
-                    placeholder="초기화 입력"
-                    disabled={resettingAllPhotos}
-                    className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-red-400 focus:outline-none disabled:opacity-40"
-                  />
-                  <button
-                    onClick={resetAllPhotos}
-                    disabled={resetConfirmText.trim() !== "초기화" || resettingAllPhotos}
-                    className="w-full rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                  >
-                    {resettingAllPhotos ? "삭제 중..." : "삭제 확정"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowResetPhotosConfirm(false);
-                      setResetConfirmText("");
-                    }}
-                    disabled={resettingAllPhotos}
-                    className="w-full rounded border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-bold text-zinc-400 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                  >
-                    취소
-                  </button>
-                </div>
-              )}
-            </div>
           </>
         )}
         </ToggleSection>
@@ -991,9 +891,24 @@ function AdminPanel() {
       {/* Divider */}
       <div className="border-t border-zinc-800" />
 
-      {/* Team reset */}
-      <ToggleSection title="조별 초기화 · 전체 삭제" description="증거·사진·메모 등 되돌릴 수 없는 작업">
+      {/* Resets */}
+      <ToggleSection title="초기화 · 전체 삭제" description="진행 기록과 증거·사진·메모를 초기화합니다">
       <div className="space-y-3">
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+          <div className="space-y-0.5"><p className="text-sm font-bold text-zinc-200">진행 상태 초기화</p><p className="text-xs text-zinc-500">심문권의 획득·사용 기록과 최종추리 제출 상태를 각각 초기화합니다.</p></div>
+          <button type="button" onClick={() => setPendingProgressReset("interrogation")} disabled={resettingInterrogationUses || resettingInterrogationEarned || resettingVotes} className="w-full rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-300 disabled:opacity-40">{resettingInterrogationUses ? "초기화 중..." : "심문권 사용 초기화"}</button>
+          <button type="button" onClick={() => setPendingProgressReset("interrogation_earned")} disabled={resettingInterrogationUses || resettingInterrogationEarned || resettingVotes} className="w-full rounded border border-red-500/40 bg-red-500/15 px-3 py-2 text-sm font-bold text-red-300 disabled:opacity-40">{resettingInterrogationEarned ? "초기화 중..." : "심문권 획득 초기화"}</button>
+          <button type="button" onClick={() => setPendingProgressReset("vote")} disabled={resettingInterrogationUses || resettingInterrogationEarned || resettingVotes} className="w-full rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm font-bold text-amber-200 disabled:opacity-40">{resettingVotes ? "초기화 중..." : "최종추리 제출 초기화"}</button>
+        </div>
+
+        {pendingProgressReset && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 px-4" role="dialog" aria-modal="true" aria-labelledby="progress-reset-confirm-title"><div className="w-full max-w-sm rounded-lg border border-red-500/30 bg-zinc-900 p-5 shadow-2xl"><h2 id="progress-reset-confirm-title" className="text-lg font-bold text-zinc-100">초기화하시겠습니까?</h2><p className="mt-2 text-sm text-zinc-400">{pendingProgressReset === "interrogation" ? "모든 조의 심문권 사용 완료 기록이 삭제됩니다. 이미 획득한 심문권은 다시 사용할 수 있습니다." : pendingProgressReset === "interrogation_earned" ? "모든 조의 심문권 획득 기록이 삭제됩니다(사용 기록 포함). 각 조는 QR 문제를 다시 풀어야 심문권을 재획득합니다." : "모든 참가자 기기의 최종추리 제출 상태가 초기화됩니다. 이미 Google Form에 전송된 응답은 삭제되지 않습니다."}</p><div className="mt-5 flex gap-2"><button type="button" onClick={confirmProgressReset} className="flex-1 rounded bg-red-500 py-2.5 text-sm font-bold text-white">초기화 실행</button><button type="button" onClick={() => setPendingProgressReset(null)} className="rounded border border-zinc-600 px-4 py-2.5 text-sm font-bold text-zinc-300">취소</button></div></div></div>}
+
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+          <div className="space-y-0.5"><p className="text-sm font-bold text-zinc-200">사진 전체 삭제</p><p className="text-xs text-zinc-500">모든 조의 사진 증거와 Storage 파일을 영구 삭제합니다.</p></div>
+          <button onClick={() => { setShowResetPhotosConfirm(true); setResetConfirmText(""); }} disabled={resettingAllPhotos} className="w-full rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40">{resettingAllPhotos ? "삭제 중..." : "사진 전체 삭제"}</button>
+          {showResetPhotosConfirm && <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 space-y-2"><p className="text-xs leading-relaxed text-red-200/80">실행하려면 아래에 초기화를 입력하세요.</p><input value={resetConfirmText} onChange={(e) => setResetConfirmText(e.target.value)} placeholder="초기화 입력" disabled={resettingAllPhotos} className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-red-400 focus:outline-none disabled:opacity-40" /><button onClick={resetAllPhotos} disabled={resetConfirmText.trim() !== "초기화" || resettingAllPhotos} className="w-full rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40">{resettingAllPhotos ? "삭제 중..." : "삭제 확정"}</button><button onClick={() => { setShowResetPhotosConfirm(false); setResetConfirmText(""); }} disabled={resettingAllPhotos} className="w-full rounded border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-bold text-zinc-400 hover:bg-zinc-800 disabled:opacity-40">취소</button></div>}
+        </div>
+
         <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">조별 초기화</h2>
         <p className="text-xs text-zinc-600">
           Supabase 증거 수집 기록과 촬영한 사진을 조별로 삭제합니다.
@@ -1035,7 +950,7 @@ function AdminPanel() {
 
         <button
           onClick={() => setShowResetAllConfirm(true)}
-          disabled={!!loadingId || teams.length === 0}
+          disabled={!!loadingId}
           className="w-full rounded-lg border border-red-500/40 bg-red-500/10 py-4 text-base font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
         >
           {loadingId === "ALL" ? "전체 삭제 중..." : "전체 조 초기화"}
