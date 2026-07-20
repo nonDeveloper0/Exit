@@ -5,6 +5,7 @@ import { INTERROGATION_QUIZZES, SUSPECTS } from "@/lib/data";
 import { useTeamEvidence } from "@/lib/useTeamEvidence";
 import { useRole } from "@/lib/useRole";
 import { useSuspectNotes } from "@/lib/useSuspectNotes";
+import PairTeamBadge from "@/components/PairTeamBadge";
 
 function formatUsedTime(iso: string) { return new Date(iso).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false }); }
 
@@ -49,7 +50,7 @@ export default function SuspectsPage() {
   }
 
   return <div className="flex flex-col gap-4 p-4 pt-6">
-    <div className="space-y-1"><div className="text-xs font-mono uppercase tracking-widest text-amber-400">Suspect Files</div><h1 className="text-2xl font-bold text-zinc-100">용의자 파일</h1><p className="text-sm text-zinc-500">심문권과 조별 수사 메모를 확인하세요.</p></div>
+    <div className="space-y-1"><div className="flex items-center justify-between gap-3"><div className="text-xs font-mono uppercase tracking-widest text-amber-400">Suspect Files</div><PairTeamBadge /></div><h1 className="text-2xl font-bold text-zinc-100">용의자 파일</h1><p className="text-sm text-zinc-500">심문권과 조별 수사 메모를 확인하세요.</p></div>
     <div className="space-y-3">{SUSPECTS.map((suspect) => {
       const quiz = Object.values(INTERROGATION_QUIZZES).find((item) => item.suspectId === suspect.id);
       const hasQuiz = !!quiz;

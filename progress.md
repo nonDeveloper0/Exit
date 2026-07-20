@@ -2,6 +2,12 @@
 
 ## 작업 완료 (2026-07-20)
 
+- [x] 우측 상단의 페어조 팀 이름 배지(예: `노랑1`, `분홍1`) 글자를 키우고, 수사본부·증거함·용의자 탭에 공통 표시했다. 공통 `PairTeamBadge` 컴포넌트로 통일해 색상·순번·실시간 이름 갱신도 세 화면에서 동일하게 반영된다.
+  - 변경: `src/components/PairTeamBadge.tsx`, `src/app/home/page.tsx`, `src/app/evidence/page.tsx`, `src/app/suspects/page.tsx`, `progress.md`
+  - 검증: 변경 파일 `eslint`, `git diff --check` 통과.
+
+## 작업 완료 (2026-07-20)
+
 - [x] 수사본부 진행 시간표 자산을 `타임테이블.jpg`에서 `타임테이블.png`로 교체했다. 일반 카드·확대 모달·운영 가이드 참조를 PNG로 변경하고 기존 JPG 파일은 삭제했다.
   - 변경: `public/타임테이블.png`(신규), `public/타임테이블.jpg`(삭제), `src/app/home/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
   - 검증: `npx.cmd eslint src/app/home/page.tsx`, `git diff --check` 통과.

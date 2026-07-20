@@ -5,6 +5,7 @@ import { PHOTO_LOCATION_TAGS, photoLocationTagLabel } from "@/lib/data";
 import { filterPhotoEvidence } from "@/lib/photoEvidenceFilter";
 import { PhotoItem, usePhotoEvidence } from "@/lib/usePhotoEvidence";
 import QrScannerModal from "@/components/QrScannerModal";
+import PairTeamBadge from "@/components/PairTeamBadge";
 import { useRole } from "@/lib/useRole";
 import { MAX_PHOTOS_PER_GROUP } from "@/lib/photoUploadLimit";
 
@@ -142,7 +143,10 @@ export default function EvidencePage() {
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
       <div className="space-y-1">
-        <div className="text-xs font-mono tracking-widest text-amber-400 uppercase">Evidence Vault</div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="text-xs font-mono tracking-widest text-amber-400 uppercase">Evidence Vault</div>
+          <PairTeamBadge />
+        </div>
         <h1 className="text-2xl font-bold text-zinc-100">증거 보관함</h1>
         <p className="text-sm text-zinc-500">
           {ownTeamId ? `${ownTeamId}조 사진 ${ownPhotoCount}/${MAX_PHOTOS_PER_GROUP}장` : "조 정보를 찾을 수 없습니다"}

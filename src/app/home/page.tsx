@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { usePhotoEvidence } from "@/lib/usePhotoEvidence";
-import { formatPairTeamName, getPairTeamTone } from "@/lib/pairTeam";
-import { usePairTeamName } from "@/lib/usePairTeamName";
+import PairTeamBadge from "@/components/PairTeamBadge";
 // [비활성] 수사현황 실시간 순위 관련 import — 복원 시 함께 주석 해제
 // import { useEffect, useState } from "react";
 // import { useAllTeamsProgress } from "@/lib/useAllTeamsProgress";
@@ -11,7 +10,6 @@ import { usePairTeamName } from "@/lib/usePairTeamName";
 
 export default function MainPage() {
   const { photos } = usePhotoEvidence();
-  const pairTeam = usePairTeamName();
   const [isTimetableOpen, setIsTimetableOpen] = useState(false);
   // [비활성] 수사현황 실시간 순위 — 아래 훅/상태와 하단 JSX 블록을 함께 주석 해제하면 복원됨
   // const { groups } = useAllTeamsProgress();
@@ -28,7 +26,7 @@ export default function MainPage() {
       <div className="space-y-1">
         <div className="flex items-center justify-between gap-3">
           <div className="text-xs font-mono text-amber-400 tracking-widest uppercase">Special Investigation Unit</div>
-          {pairTeam && <div className={`rounded-full border px-2.5 py-1 text-xs font-bold ${getPairTeamTone(pairTeam.name)}`}>{formatPairTeamName(pairTeam.name, pairTeam.index)}</div>}
+          <PairTeamBadge />
         </div>
         <h1 className="text-2xl font-bold text-zinc-100 leading-tight">
           녹산건설
