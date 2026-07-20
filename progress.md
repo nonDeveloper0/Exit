@@ -1,5 +1,11 @@
 # EXIT 2026 — 진행 현황
 
+## 작업 완료 (2026-07-21)
+
+- [x] 용의자 탭의 심문권 획득 카드 버튼 문구를 `심문 사용`에서 `심문권 사용`으로 수정했다.
+  - 변경: `src/app/suspects/page.tsx`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/suspects/page.tsx`, `git diff --check` 통과.
+
 ## 작업 완료 (2026-07-20)
 
 - [x] 채소장(B, QR `w3n5k7`) 심문권 퀴즈 조정. `earnedNote`("국립과학수사연구원..?")를 QR 획득 카드에서 제거하고 용의자 파일(`/suspects`) 심문권 티켓에만 표시되도록 변경. `poison kill` 문제 문구(`question`)를 `🤮` 이모티콘으로 교체.
