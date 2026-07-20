@@ -2,6 +2,12 @@
 
 ## 작업 완료 (2026-07-20)
 
+## 작업 완료 (2026-07-20)
+
+- [x] 관리자 게임 진행 영역에서 `전화 연출 초기화`를 수신전화 연출 카드 바로 아래로 옮기고, 최종 투표 그룹을 수신전화 하단으로 이동했다. 엔딩 공개는 최종 투표 다음 순서를 유지한다.
+  - 변경: `src/app/admin/page.tsx`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/admin/page.tsx`, `git diff --check` 통과.
+
 - [x] 관리자 `전체 조 초기화`를 증거 수집 여부와 무관하게 항상 실행할 수 있게 했다. 심문권·최종추리·사진 삭제·조별/전체 초기화를 `초기화 · 전체 삭제` 카테고리로 모았고, 수신전화의 `전화 연출 초기화`는 해당 연출 카드에 유지했다.
   - 변경: `src/app/admin/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
   - 검증: 관리자 eslint, `npm.cmd run build`, `git diff --check` 통과.

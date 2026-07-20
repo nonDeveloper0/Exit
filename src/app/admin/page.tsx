@@ -576,70 +576,6 @@ function AdminPanel() {
           <p className="text-sm text-zinc-600 py-2">상태 불러오는 중...</p>
         ) : (
           <>
-            {/* Final vote control */}
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <p className="text-sm font-bold text-zinc-200">최종 투표</p>
-                  <p className={`text-xs font-mono ${voteOpen ? "text-amber-400" : "text-zinc-500"}`}>
-                    {voteOpen ? "● 진행 중" : "○ 닫힘"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setVoteOpen(true)}
-                  disabled={settingVoteRound || voteOpen}
-                  className="flex-1 rounded px-3 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-amber-400 text-zinc-900 hover:bg-amber-300"
-                >
-                  {settingVoteRound ? "..." : "최종 투표 열기"}
-                </button>
-                <button
-                  onClick={() => setVoteOpen(false)}
-                  disabled={settingVoteRound || !voteOpen}
-                  className="flex-1 rounded px-3 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                >
-                  {settingVoteRound ? "..." : "닫기"}
-                </button>
-              </div>
-              <button
-                type="button"
-                onClick={() => void resetCallDramatization()}
-                disabled={togglingIncomingCall || resettingCall}
-                className="w-full rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs font-bold text-zinc-300 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              >
-                {resettingCall ? "초기화 중..." : "전화 연출 초기화"}
-              </button>
-              <p className="text-[10px] leading-relaxed text-zinc-600">전화를 받은 뒤 공기계에 남는 통화 재생 상태를 지우고 대기 화면으로 되돌립니다.</p>
-            </div>
-
-            {/* Ending toggle */}
-            <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-              <div className="space-y-0.5">
-                <p className="text-sm font-bold text-zinc-200">엔딩 공개</p>
-                <p className={`text-xs font-mono ${ending_open ? "text-amber-400" : "text-zinc-500"}`}>
-                  {ending_open ? "● 공개 중" : "○ 대기 중"}
-                </p>
-              </div>
-              <button
-                onClick={toggleEnding}
-                disabled={togglingEnding}
-                className={`rounded px-5 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                  ending_open
-                    ? "border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                    : "bg-amber-400 text-zinc-900 hover:bg-amber-300"
-                }`}
-              >
-                {togglingEnding ? "..." : ending_open ? "엔딩 숨기기" : "엔딩 공개"}
-              </button>
-            </div>
-
-            {ending_open && (
-              <p className="text-xs text-amber-500/70 px-1">
-                엔딩이 공개 중입니다 — 모든 참가자 기기가 자동으로 엔딩 화면으로 이동합니다.
-              </p>
-            )}
-
             {/* Incoming call */}
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
               <div className="flex items-center justify-between">
@@ -663,6 +599,18 @@ function AdminPanel() {
                   {togglingIncomingCall ? "..." : incomingCallActive ? "전화 종료" : "전화 걸기"}
                 </button>
               </div>
+            </div>
+
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => void resetCallDramatization()}
+                disabled={togglingIncomingCall || resettingCall}
+                className="w-full rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs font-bold text-zinc-300 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              >
+                {resettingCall ? "초기화 중..." : "전화 연출 초기화"}
+              </button>
+              <p className="text-[10px] leading-relaxed text-zinc-600">전화를 받은 뒤 공기계에 남는 통화 재생 상태를 지우고 대기 화면으로 되돌립니다.</p>
             </div>
 
             {incomingCallActive && (
@@ -704,6 +652,61 @@ function AdminPanel() {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Final vote control */}
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold text-zinc-200">최종 투표</p>
+                  <p className={`text-xs font-mono ${voteOpen ? "text-amber-400" : "text-zinc-500"}`}>
+                    {voteOpen ? "● 진행 중" : "○ 닫힘"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setVoteOpen(true)}
+                  disabled={settingVoteRound || voteOpen}
+                  className="flex-1 rounded px-3 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-amber-400 text-zinc-900 hover:bg-amber-300"
+                >
+                  {settingVoteRound ? "..." : "최종 투표 열기"}
+                </button>
+                <button
+                  onClick={() => setVoteOpen(false)}
+                  disabled={settingVoteRound || !voteOpen}
+                  className="flex-1 rounded px-3 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                >
+                  {settingVoteRound ? "..." : "닫기"}
+                </button>
+              </div>
+            </div>
+
+            {/* Ending toggle */}
+            <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-zinc-200">엔딩 공개</p>
+                <p className={`text-xs font-mono ${ending_open ? "text-amber-400" : "text-zinc-500"}`}>
+                  {ending_open ? "● 공개 중" : "○ 대기 중"}
+                </p>
+              </div>
+              <button
+                onClick={toggleEnding}
+                disabled={togglingEnding}
+                className={`rounded px-5 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                  ending_open
+                    ? "border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                    : "bg-amber-400 text-zinc-900 hover:bg-amber-300"
+                }`}
+              >
+                {togglingEnding ? "..." : ending_open ? "엔딩 숨기기" : "엔딩 공개"}
+              </button>
+            </div>
+
+            {ending_open && (
+              <p className="text-xs text-amber-500/70 px-1">
+                엔딩이 공개 중입니다 — 모든 참가자 기기가 자동으로 엔딩 화면으로 이동합니다.
+              </p>
             )}
           </>
         )}
