@@ -351,9 +351,9 @@ export const QR_CODES: QrCode[] = [
 export const INTERROGATION_QUIZZES = {
   w3n5k7: {
     suspectId: "B",
-    question: "부검표의 독성 반응을 일으킨 살해 방식 두 단어를 영어로 입력하세요.",
+    question: "🤮",
     answer: "poison kill",
-    earnedNote: "국립과학수사연구원", // 획득 화면에 함께 표시할 문구 (선택)
+    earnedNote: "국립과학수사연구원", // 용의자 파일 심문권 티켓에만 표시되는 문구 (선택)
   },
   // 예시: A용 문제 추가
   // h6t4c3: { suspectId: "A", question: "문제 문구", answer: "정답" },
@@ -363,7 +363,7 @@ export const INTERROGATION_QUIZZES = {
 - key(`w3n5k7`)는 QR URL의 slug이며 `QR_CODES.id`와 일치해야 합니다.
 - `suspectId`는 `"A"`~`"E"` 중 하나입니다.
 - 정답 비교는 공백 제거 + 소문자 변환으로 처리됩니다. 예: `poison kill`, `PoisonKill`, `poison   kill` 모두 동일.
-- `earnedNote`(선택): 넣으면 **QR 획득 성공 카드**와 **용의자 파일(`/suspects`)의 심문권 획득 티켓**(제시 문구 위) 양쪽에 그 문구가 앰버색 강조로 표시됩니다. 현재 채소장(B)에 `국립과학수사연구원..?`이 지정돼 있습니다. 빼면 문구가 안 나옵니다.
+- `earnedNote`(선택): 넣으면 **용의자 파일(`/suspects`)의 심문권 획득 티켓**(제시 문구 위)에만 그 문구가 앰버색 강조로 표시됩니다. (QR 획득 카드에는 표시되지 않습니다.) 현재 채소장(B)에 `국립과학수사연구원..?`이 지정돼 있습니다. 빼면 문구가 안 나옵니다.
 - 문제 등록이 없는 QR은 "이 지점에는 아직 등록된 문제가 없습니다"만 표시됩니다.
 - **획득**: 정답을 맞히면 `team_evidence_items`에 `type='interrogation_earned'`, `evidence_id=용의자ID`로 저장됩니다. 조 전체·짝 조가 공유합니다.
 - **제시**: 용의자 카드를 펼치면 관련 단서 아래에 빨간 심문권 티켓이 뜬다 → 배우에게 화면 제시

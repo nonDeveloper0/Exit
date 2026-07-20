@@ -102,7 +102,7 @@ export const INTERROGATION_QUIZZES: Record<string, InterrogationQuiz> = {
   // 채소장(B) — 기존 E15 퀴즈 재사용
   w3n5k7: {
     suspectId: "B",
-    question: "부검표의 독성 반응을 일으킨 살해 방식 두 단어를 영어로 입력하세요.",
+    question: "🤮",
     answer: "poison kill",
   },
   // 나머지 용의자(A·C·D·E)는 QR·문제 확정 후 여기에 추가.

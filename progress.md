@@ -2,6 +2,11 @@
 
 ## 작업 완료 (2026-07-20)
 
+- [x] 채소장(B, QR `w3n5k7`) 심문권 퀴즈 조정. `earnedNote`("국립과학수사연구원..?")를 QR 획득 카드에서 제거하고 용의자 파일(`/suspects`) 심문권 티켓에만 표시되도록 변경. `poison kill` 문제 문구(`question`)를 `🤮` 이모티콘으로 교체.
+  - 변경: `src/lib/data.ts`, `src/app/qr/[id]/QrPageClient.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
+## 작업 완료 (2026-07-20)
+
 - [x] 우측 상단의 페어조 팀 이름 배지(예: `노랑1`, `분홍1`) 글자를 키우고, 수사본부·증거함·용의자 탭에 공통 표시했다. 공통 `PairTeamBadge` 컴포넌트로 통일해 색상·순번·실시간 이름 갱신도 세 화면에서 동일하게 반영된다.
   - 변경: `src/components/PairTeamBadge.tsx`, `src/app/home/page.tsx`, `src/app/evidence/page.tsx`, `src/app/suspects/page.tsx`, `progress.md`
   - 검증: 변경 파일 `eslint`, `git diff --check` 통과.
