@@ -4,6 +4,12 @@
 
 ## 작업 완료 (2026-07-20)
 
+- [x] 관리자 게임 진행 영역에서 엔딩 공개를 최종 투표 위로 이동했다. 현재 순서는 수신전화 연출 → 전화 연출 초기화 → 엔딩 공개 → 최종 투표다.
+  - 변경: `src/app/admin/page.tsx`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/admin/page.tsx`, `git diff --check` 통과.
+
+## 작업 완료 (2026-07-20)
+
 - [x] 관리자 게임 진행 영역에서 `전화 연출 초기화`를 수신전화 연출 카드 바로 아래로 옮기고, 최종 투표 그룹을 수신전화 하단으로 이동했다. 엔딩 공개는 최종 투표 다음 순서를 유지한다.
   - 변경: `src/app/admin/page.tsx`, `progress.md`
   - 검증: `npx.cmd eslint src/app/admin/page.tsx`, `git diff --check` 통과.

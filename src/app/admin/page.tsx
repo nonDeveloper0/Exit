@@ -654,6 +654,33 @@ function AdminPanel() {
               </div>
             )}
 
+            {/* Ending toggle */}
+            <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-zinc-200">엔딩 공개</p>
+                <p className={`text-xs font-mono ${ending_open ? "text-amber-400" : "text-zinc-500"}`}>
+                  {ending_open ? "● 공개 중" : "○ 대기 중"}
+                </p>
+              </div>
+              <button
+                onClick={toggleEnding}
+                disabled={togglingEnding}
+                className={`rounded px-5 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                  ending_open
+                    ? "border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                    : "bg-amber-400 text-zinc-900 hover:bg-amber-300"
+                }`}
+              >
+                {togglingEnding ? "..." : ending_open ? "엔딩 숨기기" : "엔딩 공개"}
+              </button>
+            </div>
+
+            {ending_open && (
+              <p className="text-xs text-amber-500/70 px-1">
+                엔딩이 공개 중입니다 — 모든 참가자 기기가 자동으로 엔딩 화면으로 이동합니다.
+              </p>
+            )}
+
             {/* Final vote control */}
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
               <div className="flex items-center justify-between">
@@ -681,33 +708,6 @@ function AdminPanel() {
                 </button>
               </div>
             </div>
-
-            {/* Ending toggle */}
-            <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-              <div className="space-y-0.5">
-                <p className="text-sm font-bold text-zinc-200">엔딩 공개</p>
-                <p className={`text-xs font-mono ${ending_open ? "text-amber-400" : "text-zinc-500"}`}>
-                  {ending_open ? "● 공개 중" : "○ 대기 중"}
-                </p>
-              </div>
-              <button
-                onClick={toggleEnding}
-                disabled={togglingEnding}
-                className={`rounded px-5 py-2 text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                  ending_open
-                    ? "border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                    : "bg-amber-400 text-zinc-900 hover:bg-amber-300"
-                }`}
-              >
-                {togglingEnding ? "..." : ending_open ? "엔딩 숨기기" : "엔딩 공개"}
-              </button>
-            </div>
-
-            {ending_open && (
-              <p className="text-xs text-amber-500/70 px-1">
-                엔딩이 공개 중입니다 — 모든 참가자 기기가 자동으로 엔딩 화면으로 이동합니다.
-              </p>
-            )}
           </>
         )}
         </ToggleSection>
