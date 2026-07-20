@@ -2,6 +2,12 @@
 
 ## 작업 완료 (2026-07-20)
 
+- [x] 수사본부 진행 시간표 자산을 `타임테이블.jpg`에서 `타임테이블.png`로 교체했다. 일반 카드·확대 모달·운영 가이드 참조를 PNG로 변경하고 기존 JPG 파일은 삭제했다.
+  - 변경: `public/타임테이블.png`(신규), `public/타임테이블.jpg`(삭제), `src/app/home/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/home/page.tsx`, `git diff --check` 통과.
+
+## 작업 완료 (2026-07-20)
+
 - [x] 용의자 탭 하단의 `증거를 충분히 검토한 뒤 범인을 지목하세요.` 안내와 `범인 지목하기` 링크를 제거했다.
   - 변경: `src/app/suspects/page.tsx`, `progress.md`
   - 검증: `npx.cmd eslint src/app/suspects/page.tsx`, `git diff --check` 통과.
@@ -118,8 +124,8 @@
 
 ## 작업 완료 (2026-07-18)
 
-- [x] 수사본부 탭 최하단에 `진행 시간표` 이미지 카드를 추가했다. `public/타임테이블.jpg`를 표시하며, 운영자는 같은 이름으로 파일을 덮어써 교체할 수 있다.
-  - 변경: `src/app/home/page.tsx`(수사 방법 블록 다음에 Timetable 카드 추가), `public/타임테이블.jpg`(신규), `docs/01_md/EDIT_GUIDE.md`(7-2 추가), `progress.md`
+- [x] 수사본부 탭 최하단에 `진행 시간표` 이미지 카드를 추가했다. 현재 `public/타임테이블.png`를 표시하며, 운영자는 같은 이름으로 파일을 덮어써 교체할 수 있다.
+  - 변경: `src/app/home/page.tsx`(수사 방법 블록 다음에 Timetable 카드 추가), `public/타임테이블.png`, `docs/01_md/EDIT_GUIDE.md`(7-2 추가), `progress.md`
   - 검증: `src/app/home/page.tsx` eslint 통과, `tsc`(앱 소스 무에러).
 
 ## 작업 완료 (2026-07-18)
