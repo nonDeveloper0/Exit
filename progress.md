@@ -2,6 +2,18 @@
 
 ## 작업 완료 (2026-07-20)
 
+- [x] 첫 입장 화면의 조 번호를 자유 입력에서 **1~6조 드롭다운 선택**으로 바꿨다. 목록은 `src/app/page.tsx` 상단의 `TEAM_NUMBERS` 배열 하나로 관리하며, 선택값이 그대로 `pair_id`로 저장되므로 조장 지정·짝 조 매핑 등 기존 로직은 그대로 동작한다. 저장된 조가 목록에 없으면 선택이 비워진다.
+  - 변경: `src/app/page.tsx`, `docs/01_md/EDIT_GUIDE.md`(0장 신설), `progress.md`
+  - 검증: `npx.cmd eslint src/app/page.tsx`, `npm.cmd run build` 통과.
+
+## 작업 완료 (2026-07-20)
+
+- [x] 첫 입장 뒤에는 기기에 저장된 조·이름을 읽기 전용으로 잠가, 홈에서 돌아온 참가자가 실수로 다른 조를 선택하지 못하게 했다. 잘못 입장한 경우에만 `조 또는 이름을 변경해야 하나요?`에서 운영자 PIN을 확인한 뒤 변경 폼을 열 수 있다. PIN은 `NEXT_PUBLIC_TEAM_CHANGE_PIN`(빌드 시 설정)을 우선 사용하며, 미설정 기본값은 `EXIT2026`이다. 이 값은 실수 방지용 공개 PIN으로, 보안 권한 체계로 쓰지 않는다고 운영 가이드에 명시했다.
+  - 변경: `src/app/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/page.tsx`, `npm.cmd run build`, `git diff --check` 통과.
+
+## 작업 완료 (2026-07-20)
+
 - [x] 용의자 수사 노트의 조원 작성·페어조 공유 안내를 토글 버튼 아래로 옮겨 항상 보이게 했다. 수사본부 진행 시간표는 이미지를 누르면 확대 모달로 표시되며, 배경 또는 닫기 버튼으로 닫을 수 있다.
   - 변경: `src/app/suspects/page.tsx`, `src/app/home/page.tsx`, `progress.md`
   - 검증: `npx.cmd eslint src/app/suspects/page.tsx src/app/home/page.tsx`, `git diff --check` 통과.
