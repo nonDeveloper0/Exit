@@ -10,6 +10,7 @@ import { getPairTeamKey } from "@/lib/pairTeam";
 import { STAFF_LEADER_NAMES } from "@/lib/staffRole";
 
 const ADMIN_PASSWORD = "0000";
+const RESET_PASSWORD = "9999";
 const TEAM_NUMBERS = ["1", "2", "3", "4", "5", "6"];
 
 interface TeamRow {
@@ -45,6 +46,49 @@ function ToggleSection({ title, description, children, defaultOpen = false }: { 
       </summary>
       <div className="border-t border-zinc-800 p-4">{children}</div>
     </details>
+  );
+}
+
+function ResetLock({ onUnlock }: { onUnlock: () => void }) {
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState(false);
+
+  function handleSubmit() {
+    if (pin === RESET_PASSWORD) {
+      onUnlock();
+    } else {
+      setError(true);
+      setPin("");
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-4 space-y-3">
+      <div className="space-y-0.5">
+        <p className="text-sm font-bold text-red-300">2차 인증 필요</p>
+        <p className="text-xs text-zinc-500">실수로 초기화하는 것을 막기 위해 별도 PIN을 입력해야 합니다.</p>
+      </div>
+      <input
+        type="password"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={pin}
+        onChange={(e) => { setPin(e.target.value.replace(/\D/g, "").slice(0, 4)); setError(false); }}
+        onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+        placeholder="4자리 PIN"
+        aria-label="초기화 PIN 입력"
+        className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-red-400 focus:outline-none"
+      />
+      <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={pin.length !== 4}
+        className="w-full rounded border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-40"
+      >
+        잠금 해제
+      </button>
+      {error && <p className="text-xs text-red-400">PIN이 올바르지 않습니다</p>}
+    </div>
   );
 }
 
@@ -153,6 +197,7 @@ function AdminPanel() {
   const [resettingVotes, setResettingVotes] = useState(false);
   const [pendingProgressReset, setPendingProgressReset] = useState<"interrogation" | "interrogation_earned" | "vote" | null>(null);
   const [showResetAllConfirm, setShowResetAllConfirm] = useState(false);
+  const [resetUnlocked, setResetUnlocked] = useState(false);
 
   useEffect(() => {
     const team = getTeamInfo();
@@ -912,8 +957,8 @@ function AdminPanel() {
       <div className="border-t border-zinc-800" />
 
       {/* Resets */}
-      <ToggleSection title="초기화 · 전체 삭제" description="진행 기록과 증거·사진·메모를 초기화합니다">
-      <div className="space-y-3">
+      <ToggleSection title="초기화 · 전체 삭제" description="진행 기록과 증거·사진·메모를 초기화합니다 (2차 PIN 필요)">
+      {!resetUnlocked ? <ResetLock onUnlock={() => setResetUnlocked(true)} /> : <div className="space-y-3">
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 space-y-3">
           <div className="space-y-0.5"><p className="text-sm font-bold text-zinc-200">진행 상태 초기화</p><p className="text-xs text-zinc-500">심문권의 획득·사용 기록과 최종추리 제출 상태를 각각 초기화합니다.</p></div>
           <button type="button" onClick={() => setPendingProgressReset("interrogation")} disabled={resettingInterrogationUses || resettingInterrogationEarned || resettingVotes} className="w-full rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-300 disabled:opacity-40">{resettingInterrogationUses ? "초기화 중..." : "심문권 사용 초기화"}</button>
@@ -988,7 +1033,7 @@ function AdminPanel() {
             </div>
           </div>
         </div>}
-      </div>
+      </div>}
       </ToggleSection>
     </div>
   );

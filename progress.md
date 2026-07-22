@@ -2,6 +2,18 @@
 
 ## 작업 완료 (2026-07-22)
 
+- [x] 관리자 초기화 영역의 2차 PIN 잠금 변경을 검토하고 `master` 브랜치에 커밋한 뒤 원격 저장소로 푸시했다.
+  - 변경: `src/app/admin/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 검증: `git diff --check` 통과.
+
+## 작업 완료 (2026-07-22)
+
+- [x] 관리자 `초기화 · 전체 삭제` 카테고리에 2차 PIN 잠금을 추가했다. 스탭이 실수로 초기화를 누르지 못하도록, 관리자 진입 PIN(`0000`)과 별개인 `RESET_PASSWORD`(기본 `9999`)를 입력해야 섹션 내용이 열린다. 해제 상태는 화면 새로고침 전까지 유지된다.
+  - 변경: `src/app/admin/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 검증: `npx.cmd eslint src/app/admin/page.tsx`, `npm.cmd run build` 통과.
+
+## 작업 완료 (2026-07-22)
+
 - [x] 사진 제외 여부와 무관하게 조별 사진 업로드 한도는 전체 등록 사진 수(30장)로 계산하도록 정정했다. 제외 사진은 유효 증거/장소별/수사본부 집계에서는 계속 빠지지만, 한도를 비우지는 않는다.
   - 변경: `src/lib/usePhotoEvidence.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
   - 검증: 사진 필터·업로드 한도 테스트 4개, 변경 파일 ESLint, `git diff --check` 통과.
