@@ -2,7 +2,7 @@
 
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { PHOTO_LOCATION_TAGS, photoLocationTagLabel } from "@/lib/data";
-import { filterPhotoEvidence } from "@/lib/photoEvidenceFilter";
+import { filterPhotoEvidence, isCountedPhotoEvidence } from "@/lib/photoEvidenceFilter";
 import { PhotoItem, usePhotoEvidence } from "@/lib/usePhotoEvidence";
 import QrScannerModal from "@/components/QrScannerModal";
 import PairTeamBadge from "@/components/PairTeamBadge";
@@ -55,7 +55,7 @@ export default function EvidencePage() {
   const locationPhotoCounts = Object.fromEntries(
     PHOTO_LOCATION_TAGS.map((location) => [
       location.value,
-      photos.filter((photo) => photo.locationTag === location.value).length,
+      photos.filter((photo) => photo.locationTag === location.value && isCountedPhotoEvidence(photo)).length,
     ])
   );
 

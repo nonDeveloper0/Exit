@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePhotoEvidence } from "@/lib/usePhotoEvidence";
+import { isCountedPhotoEvidence } from "@/lib/photoEvidenceFilter";
 import PairTeamBadge from "@/components/PairTeamBadge";
 // [비활성] 수사현황 실시간 순위 관련 import — 복원 시 함께 주석 해제
 // import { useEffect, useState } from "react";
@@ -10,6 +11,7 @@ import PairTeamBadge from "@/components/PairTeamBadge";
 
 export default function MainPage() {
   const { photos } = usePhotoEvidence();
+  const countedPhotoCount = photos.filter(isCountedPhotoEvidence).length;
   const [isTimetableOpen, setIsTimetableOpen] = useState(false);
   // [비활성] 수사현황 실시간 순위 — 아래 훅/상태와 하단 JSX 블록을 함께 주석 해제하면 복원됨
   // const { groups } = useAllTeamsProgress();
@@ -82,7 +84,7 @@ export default function MainPage() {
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-zinc-300">팀 사진 증거수집 현황</span>
           <span className="text-sm font-mono text-amber-400 font-bold">
-            {photos.length}장
+            {countedPhotoCount}장
           </span>
         </div>
         <p className="text-xs text-zinc-500">

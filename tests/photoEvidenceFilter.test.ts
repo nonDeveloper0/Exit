@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { filterPhotoEvidence } from "../src/lib/photoEvidenceFilter.ts";
+import { filterPhotoEvidence, isCountedPhotoEvidence } from "../src/lib/photoEvidenceFilter.ts";
 
 const photos = [{ id: "a", locationTag: "WAREHOUSE" }, { id: "b", locationTag: "NA_CEO_OFFICE" }];
 
@@ -17,3 +17,9 @@ test("returns no photos from another location", () =>
     []
   )
 );
+
+test("does not count photos rejected by an administrator", () => {
+  assert.equal(isCountedPhotoEvidence({ status: "ok" }), true);
+  assert.equal(isCountedPhotoEvidence({ status: "rejected" }), false);
+  assert.equal(isCountedPhotoEvidence({ status: null }), true);
+});

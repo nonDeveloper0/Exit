@@ -10,6 +10,7 @@ import { getPairTeamKey } from "@/lib/pairTeam";
 import { STAFF_LEADER_NAMES } from "@/lib/staffRole";
 
 const ADMIN_PASSWORD = "0000";
+const TEAM_NUMBERS = ["1", "2", "3", "4", "5", "6"];
 
 interface TeamRow {
   pairId: string;
@@ -556,10 +557,15 @@ function AdminPanel() {
     }
   }
 
-  const photoTeamIds = Array.from(new Set(photos.map((photo) => photo.pair_id))).sort((a, b) =>
+  const photoTeamIds = Array.from(new Set([...TEAM_NUMBERS, ...photos.map((photo) => photo.pair_id)])).sort((a, b) =>
     a.localeCompare(b, "ko", { numeric: true })
   );
   const filteredPhotos = photoFilter ? photos.filter((photo) => photo.pair_id === photoFilter) : photos;
+  const photoSummaries = photoTeamIds.map((teamId) => {
+    const teamPhotos = photos.filter((photo) => photo.pair_id === teamId);
+    const excludedCount = teamPhotos.filter((photo) => photo.status === "rejected").length;
+    return { teamId, totalCount: teamPhotos.length, countedCount: teamPhotos.length - excludedCount, excludedCount };
+  });
 
   return (
     <div className="flex flex-col gap-6 p-4 pt-6">
@@ -718,6 +724,17 @@ function AdminPanel() {
 
       <ToggleSection title="사진 점검" description="조별 사진 확인 및 랭킹 제외 처리">
       <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {photoSummaries.map((summary) => (
+            <div key={summary.teamId} className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-sm font-bold text-zinc-200">{summary.teamId}조</span>
+                <span className="text-lg font-mono font-bold text-amber-400">{summary.countedCount}장</span>
+              </div>
+              <p className="mt-1 text-[11px] text-zinc-500">등록 {summary.totalCount} · 제외 <span className={summary.excludedCount > 0 ? "text-red-400" : undefined}>{summary.excludedCount}</span></p>
+            </div>
+          ))}
+        </div>
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">사진 점검</h2>
           <select
@@ -732,7 +749,7 @@ function AdminPanel() {
             ))}
           </select>
         </div>
-        <p className="text-xs text-zinc-600">제외한 사진은 보존되며 랭킹에서만 빠집니다.</p>
+        <p className="text-xs text-zinc-600">제외한 사진은 보존되며 증거함 카운트와 랭킹에서 빠집니다.</p>
 
         {photosLoading ? (
           <p className="py-4 text-center text-sm text-zinc-600">사진 불러오는 중...</p>

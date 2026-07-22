@@ -1,5 +1,12 @@
 # EXIT 2026 — 진행 현황
 
+## 작업 완료 (2026-07-22)
+
+- [x] 관리자에서 사진을 `제외`하면 해당 사진은 보드에 `제외됨`으로 보존하되, 증거함의 조별 유효 사진 수·장소별 수·업로드 한도와 수사본부 사진 현황 카운트에서는 즉시 제외되도록 변경했다. `복원`하면 모두 다시 반영된다.
+- [x] 관리자 `사진 점검` 상단에 1~6조별 요약 카드를 추가했다. 각 카드는 유효 사진 수, 전체 등록 수, 제외 수를 표시해 조별 집계를 한눈에 확인할 수 있다.
+  - 변경: `src/lib/photoEvidenceFilter.ts`, `src/lib/usePhotoEvidence.ts`, `src/app/evidence/page.tsx`, `src/app/home/page.tsx`, `src/app/admin/page.tsx`, `tests/photoEvidenceFilter.test.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 검증: 사진 필터 테스트 3개 통과, 변경 파일 ESLint 통과, `npm.cmd run build`, `git diff --check` 통과.
+
 ## 작업 완료 (2026-07-21)
 
 - [x] 용의자 탭의 심문권 획득 카드 버튼 문구를 `심문 사용`에서 `심문권 사용`으로 수정했다.
