@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { PHOTO_BUCKET } from "./data";
 import { compressImage } from "./image";
-import { isCountedPhotoEvidence } from "./photoEvidenceFilter";
 import { getPhotoEvidenceGroupKey } from "./photoEvidenceNumbering";
 import { supabase } from "./supabase";
 import { getTeamInfo } from "./store";
@@ -270,9 +269,7 @@ export function usePhotoEvidence() {
     }
   }, []);
 
-  // 관리자가 제외한 사진은 보드에 보존하되, 조의 유효 증거 수와 업로드 한도에서는 뺀다.
-  const ownPhotoCount = ownTeamId
-    ? photos.filter((photo) => photo.pairId === ownTeamId && isCountedPhotoEvidence(photo)).length
-    : 0;
+  // 제외 사진도 등록된 사진이므로 조당 30장 업로드 한도에는 포함한다.
+  const ownPhotoCount = ownTeamId ? photos.filter((photo) => photo.pairId === ownTeamId).length : 0;
   return { photos, loading, uploading, uploadPhoto, updatePhotoMetadata, updatingPhotoId, deletePhoto, deletingPhotoId, ownTeamId, ownPhotoCount, photoLimitReached: hasReachedPhotoLimit(ownPhotoCount) };
 }
