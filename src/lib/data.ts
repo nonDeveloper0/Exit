@@ -332,7 +332,7 @@ export const INTERROGATION_QUIZZES: Record<string, InterrogationQuiz> = {
   },
   w3n5k7: {
     suspectId: "B",
-    question: "🤮",
+    question: "화학용액 조제 및 배합 공정",
     answer: "poison kill",
     earnedNote: "국립과학수사연구원..?",
   },
