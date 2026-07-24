@@ -108,9 +108,38 @@ export default function EndingPage() {
 
 export default function EndingPage() {
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-3 p-8 text-center">
-      <h1 className="text-3xl font-black tracking-widest text-zinc-100">EXIT SEASON 2</h1>
-      <p className="text-sm font-mono uppercase tracking-widest text-zinc-500">TO BE CONTINUED...</p>
+    <div className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center overflow-hidden p-8 text-center">
+      {/* Ambient background */}
+      <div className="grid-overlay pointer-events-none absolute inset-0 opacity-60" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-amber-500/15 blur-3xl [animation:blob-one_9s_ease-in-out_infinite]" />
+        <div className="absolute bottom-1/4 right-1/4 h-56 w-56 rounded-full bg-red-600/10 blur-3xl [animation:blob-two_11s_ease-in-out_infinite]" />
+      </div>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-transparent to-zinc-950" />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center gap-6 [animation:ending-in_1.2s_ease-out]">
+        <p className="font-mono text-[0.7rem] uppercase tracking-[0.5em] text-zinc-500">
+          The End
+        </p>
+
+        <div className="space-y-1">
+          <h1 className="text-glow-amber text-6xl font-black leading-none tracking-[0.15em] text-zinc-50 sm:text-7xl">
+            EXIT
+          </h1>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <span className="h-px w-8 bg-gradient-to-r from-transparent to-amber-500/60" />
+            <p className="font-mono text-lg font-semibold uppercase tracking-[0.35em] text-amber-400">
+              Season 2
+            </p>
+            <span className="h-px w-8 bg-gradient-to-l from-transparent to-amber-500/60" />
+          </div>
+        </div>
+
+        <p className="font-mono text-xs uppercase tracking-[0.35em] text-zinc-600">
+          To Be Continued
+        </p>
+      </div>
     </div>
   );
 }

@@ -52,6 +52,11 @@ body {
     0 0 120px rgba(245, 158, 11, 0.1);
 }
 
+@keyframes ending-in {
+  0% { opacity: 0; transform: translateY(16px) scale(0.98); filter: blur(6px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
 @keyframes toast-in {
   0% { opacity: 0; transform: translateY(-12px); }
   100% { opacity: 1; transform: translateY(0); }
