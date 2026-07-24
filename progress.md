@@ -2,6 +2,10 @@
 
 ## 작업 완료 (2026-07-24)
 
+- [x] 채소장 폰(`/screen/phone2` → `public/screen/dongguri_phone_room.html`)에 iOS 스타일 4자리 암호 잠금화면을 추가했다. 접속 시 잠금화면(시계·날짜·숫자 키패드)이 먼저 뜨고, 암호 `0625`를 입력해야 홈 화면으로 진입한다. 암호는 `<script>`의 `const LOCK_CODE = "0625";`로 관리한다. 오답 시 점 4개 흔들림+"암호가 틀렸습니다" 후 초기화. 기존 홈이 초기 `active`였던 것을 잠금화면으로 옮겼다.
+  - 변경: `public/screen/dongguri_phone_room.html`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 참고: `/screen/phone2`의 실제 서빙 파일은 `dongguri_phone_room.html`(next.config rewrite)이며, EDIT_GUIDE의 채소장 폰 세부 설명 일부는 백업본 `back/phone2.html` 기준이라 라이브와 불일치 — 문서 정리는 별도 확인 후 진행 예정.
+
 - [x] 첫 입장 화면의 조·이름 변경 PIN 기본값을 `EXIT2026`에서 `9999`로 변경했다. `NEXT_PUBLIC_TEAM_CHANGE_PIN` 환경변수가 설정돼 있으면 여전히 그 값이 우선한다.
   - 변경: `src/app/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
 
