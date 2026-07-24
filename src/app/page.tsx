@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 
 // 참가 조 목록. 조 개수가 바뀌면 이 배열만 수정한다.
 const TEAM_NUMBERS = ["1", "2", "3", "4", "5", "6"];
-const TEAM_CHANGE_PIN = process.env.NEXT_PUBLIC_TEAM_CHANGE_PIN ?? "EXIT2026";
+const TEAM_CHANGE_PIN = process.env.NEXT_PUBLIC_TEAM_CHANGE_PIN ?? "9999";
 
 export default function LandingPage() {
   const router = useRouter();

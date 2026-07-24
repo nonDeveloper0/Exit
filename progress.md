@@ -2,6 +2,13 @@
 
 ## 작업 완료 (2026-07-24)
 
+- [x] 첫 입장 화면의 조·이름 변경 PIN 기본값을 `EXIT2026`에서 `9999`로 변경했다. `NEXT_PUBLIC_TEAM_CHANGE_PIN` 환경변수가 설정돼 있으면 여전히 그 값이 우선한다.
+  - 변경: `src/app/page.tsx`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+
+- [x] 나팀장 개인폰(`/phone`)이 엔딩 공개(`ending_open`) 시 엔딩 화면으로 강제 이동되던 문제를 수정했다. `GameStateRedirect`가 `/admin`만 예외로 두어 `/phone`도 `/ending`으로 리다이렉트됐는데, `/phone`은 수신 전용 연출 기기이므로 예외 목록에 추가해 항상 대기 화면을 유지하도록 했다.
+  - 변경: `src/components/GameStateRedirect.tsx`, `progress.md`
+  - 검증: `npx.cmd eslint src/components/GameStateRedirect.tsx`, `git diff --check` 통과.
+
 - [x] 엔딩 화면을 `EXIT` / `Season 2` 두 줄 구성으로 재디자인했다. 기존 단순 텍스트 대신 그리드 오버레이, 앰버/레드 앰비언트 블롭, 앰버 글로우 타이틀, `To Be Continued` 태그라인과 진입 페이드인 애니메이션(`ending-in`)을 추가해 시네마틱하게 구성했다.
   - 변경: `src/app/ending/page.tsx`, `src/app/globals.css`, `progress.md`
   - 검증: `ending/page.tsx` 타입체크 통과(기존 tests 파일 에러는 무관).

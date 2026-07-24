@@ -11,7 +11,7 @@ export default function GameStateRedirect() {
 
   useEffect(() => {
     if (!loaded) return;
-    if (ending_open && pathname !== "/ending" && pathname !== "/admin") {
+    if (ending_open && pathname !== "/ending" && pathname !== "/admin" && pathname !== "/phone") {
       router.push("/ending");
     }
   }, [ending_open, loaded, pathname, router]);
