@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>출입관리 아이패드 — 데모</title>
+<title>출입관리 아이패드</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; }
@@ -12,64 +12,39 @@
     background: #000; color: #f5f5f7; overflow: hidden;
   }
 
-  .demo-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: #1d4ed8; color: #fff; font-size: 11px; text-align: center; padding: 5px 8px; line-height: 1.5; }
-  .demo-banner b { color: #bfdbfe; }
-
   /* iOS 상태바 */
-  .statusbar { position: absolute; top: 28px; left: 0; right: 0; height: 22px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-size: 12px; font-weight: 600; color: #f5f5f7; z-index: 10; }
+  .statusbar { position: absolute; top: 14px; left: 0; right: 0; height: 22px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-size: 12px; font-weight: 600; color: #f5f5f7; z-index: 10; }
 
-  .screen { position: absolute; inset: 0; padding-top: 50px; display: none; flex-direction: column; align-items: center; }
+  .screen { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; }
   .screen.active { display: flex; }
 
-  /* 공통 배경 (iOS 잠금화면 느낌) */
-  #checkin, #passcode { background: radial-gradient(ellipse at 50% 25%, #1e3a5f 0%, #0a0e1a 70%); justify-content: flex-start; }
+  /* 잠금화면 */
+  #passcode { background: radial-gradient(ellipse at 50% 25%, #1e3a5f 0%, #0a0e1a 70%); justify-content: flex-start; padding-top: 60px; }
   .brand { margin-top: 30px; text-align: center; }
-  .brand .logo { font-size: 34px; }
-  .brand .title { font-size: 17px; font-weight: 600; margin-top: 8px; letter-spacing: .02em; }
-  .brand .sub { font-size: 12px; color: #8b95a7; margin-top: 4px; }
+  .brand .title { font-size: 18px; font-weight: 600; letter-spacing: .02em; }
+  .brand .sub { font-size: 12px; color: #8b95a7; margin-top: 4px; letter-spacing: .08em; }
 
-  .prompt { margin-top: 34px; font-size: 15px; color: #e5e7eb; }
-  .prompt.small { font-size: 13px; color: #9ca3af; margin-top: 6px; }
+  .prompt { margin-top: 40px; font-size: 15px; color: #e5e7eb; }
 
   /* 도트 표시 */
-  .dots { display: flex; gap: 16px; margin-top: 22px; height: 16px; }
-  .dot { width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid #cbd5e1; }
+  .dots { display: flex; gap: 14px; margin-top: 24px; height: 16px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #cbd5e1; }
   .dot.fill { background: #f5f5f7; border-color: #f5f5f7; }
   .dots.shake { animation: shake .4s; }
   @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-10px)} 40%,80%{transform:translateX(10px)} }
-  .msg { font-size: 12px; color: #f87171; height: 16px; margin-top: 12px; }
+  .msg { font-size: 12px; color: #f87171; height: 16px; margin-top: 14px; }
 
   /* 키패드 */
-  .keypad { margin-top: auto; margin-bottom: 40px; display: grid; grid-template-columns: repeat(3, 72px); gap: 18px; justify-content: center; }
-  .key { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,.12); border: none; color: #f5f5f7; font-size: 28px; font-weight: 400; display: flex; align-items: center; justify-content: center; }
+  .keypad { margin-top: auto; margin-bottom: 48px; display: grid; grid-template-columns: repeat(3, 76px); gap: 20px; justify-content: center; }
+  .key { width: 76px; height: 76px; border-radius: 50%; background: rgba(255,255,255,.12); border: none; color: #f5f5f7; font-size: 30px; font-weight: 400; display: flex; align-items: center; justify-content: center; }
   .key:active { background: rgba(255,255,255,.28); }
   .key.zero { grid-column: 2; }
-  .key.action { background: transparent; font-size: 15px; }
+  .key.action { background: transparent; font-size: 16px; }
   .key.action:active { background: rgba(255,255,255,.12); }
 
-  /* 출입기록 화면 */
-  #records { background: #0b0f17; justify-content: flex-start; padding: 0; padding-top: 50px; }
-  .rec-session { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; background: rgba(16,185,129,.14); border-bottom: 1px solid rgba(16,185,129,.3); font-size: 13px; }
-  .rec-session .who { display: flex; align-items: center; gap: 7px; font-weight: 600; color: #6ee7b7; }
-  .live { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; }
-  .logout-btn { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #f5f5f7; font-size: 12px; padding: 6px 12px; border-radius: 6px; }
-  .rec-head { width: 100%; padding: 18px 20px 8px; }
-  .rec-head h2 { font-size: 18px; font-weight: 700; }
-  .rec-head .date { font-size: 12px; color: #8b95a7; margin-top: 3px; }
-  .rec-list { width: 100%; padding: 8px 14px 20px; overflow-y: auto; }
-  .rec-row { display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 14px; }
-  .rec-row .time { font-variant-numeric: tabular-nums; color: #cbd5e1; width: 52px; }
-  .rec-row .dir { font-size: 11px; padding: 2px 7px; border-radius: 4px; }
-  .rec-row .in { background: rgba(59,130,246,.25); color: #93c5fd; }
-  .rec-row .out { background: rgba(148,163,184,.25); color: #cbd5e1; }
-  .rec-row .name { flex: 1; font-weight: 500; }
-  .rec-row.flag { background: rgba(239,68,68,.1); }
-  .rec-row.flag .name { color: #fca5a5; }
-  .rec-row .noout { font-size: 11px; color: #f87171; }
-
-  .toast { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%) translateY(20px); background: #065f46; color: #d1fae5; padding: 11px 20px; border-radius: 999px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: all .3s; z-index: 600; text-align: center; }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast small { display: block; font-weight: 400; color: #6ee7b7; font-size: 11px; margin-top: 2px; }
+  /* 출입기록증 화면 */
+  #record { background: #000; justify-content: center; align-items: center; padding: 0; }
+  #record img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
   .fade-in { animation: fadeIn .5s ease; }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -77,151 +52,75 @@
 </head>
 <body>
 
-<div class="demo-banner">📱 데모 · ① 방문 조 번호(신분) 입력 → ② 사원번호(공통) = <b>2201</b></div>
-
 <div class="statusbar"><span id="clock">22:51</span><span>🔋 88%</span></div>
 
-<!-- ① 방문 조 체크인 = 신분 -->
-<div class="screen active" id="checkin">
+<!-- 잠금 (비밀번호) -->
+<div class="screen active" id="passcode">
   <div class="brand">
-    <div class="logo">🛂</div>
     <div class="title">녹산건설 출입관리</div>
     <div class="sub">ACCESS CONTROL TERMINAL</div>
   </div>
-  <div class="prompt">방문 조 번호를 입력하세요</div>
-  <div class="prompt small">체크인용 — 조회 결과가 이 조로 저장됩니다</div>
-  <div class="dots" id="teamDots"></div>
-  <div class="msg" id="teamMsg"></div>
-  <div class="keypad" id="teamPad"></div>
-</div>
-
-<!-- ② 사원번호 = 공통 잠금 -->
-<div class="screen" id="passcode">
-  <div class="brand">
-    <div class="logo">🔐</div>
-    <div class="title">사원 인증</div>
-    <div class="sub" id="pcTeamSub">3조 · 사원번호를 입력하세요</div>
-  </div>
-  <div class="prompt small">사원증에 적힌 사원번호 (스탭에게 확인)</div>
+  <div class="prompt">비밀번호를 입력하세요</div>
   <div class="dots" id="pcDots"></div>
   <div class="msg" id="pcMsg"></div>
   <div class="keypad" id="pcPad"></div>
 </div>
 
-<!-- ③ 출입기록 -->
-<div class="screen" id="records">
-  <div class="rec-session">
-    <div class="who"><span class="live"></span><span id="recTeam">3조</span> 조회 세션</div>
-    <button class="logout-btn" onclick="logout()">종료</button>
-  </div>
-  <div class="rec-head">
-    <h2>현장 출입 기록</h2>
-    <div class="date">사건 당일 · 자재 물류창고 게이트</div>
-  </div>
-  <div class="rec-list">
-    <div class="rec-row"><span class="time">21:02</span><span class="dir in">입장</span><span class="name">나사장</span></div>
-    <div class="rec-row"><span class="time">21:15</span><span class="dir out">퇴장</span><span class="name">나사장</span></div>
-    <div class="rec-row flag"><span class="time">21:40</span><span class="dir in">입장</span><span class="name">이대리</span><span class="noout">퇴장 없음</span></div>
-    <div class="rec-row flag"><span class="time">21:58</span><span class="dir in">입장</span><span class="name">채소장</span><span class="noout">퇴장 없음</span></div>
-    <div class="rec-row flag"><span class="time">22:07</span><span class="dir in">입장</span><span class="name">나팀장</span><span class="noout">퇴장 없음</span></div>
-    <div class="rec-row"><span class="time">22:19</span><span class="dir in">입장</span><span class="name">김사원</span></div>
-    <div class="rec-row"><span class="time">22:31</span><span class="dir out">퇴장</span><span class="name">김사원</span></div>
-    <div class="rec-row" style="opacity:.6"><span class="time">23:—</span><span class="dir out">기록</span><span class="name">이후 CCTV 삭제 구간과 겹침</span></div>
-  </div>
+<!-- 출입기록증 -->
+<div class="screen" id="record">
+  <img src="/출입기록증.png" alt="출입기록증" />
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-  // 뒤로가기(모바일 브라우저 스와이프/버튼)로 화면을 벗어나지 못하게 막음 — 히스토리를 계속 되채워서 popstate를 무력화
-  // ⚠️ 안드로이드 크롬의 "제스처 뒤로가기(예측형 뒤로가기)"는 이 트릭을 우회하는 경우가 있음(크롬/안드로이드 자체 한계).
-  //    2차 안전장치로 beforeunload를 걸어 실제로 페이지를 벗어나려 하면 브라우저 기본 확인창이라도 뜨게 함.
+  // 뒤로가기(모바일 브라우저 스와이프/버튼)로 화면을 벗어나지 못하게 막음
   history.pushState(null, "", location.href);
   window.addEventListener("popstate", () => history.pushState(null, "", location.href));
-  window.addEventListener("beforeunload", (e) => { e.preventDefault(); e.returnValue = ""; });
 
-  const SAWON_NO = "2201";  // 공통 사원번호 (사원증 = 스탭 보관)
-  let teamNo = null;
-  let teamBuf = "";
+  const PASSCODE = "20210812";
   let pcBuf = "";
-  let idleTimer = null;
 
   // 시계
   function tick() { const d = new Date(); document.getElementById("clock").textContent = String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
   tick(); setInterval(tick, 10000);
 
   // 키패드 생성
-  function buildPad(padId, onDigit, actionLabel, onAction) {
+  function buildPad(padId, onDigit, onDel) {
     const pad = document.getElementById(padId);
     for (let n = 1; n <= 9; n++) addKey(pad, n, () => onDigit(String(n)));
-    const del = document.createElement("button"); del.className = "key action"; del.textContent = "⌫"; del.onclick = () => onAction("del"); pad.appendChild(del);
+    const spacer = document.createElement("span"); spacer.className = "key action"; pad.appendChild(spacer);
     addKey(pad, 0, () => onDigit("0"), "zero");
-    const act = document.createElement("button"); act.className = "key action"; act.textContent = actionLabel; act.onclick = () => onAction("go"); pad.appendChild(act);
+    const del = document.createElement("button"); del.className = "key action"; del.textContent = "⌫"; del.onclick = onDel; pad.appendChild(del);
   }
   function addKey(pad, label, fn, extra) { const b = document.createElement("button"); b.className = "key" + (extra ? " " + extra : ""); b.textContent = label; b.onclick = fn; pad.appendChild(b); }
 
-  function renderDots(elId, len, max) {
+  function renderDots(elId, len) {
     const el = document.getElementById(elId); el.innerHTML = "";
-    const n = Math.max(len, 0);
-    for (let i = 0; i < Math.max(n, 1); i++) { const d = document.createElement("span"); d.className = "dot" + (i < n ? " fill" : ""); el.appendChild(d); }
-    if (n === 0) { el.innerHTML = '<span class="dot"></span>'; }
+    const n = Math.max(len, 1);
+    for (let i = 0; i < n; i++) { const d = document.createElement("span"); d.className = "dot" + (i < len ? " fill" : ""); el.appendChild(d); }
   }
 
-  // ── ① 방문 조 번호 ──
-  buildPad("teamPad",
-    d => { teamBuf += d; renderDots("teamDots", teamBuf.length); resetIdle(); },
-    "확인",
-    a => {
-      if (a === "del") { teamBuf = teamBuf.slice(0, -1); renderDots("teamDots", teamBuf.length); return; }
-      if (!teamBuf) { flash("teamMsg", "조 번호를 입력하세요"); return; }
-      teamNo = parseInt(teamBuf, 10);
-      document.getElementById("pcTeamSub").textContent = teamNo + "조 · 사원번호를 입력하세요";
-      go("checkin", "passcode");
-    });
-  renderDots("teamDots", 0);
-
-  // ── ② 사원번호 (공통) ──
   buildPad("pcPad",
-    d => { pcBuf += d; renderDots("pcDots", pcBuf.length); resetIdle(); },
-    "인증",
-    a => {
-      if (a === "del") { pcBuf = pcBuf.slice(0, -1); renderDots("pcDots", pcBuf.length); return; }
-      if (pcBuf === SAWON_NO) {
-        document.getElementById("recTeam").textContent = teamNo + "조";
-        go("passcode", "records");
-        collect();
-      } else {
-        document.getElementById("pcDots").classList.add("shake");
-        setTimeout(() => document.getElementById("pcDots").classList.remove("shake"), 400);
-        flash("pcMsg", "사원번호가 일치하지 않습니다");
-        pcBuf = ""; renderDots("pcDots", 0);
-      }
-    });
+    d => {
+      if (pcBuf.length >= PASSCODE.length) return;
+      pcBuf += d; renderDots("pcDots", pcBuf.length);
+      if (pcBuf.length === PASSCODE.length) setTimeout(check, 150);
+    },
+    () => { pcBuf = pcBuf.slice(0, -1); renderDots("pcDots", pcBuf.length); });
   renderDots("pcDots", 0);
 
-  function collect() {
-    const t = document.getElementById("toast");
-    t.innerHTML = "✓ 현장출입기록 수집됨<small>" + teamNo + "조 수집함으로 전송됨</small>";
-    t.classList.add("show");
-    setTimeout(() => t.classList.remove("show"), 2600);
+  function check() {
+    if (pcBuf === PASSCODE) {
+      document.getElementById("passcode").classList.remove("active");
+      document.getElementById("record").classList.add("active", "fade-in");
+    } else {
+      const dots = document.getElementById("pcDots");
+      dots.classList.add("shake");
+      setTimeout(() => dots.classList.remove("shake"), 400);
+      document.getElementById("pcMsg").textContent = "비밀번호가 일치하지 않습니다";
+      setTimeout(() => document.getElementById("pcMsg").textContent = "", 2000);
+      pcBuf = ""; renderDots("pcDots", 0);
+    }
   }
-
-  function go(fromId, toId) {
-    document.getElementById(fromId).classList.remove("active");
-    const to = document.getElementById(toId); to.classList.add("active", "fade-in");
-    resetIdle();
-  }
-  function flash(id, msg) { const el = document.getElementById(id); el.textContent = msg; setTimeout(() => { if (el.textContent === msg) el.textContent = ""; }, 2000); }
-
-  function logout() {
-    ["passcode","records"].forEach(id => document.getElementById(id).classList.remove("active"));
-    document.getElementById("checkin").classList.add("active");
-    teamNo = null; teamBuf = ""; pcBuf = "";
-    renderDots("teamDots", 0); renderDots("pcDots", 0);
-    document.getElementById("teamMsg").textContent = ""; document.getElementById("pcMsg").textContent = "";
-    clearTimeout(idleTimer);
-  }
-  function resetIdle() { clearTimeout(idleTimer); idleTimer = setTimeout(logout, 90000); }
 </script>
 </body>
 </html>

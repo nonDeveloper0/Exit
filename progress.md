@@ -1,5 +1,16 @@
 # EXIT 2026 — 진행 현황
 
+## 작업 완료 (2026-07-25)
+
+- [x] 출입관리 아이패드(`/screen/ipad` → `public/screen/ipad.html`)를 단순화했다. 기존 "방문 조 번호 → 사원번호 → 출입기록 리스트" 2단계 흐름과 이모지 아이콘·데모 배너를 모두 제거하고, 단일 숫자 키패드 잠금화면 하나로 바꿨다. 비밀번호 `20210812`(8자리, 다 입력하면 자동 확인)를 맞추면 곧바로 출입기록증 이미지(`/출입기록증.png`)를 전체 화면에 표시한다. 오답 시 점 흔들림+"비밀번호가 일치하지 않습니다" 후 초기화. 비밀번호는 `<script>`의 `const PASSCODE = "20210812";`로 관리.
+  - 변경: `public/screen/ipad.html`, `progress.md`
+
+- [x] 나팀장 개인폰(`/phone`)의 `통화내용 다시 듣기` 재생 기능을 완전히 제거했다. 전화를 받으면 켜지던 localStorage 플래그(`exit2026_last_call_recording`)가 새로고침/재실행 후에도 남아 대기 화면에 재생 버튼이 계속 뜨던 문제. 이제 폰은 시계 대기 화면만 보이고, 전화 화면은 관리자가 `전화 걸기`를 눌렀을 때만 뜬다. 받아도 폰에 아무 버튼이 남지 않는다.
+  - 제거: `phone/page.tsx`의 재생 상태·버튼·`call_reset` 구독, `IncomingCallOverlay.accept()`의 `setHasLastCallRecording(true)`, `store.ts`의 `getHasLastCallRecording`/`setHasLastCallRecording`/`CALL_RECORDING_AVAILABLE_EVENT`/`LAST_CALL_RECORDING_KEY`(고아 코드).
+  - 유지: 관리자 `전화 연출 초기화`는 수신전화 마커를 삭제해 떠 있는 전화 화면을 취소하는 용도로 그대로 둠(`call_reset` 브로드캐스트는 이제 폰 리스너 없음 — admin 코드는 무해하게 유지).
+  - 변경: `src/app/phone/page.tsx`, `src/components/IncomingCallOverlay.tsx`, `src/lib/store.ts`, `docs/01_md/EDIT_GUIDE.md`, `progress.md`
+  - 검증: 변경 파일 ESLint, `npm run build` 통과.
+
 ## 작업 완료 (2026-07-24)
 
 - [x] 채소장 폰(`/screen/phone2` → `public/screen/dongguri_phone_room.html`)에 iOS 스타일 4자리 암호 잠금화면을 추가했다. 접속 시 잠금화면(시계·날짜·숫자 키패드)이 먼저 뜨고, 암호 `0625`를 입력해야 홈 화면으로 진입한다. 암호는 `<script>`의 `const LOCK_CODE = "0625";`로 관리한다. 오답 시 점 4개 흔들림+"암호가 틀렸습니다" 후 초기화. 기존 홈이 초기 `active`였던 것을 잠금화면으로 옮겼다.
