@@ -95,7 +95,7 @@
 
   function renderDots(elId, len) {
     const el = document.getElementById(elId); el.innerHTML = "";
-    const n = Math.max(len, 1);
+    const n = PASSCODE.length;
     for (let i = 0; i < n; i++) { const d = document.createElement("span"); d.className = "dot" + (i < len ? " fill" : ""); el.appendChild(d); }
   }
 
@@ -114,6 +114,7 @@
       document.getElementById("record").classList.add("active", "fade-in");
     } else {
       const dots = document.getElementById("pcDots");
+      if (navigator.vibrate) navigator.vibrate(200);
       dots.classList.add("shake");
       setTimeout(() => dots.classList.remove("shake"), 400);
       document.getElementById("pcMsg").textContent = "비밀번호가 일치하지 않습니다";
