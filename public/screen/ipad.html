@@ -45,6 +45,8 @@
   /* 출입기록증 화면 */
   #record { background: #000; justify-content: center; align-items: center; padding: 0; }
   #record img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .back-btn { position: absolute; top: 44px; left: 16px; z-index: 20; background: rgba(255,255,255,.14); border: none; color: #f5f5f7; font-size: 15px; padding: 8px 16px; border-radius: 20px; }
+  .back-btn:active { background: rgba(255,255,255,.3); }
 
   .fade-in { animation: fadeIn .5s ease; }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -68,6 +70,7 @@
 
 <!-- 출입기록증 -->
 <div class="screen" id="record">
+  <button class="back-btn" id="recordBack">‹ 뒤로</button>
   <img src="/access-record.png" alt="출입기록증" />
 </div>
 
@@ -107,6 +110,14 @@
     },
     () => { pcBuf = pcBuf.slice(0, -1); renderDots("pcDots", pcBuf.length); });
   renderDots("pcDots", 0);
+
+  // 출입기록증에서 비밀번호 화면으로 복귀
+  document.getElementById("recordBack").onclick = () => {
+    document.getElementById("record").classList.remove("active", "fade-in");
+    pcBuf = ""; renderDots("pcDots", 0);
+    document.getElementById("pcMsg").textContent = "";
+    document.getElementById("passcode").classList.add("active");
+  };
 
   function check() {
     if (pcBuf === PASSCODE) {
